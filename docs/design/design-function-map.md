@@ -17,6 +17,32 @@
 | M01.F05.I03 | AuthController#SsoCallback / AuthService#SsoCallback | POST /api/auth/sso/callback | - | M01.F05.I03 | - | 已上线 |
 | M01.F05.I04 | AuthController#Refresh / AuthService#Refresh | POST /api/auth/refresh | - | M01.F05.I04 | - | 已上线 |
 | M01.F05.I05 | AuthController#Logout / AuthService#Logout | POST /api/auth/logout | - | M01.F05.I05 | - | 已上线 |
+| M04.F06.I01 | CatalogController#ListModels / CatalogService#ListModels | GET /api/catalog/models | inspection_models（内存 store 镜像 V004 语义） | M04.F06.I01 | - | 已上线 |
+| M04.F06.I02 | CatalogController#CreateModel / CatalogService#CreateModel | POST /api/catalog/models | inspection_models | M04.F06.I02 | - | 已上线 |
+| M04.F06.I03 | CatalogController#UpdateModel / CatalogService#UpdateModel | PUT /api/catalog/models/{code} | inspection_models | M04.F06.I03 | - | 已上线 |
+| M04.F06.I04 | CatalogController#DeleteModel / CatalogService#DeleteModel | DELETE /api/catalog/models/{code} | inspection_models | M04.F06.I04 | - | 已上线 |
+| M04.F07.I01 | CatalogController#ListSpecs / CatalogService#ListSpecs | GET /api/catalog/specs | inspection_specs | M04.F07.I01 | - | 已上线 |
+| M04.F07.I02 | CatalogController#CreateSpec / CatalogService#CreateSpec | POST /api/catalog/specs | inspection_specs | M04.F07.I02 | - | 已上线 |
+| M04.F07.I03 | CatalogController#UpdateSpec / CatalogService#UpdateSpec | PUT /api/catalog/specs/{code} | inspection_specs | M04.F07.I03 | - | 已上线 |
+| M04.F07.I04 | CatalogController#DeleteSpec / CatalogService#DeleteSpec | DELETE /api/catalog/specs/{code} | inspection_specs | M04.F07.I04 | - | 已上线 |
+| M04.F08.I01 | CatalogController#ListGrades / CatalogService#ListGrades | GET /api/catalog/grades | inspection_grades | M04.F08.I01 | - | 已上线 |
+| M04.F08.I02 | CatalogController#CreateGrade / CatalogService#CreateGrade | POST /api/catalog/grades | inspection_grades | M04.F08.I02 | - | 已上线 |
+| M04.F08.I03 | CatalogController#UpdateGrade / CatalogService#UpdateGrade | PUT /api/catalog/grades/{code} | inspection_grades | M04.F08.I03 | - | 已上线 |
+| M04.F08.I04 | CatalogController#DeleteGrade / CatalogService#DeleteGrade | DELETE /api/catalog/grades/{code} | inspection_grades | M04.F08.I04 | - | 已上线 |
+| M04.F09.I01 | CatalogController#ListBrands / CatalogService#ListBrands | GET /api/catalog/brands | inspection_brands | M04.F09.I01 | - | 已上线 |
+| M04.F09.I02 | CatalogController#CreateBrand / CatalogService#CreateBrand | POST /api/catalog/brands | inspection_brands | M04.F09.I02 | - | 已上线 |
+| M04.F09.I03 | CatalogController#UpdateBrand / CatalogService#UpdateBrand | PUT /api/catalog/brands/{code} | inspection_brands | M04.F09.I03 | - | 已上线 |
+| M04.F09.I04 | CatalogController#DeleteBrand / CatalogService#DeleteBrand | DELETE /api/catalog/brands/{code} | inspection_brands + technical_requirements.brand SET NULL | M04.F09.I04 | - | 已上线 |
+| M06.F05.I01 | CalculationRulesController#ListCalculationRules / CalculationRuleService#List | GET /api/calculation-rules | inspection_calculation_rules（平台级） | M06.F05.I01 | - | 已上线 |
+| M06.F05.I02 | CalculationRulesController#GetCalculationRule / CalculationRuleService#Get | GET /api/calculation-rules/{object}/{parameter} | inspection_calculation_rules | M06.F05.I02 | - | 已上线 |
+| M06.F05.I03 | CalculationRulesController#CreateCalculationRule / CalculationRuleService#Create | POST /api/calculation-rules | inspection_calculation_rules | M06.F05.I03 | - | 已上线 |
+| M06.F05.I04 | CalculationRulesController#UpdateCalculationRule / CalculationRuleService#Update | PUT /api/calculation-rules/{object}/{parameter} | inspection_calculation_rules | M06.F05.I04 | - | 已上线 |
+| M06.F05.I05 | CalculationRulesController#DeleteCalculationRule / CalculationRuleService#Delete | DELETE /api/calculation-rules/{object}/{parameter} | inspection_calculation_rules | M06.F05.I05 | - | 已上线 |
+| M06.F06.I01 | TechnicalRequirementsController#ListTechnicalRequirements / TechnicalRequirementService#List | GET /api/technical-requirements | inspection_technical_requirements | M06.F06.I01 | - | 已上线 |
+| M06.F06.I02 | TechnicalRequirementsController#GetTechnicalRequirement / TechnicalRequirementService#Get | GET /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I02 | - | 已上线 |
+| M06.F06.I03 | TechnicalRequirementsController#CreateTechnicalRequirement / TechnicalRequirementService#Create | POST /api/technical-requirements | inspection_technical_requirements | M06.F06.I03 | - | 已上线 |
+| M06.F06.I04 | TechnicalRequirementsController#UpdateTechnicalRequirement / TechnicalRequirementService#Update | PUT /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I04 | - | 已上线 |
+| M06.F06.I05 | TechnicalRequirementsController#DeleteTechnicalRequirement / TechnicalRequirementService#Delete | DELETE /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I05 | - | 已上线 |
 
 ## 约定
 

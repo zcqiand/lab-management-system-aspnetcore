@@ -1,4 +1,7 @@
+using System.Security.Authentication;
+using Lab.AspNetCore.Data;
 using Lab.AspNetCore.Directory;
+using Lab.AspNetCore.Security;
 using Lab.AspNetCore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -44,11 +47,40 @@ builder.Services.AddSingleton<AuthService>(sp =>
         sp.GetRequiredService<IUserDirectory>(),
         sp.GetRequiredService<IConfiguration>()["Lab:Sso:SaasBase"] ?? "http://localhost:3000"));
 
+// B2：码表/计算规则/技术要求（内存存储，镜像 springboot B2 语义；换 EF 仓储时 service 不动）
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
+builder.Services.AddSingleton<InMemoryCatalogStore>();
+builder.Services.AddSingleton<InMemoryRuleStore>();
+builder.Services.AddSingleton<InMemoryRequirementStore>();
+builder.Services.AddSingleton<CatalogService>();
+builder.Services.AddSingleton<CalculationRuleService>();
+builder.Services.AddSingleton<TechnicalRequirementService>();
+// 牌号删除 → 技术要求 brand 列 SET NULL（V011 FK 语义联动）
+builder.Services.AddHostedService<CatalogBrandFkHook>();
+
 var app = builder.Build();
 
 app.UseCors("labFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
+
+// 异常 → HTTP 映射（镜像 springboot GlobalExceptionHandler）：
+// KeyNotFound → 404；AuthenticationException/UnauthorizedAccess → 401；ArgumentException → 400
+app.UseExceptionHandler(errorApp =>
+    errorApp.Run(async context =>
+    {
+        var ex = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>()?.Error;
+        context.Response.StatusCode = ex switch
+        {
+            KeyNotFoundException => StatusCodes.Status404NotFound,
+            AuthenticationException or UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+            ArgumentException => StatusCodes.Status400BadRequest,
+            _ => StatusCodes.Status500InternalServerError,
+        };
+        await context.Response.WriteAsJsonAsync(new { error = ex?.Message ?? "internal error" });
+    }));
+
 app.MapControllers();
 
 app.Run();

@@ -23,6 +23,25 @@ flowchart TD
 | S04 | 登出 | 所有用户 | Bearer token | 204 | authenticated -> anonymous | M01.F05.I05 |
 | S05 | token 刷新 | 所有用户 | refreshToken | 新 access token | authenticated（续期） | M01.F05.I04 |
 
+## FLOW-02 检测基础数据维护（B2）
+
+```mermaid
+flowchart TD
+    S01[码表维护] --> S02[计算规则挂接]
+    S02 --> S03[技术要求四维度匹配]
+    S03 --> S04{审核状态}
+    S04 -->|draft| S03
+    S04 -->|verified| S05[发布供检测引用]
+```
+
+| 步骤 | 名称 | 角色 | 输入 | 输出 | 状态流转 | 支撑功能子项 |
+|---|---|---|---|---|---|---|
+| S01 | 码表维护（型号/规格/等级/牌号 CRUD） | 管理员 | code/name/objectCode | 码表行 | - | M04.F06.I01, M04.F06.I02, M04.F06.I03, M04.F06.I04, M04.F07.I01, M04.F07.I02, M04.F07.I03, M04.F07.I04, M04.F08.I01, M04.F08.I02, M04.F08.I03, M04.F08.I04, M04.F09.I01, M04.F09.I02, M04.F09.I03, M04.F09.I04 |
+| S02 | 计算规则挂接（object+parameter 复合键） | 管理员 | 算法类型/公式/试件数 | 计算规则行 | - | M06.F05.I01, M06.F05.I02, M06.F05.I03, M06.F05.I04, M06.F05.I05 |
+| S03 | 技术要求维护（三键 + 四维度匹配） | 管理员 | 判定标准/限值/brand/model/grade/spec | 技术要求行 | draft | M06.F06.I01, M06.F06.I02, M06.F06.I03, M06.F06.I04, M06.F06.I05 |
+| S04 | 审核状态推进 | 审核人 | verificationStatus | reviewed/verified/rejected | draft -> verified | M06.F06.I04 |
+| S05 | 发布供检测引用 | - | - | - | verified | -（下游 M03 消费） |
+
 ### 评审时问这四个问题
 
 1. 有没有哪个步骤的「支撑功能子项」是空的？→ 功能缺失，或这一步不该存在

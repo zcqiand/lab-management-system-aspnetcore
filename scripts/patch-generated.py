@@ -24,7 +24,8 @@ GENERATED = ROOT / "src" / "Controllers" / "Generated" / "Controllers.cs"
 
 def patch_state_property(text: str) -> str:
     old = "public State State { get; set; } = new State();"
-    new = "public object? State { get; set; } // oneOf AuthState 判别联合，NSwag 无法映射，后端不消费"
+    # CS8669：生成文件无 #nullable 上下文，不能用 object? —— 用 object + 注释
+    new = "public object State { get; set; } // oneOf AuthState 判别联合，NSwag 无法映射，后端不消费"
     if old in text:
         return text.replace(old, new)
     if new in text:

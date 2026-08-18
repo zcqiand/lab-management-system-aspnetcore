@@ -107,10 +107,46 @@
 
 | 功能 ID | 功能名称 | 闭环定义 | 类型 | 状态 |
 |---|---|---|---|---|
-| M04.F06 | 型号维护 | InspectionModel 官方数据码表维护，列表按检测专项过滤 | 接口 | 规划 |
-| M04.F07 | 规格维护 | InspectionSpec 官方数据码表维护，列表按检测专项过滤 | 接口 | 规划 |
-| M04.F08 | 等级维护 | InspectionGrade 官方数据码表维护，列表按检测专项过滤 | 接口 | 规划 |
-| M04.F09 | 牌号维护 | InspectionBrand 官方数据码表维护，列表按检测专项过滤 | 接口 | 规划 |
+| M04.F06 | 型号维护 | InspectionModel 官方数据码表维护，列表按检测专项过滤 | 接口 | 已上线 |
+| M04.F07 | 规格维护 | InspectionSpec 官方数据码表维护，列表按检测专项过滤 | 接口 | 已上线 |
+| M04.F08 | 等级维护 | InspectionGrade 官方数据码表维护，列表按检测专项过滤 | 接口 | 已上线 |
+| M04.F09 | 牌号维护 | InspectionBrand 官方数据码表维护，列表按检测专项过滤 | 接口 | 已上线 |
+
+### M04.F06 型号维护
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M04.F06.I01 | 型号列表 | 接口 | GET /api/catalog/models：tenant + inspectionObjectCode 精确 + keyword 大小写不敏包含 code/name，排序 sortOrder,code | 已上线 |
+| M04.F06.I02 | 型号新增 | 接口 | POST /api/catalog/models | 已上线 |
+| M04.F06.I03 | 型号修改 | 接口 | PUT /api/catalog/models/{code}：PATCH 语义，未传字段保留 | 已上线 |
+| M04.F06.I04 | 型号删除 | 接口 | DELETE /api/catalog/models/{code}，miss 404 | 已上线 |
+
+### M04.F07 规格维护
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M04.F07.I01 | 规格列表 | 接口 | GET /api/catalog/specs（过滤同型号） | 已上线 |
+| M04.F07.I02 | 规格新增 | 接口 | POST /api/catalog/specs | 已上线 |
+| M04.F07.I03 | 规格修改 | 接口 | PUT /api/catalog/specs/{code} | 已上线 |
+| M04.F07.I04 | 规格删除 | 接口 | DELETE /api/catalog/specs/{code} | 已上线 |
+
+### M04.F08 等级维护
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M04.F08.I01 | 等级列表 | 接口 | GET /api/catalog/grades | 已上线 |
+| M04.F08.I02 | 等级新增 | 接口 | POST /api/catalog/grades | 已上线 |
+| M04.F08.I03 | 等级修改 | 接口 | PUT /api/catalog/grades/{code} | 已上线 |
+| M04.F08.I04 | 等级删除 | 接口 | DELETE /api/catalog/grades/{code} | 已上线 |
+
+### M04.F09 牌号维护
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M04.F09.I01 | 牌号列表 | 接口 | GET /api/catalog/brands | 已上线 |
+| M04.F09.I02 | 牌号新增 | 接口 | POST /api/catalog/brands | 已上线 |
+| M04.F09.I03 | 牌号修改 | 接口 | PUT /api/catalog/brands/{code} | 已上线 |
+| M04.F09.I04 | 牌号删除 | 接口 | DELETE /api/catalog/brands/{code}；被 technical_requirements 引用时 brand 列 SET NULL（V011 FK 语义） | 已上线 |
 
 ## M05 数据统计
 
@@ -127,8 +163,28 @@
 | M06.F02 | 检测项目 | InspectionObject CRUD + 专项/参数关联 | 接口 | 规划 |
 | M06.F03 | 检测参数 | InspectionParameter CRUD + 标准/参数关联 | 接口 | 规划 |
 | M06.F04 | 检测标准 | InspectionStandard CRUD（含状态：active/superseded/draft） | 接口 | 规划 |
-| M06.F05 | 计算规则 | CalculationRule 维护（复合主键，算法类型 + 公式） | 接口 | 规划 |
-| M06.F06 | 技术要求 | TechnicalRequirement 维护，按四维度匹配；brand/model/grade/spec 改为 FK 引用实体 | 接口 | 规划 |
+| M06.F05 | 计算规则 | CalculationRule 维护（复合主键，算法类型 + 公式） | 接口 | 已上线 |
+| M06.F06 | 技术要求 | TechnicalRequirement 维护，按四维度匹配；brand/model/grade/spec 改为 FK 引用实体 | 接口 | 已上线 |
+
+### M06.F05 计算规则
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F05.I01 | 规则列表 | 接口 | GET /api/calculation-rules：objectCode/parameterCode 双过滤（平台级无 tenant） | 已上线 |
+| M06.F05.I02 | 规则详情 | 接口 | GET /api/calculation-rules/{object}/{parameter} 复合键 | 已上线 |
+| M06.F05.I03 | 规则新增 | 接口 | POST：默认 algorithmType=manual、specimenCount=1 | 已上线 |
+| M06.F05.I04 | 规则修改 | 接口 | PUT 复合键 PATCH 语义 | 已上线 |
+| M06.F05.I05 | 规则删除 | 接口 | DELETE 复合键，miss 404 | 已上线 |
+
+### M06.F06 技术要求
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F06.I01 | 要求列表 | 接口 | GET /api/technical-requirements：object/parameter/standard + verificationStatus 四过滤 + tenant 隔离 | 已上线 |
+| M06.F06.I02 | 要求详情 | 接口 | GET 三键 (object,parameter,judgmentStandard) | 已上线 |
+| M06.F06.I03 | 要求新增 | 接口 | POST：默认 numeric/≥/manual/draft，tenant 从 token 注入 | 已上线 |
+| M06.F06.I04 | 要求修改 | 接口 | PUT 三键 PATCH 语义（含 brand/model/grade/spec 四维度） | 已上线 |
+| M06.F06.I05 | 要求删除 | 接口 | DELETE 三键，miss 404 | 已上线 |
 | M06.F07 | 报告名称 | InspectionReportName CRUD + extFields 模板 + 关联标准/参数 | 接口 | 规划 |
 | M06.F08 | 参数界面 | ParamInterface 维护 + 参数↔界面 link | 接口 | 规划 |
 

@@ -1,87 +1,204 @@
 {
   "schema": 1,
   "approved": true,
-  "base_sha": "1f5fe83f448a7bfd",
-  "summary": "B1 认证域落地：M00.F01/F02 + M01.F04/F05 拆 I 级（9 个，定义镜像 lab-management-system-springboot 同名 ID，保证家族跨仓同 ID 同义）并翻已上线。其余模块保持规划不动。实现：AuthController 9 端点 + AuthService + ConfigUserDirectory（NSwag codegen 自 shared OpenAPI），16 fnTest 全绿。",
+  "base_sha": "d2ba0374ea6038ad",
+  "summary": "B2 码表+计算规则+技术要求落地：M04.F06/F07/F08/F09 各拆 4 个 I 级（16，码表 CRUD）+ M06.F05/F06 各拆 5 个 I 级（10，复合键 CRUD）共 26 个 I 级新增（定义镜像 lab-management-system-springboot 同名 ID）+ 6 个 F 级翻已上线。实现：CatalogController 16 端点 + CalculationRulesController/TechnicalRequirementsController 10 端点（内存 store，语义镜像 springboot B2：tenant 过滤/objectCode 精确/keyword 不敏包含/sortOrder+code 排序/PATCH/404/FK SET NULL 联动）。48 fnTest 全绿（B1 16 + B2 32）。",
   "changes": [
     {
-      "id": "M00.F01.I01",
+      "id": "M04.F06.I01",
       "action": "新增",
-      "name": "当前会话",
-      "reason": "GET /api/auth/me：user + 关联租户列表 + currentTenantId（token tenant_id claim，缺省 TENANT-001）"
+      "name": "型号列表",
+      "reason": "GET /api/catalog/models：tenant + inspectionObjectCode 精确 + keyword 大小写不敏包含 code/name，排序 sortOrder,code"
     },
     {
-      "id": "M00.F02.I01",
+      "id": "M04.F06.I02",
       "action": "新增",
-      "name": "选租户换发",
-      "reason": "POST /api/auth/switch-tenant：校验租户归属后换发携带 tenant_id claim 的 token"
+      "name": "型号新增",
+      "reason": "POST /api/catalog/models"
     },
     {
-      "id": "M01.F04.I01",
+      "id": "M04.F06.I03",
       "action": "新增",
-      "name": "动态菜单",
-      "reason": "GET /api/auth/menus：按角色下发导航树（5 根节点，镜像 lab-msw）"
+      "name": "型号修改",
+      "reason": "PUT /api/catalog/models/{code}：PATCH 语义，未传字段保留"
     },
     {
-      "id": "M01.F04.I02",
+      "id": "M04.F06.I04",
       "action": "新增",
-      "name": "权限集",
-      "reason": "GET /api/auth/permissions：RBAC 权限串列表（admin 全量 11 项）"
+      "name": "型号删除",
+      "reason": "DELETE /api/catalog/models/{code}，miss 404"
     },
     {
-      "id": "M01.F05.I01",
+      "id": "M04.F07.I01",
       "action": "新增",
-      "name": "密码登录",
-      "reason": "POST /api/auth/login：用户名+密码校验，签发 access/refresh token + 租户列表"
+      "name": "规格列表",
+      "reason": "GET /api/catalog/specs（过滤同型号）"
     },
     {
-      "id": "M01.F05.I02",
+      "id": "M04.F07.I02",
       "action": "新增",
-      "name": "SSO 跳转",
-      "reason": "GET /api/auth/sso/authorize?redirect=：构造 saas 身份平台登录跳转 URL + state"
+      "name": "规格新增",
+      "reason": "POST /api/catalog/specs"
     },
     {
-      "id": "M01.F05.I03",
+      "id": "M04.F07.I03",
       "action": "新增",
-      "name": "SSO 回调",
-      "reason": "POST /api/auth/sso/callback：dev 直发 demo 会话（真对接待 saas 端点可用）"
+      "name": "规格修改",
+      "reason": "PUT /api/catalog/specs/{code}"
     },
     {
-      "id": "M01.F05.I04",
+      "id": "M04.F07.I04",
       "action": "新增",
-      "name": "刷新 token",
-      "reason": "POST /api/auth/refresh：refresh token 换发新 access token"
+      "name": "规格删除",
+      "reason": "DELETE /api/catalog/specs/{code}"
     },
     {
-      "id": "M01.F05.I05",
+      "id": "M04.F08.I01",
       "action": "新增",
-      "name": "登出",
-      "reason": "POST /api/auth/logout：无状态 JWT 服务端无 session，前端清存储"
+      "name": "等级列表",
+      "reason": "GET /api/catalog/grades"
     },
     {
-      "id": "M00.F01",
+      "id": "M04.F08.I02",
+      "action": "新增",
+      "name": "等级新增",
+      "reason": "POST /api/catalog/grades"
+    },
+    {
+      "id": "M04.F08.I03",
+      "action": "新增",
+      "name": "等级修改",
+      "reason": "PUT /api/catalog/grades/{code}"
+    },
+    {
+      "id": "M04.F08.I04",
+      "action": "新增",
+      "name": "等级删除",
+      "reason": "DELETE /api/catalog/grades/{code}"
+    },
+    {
+      "id": "M04.F09.I01",
+      "action": "新增",
+      "name": "牌号列表",
+      "reason": "GET /api/catalog/brands"
+    },
+    {
+      "id": "M04.F09.I02",
+      "action": "新增",
+      "name": "牌号新增",
+      "reason": "POST /api/catalog/brands"
+    },
+    {
+      "id": "M04.F09.I03",
+      "action": "新增",
+      "name": "牌号修改",
+      "reason": "PUT /api/catalog/brands/{code}"
+    },
+    {
+      "id": "M04.F09.I04",
+      "action": "新增",
+      "name": "牌号删除",
+      "reason": "DELETE /api/catalog/brands/{code}；被 technical_requirements 引用时 brand 列 SET NULL（V011 FK 语义）"
+    },
+    {
+      "id": "M06.F05.I01",
+      "action": "新增",
+      "name": "规则列表",
+      "reason": "GET /api/calculation-rules：objectCode/parameterCode 双过滤（平台级无 tenant）"
+    },
+    {
+      "id": "M06.F05.I02",
+      "action": "新增",
+      "name": "规则详情",
+      "reason": "GET /api/calculation-rules/{object}/{parameter} 复合键"
+    },
+    {
+      "id": "M06.F05.I03",
+      "action": "新增",
+      "name": "规则新增",
+      "reason": "POST：默认 algorithmType=manual、specimenCount=1"
+    },
+    {
+      "id": "M06.F05.I04",
+      "action": "新增",
+      "name": "规则修改",
+      "reason": "PUT 复合键 PATCH 语义"
+    },
+    {
+      "id": "M06.F05.I05",
+      "action": "新增",
+      "name": "规则删除",
+      "reason": "DELETE 复合键，miss 404"
+    },
+    {
+      "id": "M06.F06.I01",
+      "action": "新增",
+      "name": "要求列表",
+      "reason": "GET /api/technical-requirements：object/parameter/standard + verificationStatus 四过滤 + tenant 隔离"
+    },
+    {
+      "id": "M06.F06.I02",
+      "action": "新增",
+      "name": "要求详情",
+      "reason": "GET 三键 (object,parameter,judgmentStandard)"
+    },
+    {
+      "id": "M06.F06.I03",
+      "action": "新增",
+      "name": "要求新增",
+      "reason": "POST：默认 numeric/≥/manual/draft，tenant 从 token 注入"
+    },
+    {
+      "id": "M06.F06.I04",
+      "action": "新增",
+      "name": "要求修改",
+      "reason": "PUT 三键 PATCH 语义（含 brand/model/grade/spec 四维度）"
+    },
+    {
+      "id": "M06.F06.I05",
+      "action": "新增",
+      "name": "要求删除",
+      "reason": "DELETE 三键，miss 404"
+    },
+    {
+      "id": "M04.F06",
       "action": "变更",
-      "name": "当前用户会话",
-      "reason": "规划→已上线：I01 已实现并有 fnTest"
+      "name": "型号维护",
+      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
     },
     {
-      "id": "M00.F02",
+      "id": "M04.F07",
       "action": "变更",
-      "name": "登录选租户",
-      "reason": "规划→已上线：I01 已实现并有 fnTest"
+      "name": "规格维护",
+      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
     },
     {
-      "id": "M01.F04",
+      "id": "M04.F08",
       "action": "变更",
-      "name": "权限管理",
-      "reason": "规划→已上线：I01/I02 已实现并有 fnTest"
+      "name": "等级维护",
+      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
     },
     {
-      "id": "M01.F05",
+      "id": "M04.F09",
       "action": "变更",
-      "name": "认证管理",
+      "name": "牌号维护",
+      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
+    },
+    {
+      "id": "M06.F05",
+      "action": "变更",
+      "name": "计算规则",
+      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
+    },
+    {
+      "id": "M06.F06",
+      "action": "变更",
+      "name": "技术要求",
       "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
     }
   ],
-  "sync_files": []
+  "sync_files": [
+    "docs/design/design-function-map.md",
+    "docs/design/flow-function-map.md"
+  ]
 }

@@ -552,7 +552,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("state")]
         [System.ComponentModel.DataAnnotations.Required]
-        public object? State { get; set; } // oneOf AuthState 判别联合，NSwag 无法映射，后端不消费
+        public object State { get; set; } // oneOf AuthState 判别联合，NSwag 无法映射，后端不消费
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
