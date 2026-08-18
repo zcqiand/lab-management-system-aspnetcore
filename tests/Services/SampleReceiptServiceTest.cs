@@ -18,16 +18,25 @@ public class SampleReceiptServiceTest
         var store = new InMemoryFlowStore();
         store.SaveContract(new Contract
         {
-            Id = "C-1", TenantId = Tenant, ContractCode = "HT-A", Status = ContractStatus.Active,
-            CreatedAt = "t", UpdatedAt = "t",
+            Id = "C-1",
+            TenantId = Tenant,
+            ContractCode = "HT-A",
+            Status = ContractStatus.Active,
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         return store;
     }
 
     private static CreateSampleReceiptRequest Req(string commissionCode = "WT-001", string category = "CAT-A") => new()
     {
-        ContractId = "C-1", CommissionCode = commissionCode, CommissionDate = "2026-01-10",
-        CategoryCode = category, ProjectName = "工程一", ReceivedBy = "张三", SampleSource = "送样",
+        ContractId = "C-1",
+        CommissionCode = commissionCode,
+        CommissionDate = "2026-01-10",
+        CategoryCode = category,
+        ProjectName = "工程一",
+        ReceivedBy = "张三",
+        SampleSource = "送样",
         TestCategory = "常规",
     };
 
@@ -146,7 +155,9 @@ public class SampleReceiptServiceTest
 
         var assigned = service.AssignTask(Tenant, r.Id, new AssignTaskRequest
         {
-            AssigneeId = "U-1", AssigneeName = "李四", PlannedTestDate = "2026-01-15",
+            AssigneeId = "U-1",
+            AssigneeName = "李四",
+            PlannedTestDate = "2026-01-15",
         });
 
         Assert.Equal("U-1", assigned.AssigneeId);

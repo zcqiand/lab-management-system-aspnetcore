@@ -39,6 +39,8 @@ flowchart TD
 | S01 | 码表维护（型号/规格/等级/牌号 CRUD） | 管理员 | code/name/objectCode | 码表行 | - | M04.F06.I01, M04.F06.I02, M04.F06.I03, M04.F06.I04, M04.F07.I01, M04.F07.I02, M04.F07.I03, M04.F07.I04, M04.F08.I01, M04.F08.I02, M04.F08.I03, M04.F08.I04, M04.F09.I01, M04.F09.I02, M04.F09.I03, M04.F09.I04 |
 | S02 | 计算规则挂接（object+parameter 复合键） | 管理员 | 算法类型/公式/试件数 | 计算规则行 | - | M06.F05.I01, M06.F05.I02, M06.F05.I03, M06.F05.I04, M06.F05.I05 |
 | S03 | 技术要求维护（三键 + 四维度匹配） | 管理员 | 判定标准/限值/brand/model/grade/spec | 技术要求行 | draft | M06.F06.I01, M06.F06.I02, M06.F06.I03, M06.F06.I04, M06.F06.I05 |
+| S06 | 检测能力字典维护（专项/项目/参数/标准/报告名称/参数界面 CRUD） | 管理员 | code/name 等 | 字典行 | - | M06.F01.I01, M06.F01.I02, M06.F01.I03, M06.F01.I04, M06.F02.I01, M06.F02.I02, M06.F02.I03, M06.F02.I04, M06.F03.I01, M06.F03.I02, M06.F03.I03, M06.F03.I04, M06.F04.I01, M06.F04.I02, M06.F04.I03, M06.F04.I04, M06.F07.I01, M06.F07.I02, M06.F07.I03, M06.F07.I04, M06.F07.I05, M06.F08.I01, M06.F08.I02, M06.F08.I03, M06.F08.I04, M06.F08.I05 |
+| S07 | 关联关系维护（8 组 junction link/unlink） | 管理员 | code 对（+role） | junction 行（link=upsert / unlink 404） | - | M06.F01.I05, M06.F01.I06, M06.F02.I05, M06.F02.I06, M06.F02.I07, M06.F02.I08, M06.F03.I05, M06.F03.I06, M06.F03.I07, M06.F04.I05, M06.F04.I06, M06.F04.I07, M06.F07.I06, M06.F07.I07, M06.F07.I08, M06.F08.I06 |
 | S04 | 审核状态推进 | 审核人 | verificationStatus | reviewed/verified/rejected | draft -> verified | M06.F06.I04 |
 | S05 | 发布供检测引用 | - | - | - | verified | -（下游 M03 消费） |
 

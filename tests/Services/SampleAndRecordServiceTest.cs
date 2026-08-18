@@ -18,13 +18,21 @@ public class SampleAndRecordServiceTest
         var store = new InMemoryFlowStore();
         store.SaveContract(new Contract
         {
-            Id = "C-1", TenantId = Tenant, ContractCode = "HT-A", Status = ContractStatus.Active,
-            CreatedAt = "t", UpdatedAt = "t",
+            Id = "C-1",
+            TenantId = Tenant,
+            ContractCode = "HT-A",
+            Status = ContractStatus.Active,
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         store.SaveReceipt(new SampleReceipt
         {
-            Id = "R-1", TenantId = Tenant, ContractId = "C-1", FlowStatus = FlowStatus.Receiving,
-            CreatedAt = "t", UpdatedAt = "t",
+            Id = "R-1",
+            TenantId = Tenant,
+            ContractId = "C-1",
+            FlowStatus = FlowStatus.Receiving,
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         return store;
     }
@@ -104,7 +112,10 @@ public class SampleAndRecordServiceTest
 
     private static CreateTestRecordRequest RecReq(string sampleId = "R-1") => new()
     {
-        SampleId = sampleId, ParameterCode = "PARAM-1", Requirement = "≥30MPa", Result = "35.2",
+        SampleId = sampleId,
+        ParameterCode = "PARAM-1",
+        Requirement = "≥30MPa",
+        Result = "35.2",
     };
 
     [Fact]

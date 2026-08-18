@@ -1,278 +1,296 @@
 {
   "schema": 1,
   "approved": true,
-  "base_sha": "893ef9d25af19925",
-  "summary": "B3 合同+接样+样品+检测记录+流程落地：37 个 I 级新增（M02.F01 5 + M03.F01 6 + M03.F02 1 + M03.F03 11 + M03.F05/F06/F07/F08 各 3 + M03.F09 1，镜像 springboot 同名 ID）+ 9 个 F 级翻已上线。实现：19 端点（合同 CRUD 5 + 接样 7 + 流程 2 + 样品 5 + 检测记录 6 = 实际 25 路由），7 阶段状态机（SUBMIT 前进/RETURN 退回/WITHDRAW 仅 receiving 自转移）、批量容错、flow_history 全程记录、assignTask 自动推进、FK RESTRICT/CASCADE。88 fnTest 全绿（B1 16 + B2 32 + B3 34 + B4 6）。",
+  "base_sha": "3a8288cafeea43c2",
+  "summary": "B5 检测能力字典 + B6 objects/junction 落地：45 个 I 级新增（M06.F01 6 + F02 8 + F03 7 + F04 7 + F07 8 + F08 6，镜像 springboot 同名 ID 含 junction 双标归属）+ 6 个 F 级翻已上线，M06 检测能力模块全量收口。实现：42 端点（字典 5 实体 CRUD 22 + objects 4 + 8 组 junction link/unlink 16）；link=upsert 幂等、unlink miss 404；role 在 PK 两组；param-interface 行级 config。分叉注记：role 枚举（TESTING=0）无 null 态，C# 侧无法区分未传与显式 TESTING，放弃 springboot 的 role 必填校验（默认 TESTING）。136 fnTest 全绿（累计 B1 16 + B2 32 + B3 34 + B4 6 + B5/B6 48）。",
   "changes": [
     {
-      "id": "M02.F01.I01",
+      "id": "M06.F01.I01",
       "action": "新增",
-      "name": "合同列表",
-      "reason": "GET /api/contracts?keyword=&status=：keyword 模糊 contractCode/projectName 不敏、status 精确、tenant 收口"
+      "name": "专项列表",
+      "reason": "GET /api/inspection/specialties?keyword=：keyword 模糊 code/name"
     },
     {
-      "id": "M02.F01.I02",
+      "id": "M06.F01.I02",
       "action": "新增",
-      "name": "合同详情",
-      "reason": "GET /api/contracts/{id}，miss 404"
+      "name": "专项详情",
+      "reason": "GET /api/inspection/specialties/{code}，miss 404"
     },
     {
-      "id": "M02.F01.I03",
+      "id": "M06.F01.I03",
       "action": "新增",
-      "name": "创建合同",
-      "reason": "POST /api/contracts：id=C-UUID、status 默认 active"
+      "name": "专项新增",
+      "reason": "POST：code/officialNo/name 必填"
     },
     {
-      "id": "M02.F01.I04",
+      "id": "M06.F01.I04",
       "action": "新增",
-      "name": "更新合同",
-      "reason": "PUT /api/contracts/{id}：PATCH 语义"
+      "name": "专项修改",
+      "reason": "PUT PATCH 语义"
     },
     {
-      "id": "M02.F01.I05",
+      "id": "M06.F01.I05",
       "action": "新增",
-      "name": "删除合同",
-      "reason": "DELETE /api/contracts/{id}：被接样引用 FK RESTRICT 拒"
+      "name": "专项标准关联",
+      "reason": "POST /api/inspection/links/object-standard：role 在 PK（同 code 对不同 role 两行）"
     },
     {
-      "id": "M03.F01.I01",
+      "id": "M06.F01.I06",
       "action": "新增",
-      "name": "接样列表",
-      "reason": "GET /api/receipts?contractId=&flowStatus=&keyword=：keyword 模糊 commissionCode/projectName"
+      "name": "专项标准解除",
+      "reason": "DELETE unlink，miss 404"
     },
     {
-      "id": "M03.F01.I02",
+      "id": "M06.F02.I01",
       "action": "新增",
-      "name": "接样详情",
-      "reason": "GET /api/receipts/{id}，miss 404"
+      "name": "项目列表",
+      "reason": "GET /api/inspection/objects?inspectionSpecialtyCode=&keyword="
     },
     {
-      "id": "M03.F01.I03",
+      "id": "M06.F02.I02",
       "action": "新增",
-      "name": "创建接样",
-      "reason": "POST /api/receipts：contract FK 必存在、flow_status=receiving 起步、flow_history=[]"
+      "name": "项目详情",
+      "reason": "GET /api/inspection/objects/{code}，miss 404"
     },
     {
-      "id": "M03.F01.I04",
+      "id": "M06.F02.I03",
       "action": "新增",
-      "name": "更新接样",
-      "reason": "PUT /api/receipts/{id}：PATCH 语义（含 3 个 jsonb 列表）"
+      "name": "项目新增",
+      "reason": "POST：specialty FK RESTRICT、sourceProjectNo/Name 必填"
     },
     {
-      "id": "M03.F01.I05",
+      "id": "M06.F02.I04",
       "action": "新增",
-      "name": "删除接样",
-      "reason": "DELETE /api/receipts/{id}：CASCADE 下属 samples"
+      "name": "项目修改",
+      "reason": "PUT PATCH 语义"
     },
     {
-      "id": "M03.F01.I06",
+      "id": "M06.F02.I05",
       "action": "新增",
-      "name": "流程历史",
-      "reason": "GET /api/receipts/{id}/history → FlowHistoryEntry[]"
+      "name": "专项项目关联",
+      "reason": "POST /api/inspection/links/specialty-object：upsert 幂等"
     },
     {
-      "id": "M03.F02.I01",
+      "id": "M06.F02.I06",
       "action": "新增",
-      "name": "任务分配",
-      "reason": "PUT /api/receipts/{id}/task：assignee/plannedDate 挂 SampleReceipt；receiving 态自动推进 task_assignment 并写 history"
+      "name": "专项项目解除",
+      "reason": "DELETE unlink，miss 404"
     },
     {
-      "id": "M03.F03.I01",
+      "id": "M06.F02.I07",
       "action": "新增",
-      "name": "样品列表",
-      "reason": "GET /api/samples?receiptId=&keyword=：keyword 模糊 sampleCode/sampleName，createdAt DESC"
+      "name": "项目参数关联",
+      "reason": "POST /api/inspection/links/object-parameter：qualificationLevel 默认 QUALIFIED"
     },
     {
-      "id": "M03.F03.I02",
+      "id": "M06.F02.I08",
       "action": "新增",
-      "name": "样品详情",
-      "reason": "GET /api/samples/{id}，miss 404"
+      "name": "项目参数解除",
+      "reason": "DELETE unlink，miss 404"
     },
     {
-      "id": "M03.F03.I03",
+      "id": "M06.F03.I01",
       "action": "新增",
-      "name": "创建样品",
-      "reason": "POST /api/samples：receipt FK 必存在、ext 默认 {}"
+      "name": "参数列表",
+      "reason": "GET /api/inspection/parameters?keyword=&sourceType="
     },
     {
-      "id": "M03.F03.I04",
+      "id": "M06.F03.I02",
       "action": "新增",
-      "name": "更新样品",
-      "reason": "PUT /api/samples/{id}：PATCH 语义"
+      "name": "参数详情",
+      "reason": "GET /{code}，miss 404"
     },
     {
-      "id": "M03.F03.I05",
+      "id": "M06.F03.I03",
       "action": "新增",
-      "name": "删除样品",
-      "reason": "DELETE /api/samples/{id}"
+      "name": "参数新增",
+      "reason": "POST：aliases 默认 []、sourceType 默认 OFFICIAL"
     },
     {
-      "id": "M03.F03.I06",
+      "id": "M06.F03.I04",
       "action": "新增",
-      "name": "检测记录列表",
-      "reason": "GET /api/test-records?sampleId=：tenant+sampleId 过滤，分页回显"
+      "name": "参数修改",
+      "reason": "PUT PATCH；aliases 传则整体替换"
     },
     {
-      "id": "M03.F03.I07",
+      "id": "M06.F03.I05",
       "action": "新增",
-      "name": "检测记录详情",
-      "reason": "GET /api/test-records/{id}，miss 404"
+      "name": "标准参数关联",
+      "reason": "POST /api/inspection/links/standard-parameter：upsert"
     },
     {
-      "id": "M03.F03.I08",
+      "id": "M06.F03.I06",
       "action": "新增",
-      "name": "创建检测记录",
-      "reason": "POST /api/test-records：sampleId/parameterCode/requirement/result 必填"
+      "name": "标准参数解除",
+      "reason": "DELETE unlink，miss 404"
     },
     {
-      "id": "M03.F03.I09",
+      "id": "M06.F03.I07",
       "action": "新增",
-      "name": "更新检测记录",
-      "reason": "PUT /api/test-records/{id}：PATCH 语义"
+      "name": "参数界面解除",
+      "reason": "DELETE /api/param-interfaces/links unlink（参数侧视角）"
     },
     {
-      "id": "M03.F03.I10",
+      "id": "M06.F04.I01",
       "action": "新增",
-      "name": "删除检测记录",
-      "reason": "DELETE /api/test-records/{id}"
+      "name": "标准列表",
+      "reason": "GET /api/inspection/standards?keyword=&status="
     },
     {
-      "id": "M03.F03.I11",
+      "id": "M06.F04.I02",
       "action": "新增",
-      "name": "改判",
-      "reason": "PATCH /api/test-records/{id}/verdict：verdict 直接覆写（生成契约 PATCH；springboot 侧 PUT）"
+      "name": "标准详情",
+      "reason": "GET /{code}，miss 404"
     },
     {
-      "id": "M03.F05.I01",
+      "id": "M06.F04.I03",
       "action": "新增",
-      "name": "审核队列",
-      "reason": "GET /api/receipts/flow/queue?stage=：stage 精确 + tenant 收口，pageSize 默认 50 cap 200"
+      "name": "标准新增",
+      "reason": "POST：status 默认 ACTIVE"
     },
     {
-      "id": "M03.F05.I02",
+      "id": "M06.F04.I04",
       "action": "新增",
-      "name": "审核查看",
-      "reason": "GET /api/receipts/{id} review 视角（复用详情端点）"
+      "name": "标准修改",
+      "reason": "PUT PATCH（含 active/superseded/draft 状态迁移）"
     },
     {
-      "id": "M03.F05.I03",
+      "id": "M06.F04.I05",
       "action": "新增",
-      "name": "通过退回",
-      "reason": "POST /api/receipts/flow：review 下 SUBMIT→approval / RETURN→data_entry"
+      "name": "报告对象解除",
+      "reason": "DELETE /api/report-names/links/object unlink（标准侧视角）"
     },
     {
-      "id": "M03.F06.I01",
+      "id": "M06.F04.I06",
       "action": "新增",
-      "name": "阶段推进",
-      "reason": "POST /api/receipts/flow 批量：SUBMIT/RETURN/WITHDRAW，单条失败进 FlowActionResult 不炸整批"
+      "name": "报告参数解除",
+      "reason": "DELETE /api/report-names/links/parameter unlink（标准侧视角）"
     },
     {
-      "id": "M03.F06.I02",
+      "id": "M06.F04.I07",
       "action": "新增",
-      "name": "批准查看",
-      "reason": "GET /api/receipts/{id} approval 视角"
+      "name": "报告标准解除",
+      "reason": "DELETE /api/report-names/links/standard unlink（role 在 PK）"
     },
     {
-      "id": "M03.F06.I03",
+      "id": "M06.F07.I01",
       "action": "新增",
-      "name": "批准退回",
-      "reason": "POST /api/receipts/flow：approval 下 SUBMIT→issuance / RETURN→review"
+      "name": "报告名称列表",
+      "reason": "GET /api/report-names?keyword="
     },
     {
-      "id": "M03.F07.I01",
+      "id": "M06.F07.I02",
       "action": "新增",
-      "name": "发放队列",
-      "reason": "GET /api/receipts/flow/queue?stage=issuance"
+      "name": "报告名称详情",
+      "reason": "GET /{code}：含 extFields List<ExtFieldDef>"
     },
     {
-      "id": "M03.F07.I02",
+      "id": "M06.F07.I03",
       "action": "新增",
-      "name": "发放查看",
-      "reason": "GET /api/receipts/{id} issuance 视角（含 issued_at）"
+      "name": "报告名称新增",
+      "reason": "POST：extFields 默认 []"
     },
     {
-      "id": "M03.F07.I03",
+      "id": "M06.F07.I04",
       "action": "新增",
-      "name": "发放退回",
-      "reason": "POST /api/receipts/flow：issuance 下 SUBMIT→archived / RETURN→approval"
+      "name": "报告名称修改",
+      "reason": "PUT PATCH"
     },
     {
-      "id": "M03.F08.I01",
+      "id": "M06.F07.I05",
       "action": "新增",
-      "name": "归档队列",
-      "reason": "GET /api/receipts/flow/queue?stage=archived"
+      "name": "报告名称删除",
+      "reason": "DELETE，miss 404"
     },
     {
-      "id": "M03.F08.I02",
+      "id": "M06.F07.I06",
       "action": "新增",
-      "name": "归档查看",
-      "reason": "GET /api/receipts/{id} archived 视角"
+      "name": "报告对象关联",
+      "reason": "POST /api/report-names/links/object：upsert"
     },
     {
-      "id": "M03.F08.I03",
+      "id": "M06.F07.I07",
       "action": "新增",
-      "name": "归档退回",
-      "reason": "POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移"
+      "name": "报告标准关联",
+      "reason": "POST /api/report-names/links/standard（role 在 PK）"
     },
     {
-      "id": "M03.F09.I01",
+      "id": "M06.F07.I08",
       "action": "新增",
-      "name": "接样单详情聚合",
-      "reason": "GET /api/receipts/{id} + 客户端组合 samples/test-records 三视图"
+      "name": "报告参数关联",
+      "reason": "POST /api/report-names/links/parameter：upsert"
     },
     {
-      "id": "M02.F01",
+      "id": "M06.F08.I01",
+      "action": "新增",
+      "name": "参数界面列表",
+      "reason": "GET /api/param-interfaces?keyword="
+    },
+    {
+      "id": "M06.F08.I02",
+      "action": "新增",
+      "name": "参数界面详情",
+      "reason": "GET /{code}：含 config Map"
+    },
+    {
+      "id": "M06.F08.I03",
+      "action": "新增",
+      "name": "参数界面新增",
+      "reason": "POST：code/componentPath 必填，config 默认 {}"
+    },
+    {
+      "id": "M06.F08.I04",
+      "action": "新增",
+      "name": "参数界面修改",
+      "reason": "PUT PATCH"
+    },
+    {
+      "id": "M06.F08.I05",
+      "action": "新增",
+      "name": "参数界面删除",
+      "reason": "DELETE，miss 404"
+    },
+    {
+      "id": "M06.F08.I06",
+      "action": "新增",
+      "name": "参数界面关联",
+      "reason": "POST /api/param-interfaces/links：行级 config jsonb（区别于 PI.config）"
+    },
+    {
+      "id": "M06.F01",
       "action": "变更",
-      "name": "合同管理",
-      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
+      "name": "检测专项",
+      "reason": "规划→已上线：I01-I06"
     },
     {
-      "id": "M03.F01",
+      "id": "M06.F02",
       "action": "变更",
-      "name": "接样管理",
-      "reason": "规划→已上线：I01-I06 已实现并有 fnTest"
+      "name": "检测项目",
+      "reason": "规划→已上线：I01-I08"
     },
     {
-      "id": "M03.F02",
+      "id": "M06.F03",
       "action": "变更",
-      "name": "任务分配",
-      "reason": "规划→已上线：I01 已实现并有 fnTest"
+      "name": "检测参数",
+      "reason": "规划→已上线：I01-I07"
     },
     {
-      "id": "M03.F03",
+      "id": "M06.F04",
       "action": "变更",
-      "name": "数据录入",
-      "reason": "规划→已上线：I01-I11 已实现并有 fnTest"
+      "name": "检测标准",
+      "reason": "规划→已上线：I01-I07"
     },
     {
-      "id": "M03.F05",
+      "id": "M06.F07",
       "action": "变更",
-      "name": "报告审核",
-      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖队列+转移"
+      "name": "报告名称",
+      "reason": "规划→已上线：I01-I08"
     },
     {
-      "id": "M03.F06",
+      "id": "M06.F08",
       "action": "变更",
-      "name": "报告批准",
-      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖推进/退回/容错/全周期"
-    },
-    {
-      "id": "M03.F07",
-      "action": "变更",
-      "name": "报告发放",
-      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖 WITHDRAW 语义"
-    },
-    {
-      "id": "M03.F08",
-      "action": "变更",
-      "name": "报告归档",
-      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖终态"
-    },
-    {
-      "id": "M03.F09",
-      "action": "变更",
-      "name": "接样单详情",
-      "reason": "规划→已上线：I01 复用详情端点"
+      "name": "参数界面",
+      "reason": "规划→已上线：I01-I06"
     }
   ],
   "sync_files": [

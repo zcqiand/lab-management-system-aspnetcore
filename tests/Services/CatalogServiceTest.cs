@@ -15,8 +15,13 @@ public class CatalogServiceTest
 
     private static InspectionModel Model(string code, string name, int sortOrder = 0, string obj = "OBJ-CONCRETE") => new()
     {
-        Code = code, TenantId = Tenant, InspectionObjectCode = obj, Name = name,
-        SortOrder = sortOrder, CreatedAt = "t", UpdatedAt = "t",
+        Code = code,
+        TenantId = Tenant,
+        InspectionObjectCode = obj,
+        Name = name,
+        SortOrder = sortOrder,
+        CreatedAt = "t",
+        UpdatedAt = "t",
     };
 
     // === M04.F06 型号 ===
@@ -75,7 +80,10 @@ public class CatalogServiceTest
 
         var m = service.CreateModel(Tenant, new CreateCatalogEntryRequest
         {
-            Code = "M-NEW", Name = "新型号", InspectionObjectCode = "OBJ-CONCRETE", SortOrder = 5,
+            Code = "M-NEW",
+            Name = "新型号",
+            InspectionObjectCode = "OBJ-CONCRETE",
+            SortOrder = 5,
         });
 
         Assert.Equal(Tenant, m.TenantId);
@@ -273,8 +281,13 @@ public class CatalogServiceTest
         catalog.SaveBrand(new InspectionBrand { Code = "HRB400", TenantId = Tenant, Name = "热轧带肋", CreatedAt = "t", UpdatedAt = "t" });
         requirements.Save(new TechnicalRequirement
         {
-            TenantId = Tenant, InspectionObjectCode = "OBJ", InspectionParameterCode = "PARAM",
-            JudgmentStandardCode = "STD", Brand = "HRB400", CreatedAt = "t", UpdatedAt = "t",
+            TenantId = Tenant,
+            InspectionObjectCode = "OBJ",
+            InspectionParameterCode = "PARAM",
+            JudgmentStandardCode = "STD",
+            Brand = "HRB400",
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         var service = new CatalogService(catalog);
 

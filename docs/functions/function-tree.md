@@ -252,10 +252,10 @@
 
 | 功能 ID | 功能名称 | 闭环定义 | 类型 | 状态 |
 |---|---|---|---|---|
-| M06.F01 | 检测专项 | InspectionSpecialty CRUD（检测能力字典根） | 接口 | 规划 |
-| M06.F02 | 检测项目 | InspectionObject CRUD + 专项/参数关联 | 接口 | 规划 |
-| M06.F03 | 检测参数 | InspectionParameter CRUD + 标准/参数关联 | 接口 | 规划 |
-| M06.F04 | 检测标准 | InspectionStandard CRUD（含状态：active/superseded/draft） | 接口 | 规划 |
+| M06.F01 | 检测专项 | InspectionSpecialty CRUD（检测能力字典根） | 接口 | 已上线 |
+| M06.F02 | 检测项目 | InspectionObject CRUD + 专项/参数关联 | 接口 | 已上线 |
+| M06.F03 | 检测参数 | InspectionParameter CRUD + 标准/参数关联 | 接口 | 已上线 |
+| M06.F04 | 检测标准 | InspectionStandard CRUD（含状态：active/superseded/draft） | 接口 | 已上线 |
 | M06.F05 | 计算规则 | CalculationRule 维护（复合主键，算法类型 + 公式） | 接口 | 已上线 |
 | M06.F06 | 技术要求 | TechnicalRequirement 维护，按四维度匹配；brand/model/grade/spec 改为 FK 引用实体 | 接口 | 已上线 |
 
@@ -278,8 +278,80 @@
 | M06.F06.I03 | 要求新增 | 接口 | POST：默认 numeric/≥/manual/draft，tenant 从 token 注入 | 已上线 |
 | M06.F06.I04 | 要求修改 | 接口 | PUT 三键 PATCH 语义（含 brand/model/grade/spec 四维度） | 已上线 |
 | M06.F06.I05 | 要求删除 | 接口 | DELETE 三键，miss 404 | 已上线 |
-| M06.F07 | 报告名称 | InspectionReportName CRUD + extFields 模板 + 关联标准/参数 | 接口 | 规划 |
-| M06.F08 | 参数界面 | ParamInterface 维护 + 参数↔界面 link | 接口 | 规划 |
+
+### M06.F07 报告名称
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F07.I01 | 报告名称列表 | 接口 | GET /api/report-names?keyword= | 已上线 |
+| M06.F07.I02 | 报告名称详情 | 接口 | GET /{code}：含 extFields List<ExtFieldDef> | 已上线 |
+| M06.F07.I03 | 报告名称新增 | 接口 | POST：extFields 默认 [] | 已上线 |
+| M06.F07.I04 | 报告名称修改 | 接口 | PUT PATCH | 已上线 |
+| M06.F07.I05 | 报告名称删除 | 接口 | DELETE，miss 404 | 已上线 |
+| M06.F07.I06 | 报告对象关联 | 接口 | POST /api/report-names/links/object：upsert | 已上线 |
+| M06.F07.I07 | 报告标准关联 | 接口 | POST /api/report-names/links/standard（role 在 PK） | 已上线 |
+| M06.F07.I08 | 报告参数关联 | 接口 | POST /api/report-names/links/parameter：upsert | 已上线 |
+
+### M06.F08 参数界面
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F08.I01 | 参数界面列表 | 接口 | GET /api/param-interfaces?keyword= | 已上线 |
+| M06.F08.I02 | 参数界面详情 | 接口 | GET /{code}：含 config Map | 已上线 |
+| M06.F08.I03 | 参数界面新增 | 接口 | POST：code/componentPath 必填，config 默认 {} | 已上线 |
+| M06.F08.I04 | 参数界面修改 | 接口 | PUT PATCH | 已上线 |
+| M06.F08.I05 | 参数界面删除 | 接口 | DELETE，miss 404 | 已上线 |
+| M06.F08.I06 | 参数界面关联 | 接口 | POST /api/param-interfaces/links：行级 config jsonb（区别于 PI.config） | 已上线 |
+| M06.F07 | 报告名称 | InspectionReportName CRUD + extFields 模板 + 关联标准/参数 | 接口 | 已上线 |
+| M06.F08 | 参数界面 | ParamInterface 维护 + 参数↔界面 link | 接口 | 已上线 |
+
+### M06.F01 检测专项
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F01.I01 | 专项列表 | 接口 | GET /api/inspection/specialties?keyword=：keyword 模糊 code/name | 已上线 |
+| M06.F01.I02 | 专项详情 | 接口 | GET /api/inspection/specialties/{code}，miss 404 | 已上线 |
+| M06.F01.I03 | 专项新增 | 接口 | POST：code/officialNo/name 必填 | 已上线 |
+| M06.F01.I04 | 专项修改 | 接口 | PUT PATCH 语义 | 已上线 |
+| M06.F01.I05 | 专项标准关联 | 接口 | POST /api/inspection/links/object-standard：role 在 PK（同 code 对不同 role 两行） | 已上线 |
+| M06.F01.I06 | 专项标准解除 | 接口 | DELETE unlink，miss 404 | 已上线 |
+
+### M06.F02 检测项目
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F02.I01 | 项目列表 | 接口 | GET /api/inspection/objects?inspectionSpecialtyCode=&keyword= | 已上线 |
+| M06.F02.I02 | 项目详情 | 接口 | GET /api/inspection/objects/{code}，miss 404 | 已上线 |
+| M06.F02.I03 | 项目新增 | 接口 | POST：specialty FK RESTRICT、sourceProjectNo/Name 必填 | 已上线 |
+| M06.F02.I04 | 项目修改 | 接口 | PUT PATCH 语义 | 已上线 |
+| M06.F02.I05 | 专项项目关联 | 接口 | POST /api/inspection/links/specialty-object：upsert 幂等 | 已上线 |
+| M06.F02.I06 | 专项项目解除 | 接口 | DELETE unlink，miss 404 | 已上线 |
+| M06.F02.I07 | 项目参数关联 | 接口 | POST /api/inspection/links/object-parameter：qualificationLevel 默认 QUALIFIED | 已上线 |
+| M06.F02.I08 | 项目参数解除 | 接口 | DELETE unlink，miss 404 | 已上线 |
+
+### M06.F03 检测参数
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F03.I01 | 参数列表 | 接口 | GET /api/inspection/parameters?keyword=&sourceType= | 已上线 |
+| M06.F03.I02 | 参数详情 | 接口 | GET /{code}，miss 404 | 已上线 |
+| M06.F03.I03 | 参数新增 | 接口 | POST：aliases 默认 []、sourceType 默认 OFFICIAL | 已上线 |
+| M06.F03.I04 | 参数修改 | 接口 | PUT PATCH；aliases 传则整体替换 | 已上线 |
+| M06.F03.I05 | 标准参数关联 | 接口 | POST /api/inspection/links/standard-parameter：upsert | 已上线 |
+| M06.F03.I06 | 标准参数解除 | 接口 | DELETE unlink，miss 404 | 已上线 |
+| M06.F03.I07 | 参数界面解除 | 接口 | DELETE /api/param-interfaces/links unlink（参数侧视角） | 已上线 |
+
+### M06.F04 检测标准
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M06.F04.I01 | 标准列表 | 接口 | GET /api/inspection/standards?keyword=&status= | 已上线 |
+| M06.F04.I02 | 标准详情 | 接口 | GET /{code}，miss 404 | 已上线 |
+| M06.F04.I03 | 标准新增 | 接口 | POST：status 默认 ACTIVE | 已上线 |
+| M06.F04.I04 | 标准修改 | 接口 | PUT PATCH（含 active/superseded/draft 状态迁移） | 已上线 |
+| M06.F04.I05 | 报告对象解除 | 接口 | DELETE /api/report-names/links/object unlink（标准侧视角） | 已上线 |
+| M06.F04.I06 | 报告参数解除 | 接口 | DELETE /api/report-names/links/parameter unlink（标准侧视角） | 已上线 |
+| M06.F04.I07 | 报告标准解除 | 接口 | DELETE /api/report-names/links/standard unlink（role 在 PK） | 已上线 |
 
 ---
 

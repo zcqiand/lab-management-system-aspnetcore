@@ -16,8 +16,13 @@ public class RuleAndRequirementServiceTest
 
     private static CalculationRule Rule(string obj, string param, int sortOrder = 0, CalculationAlgorithmType algo = CalculationAlgorithmType.Formula) => new()
     {
-        InspectionObjectCode = obj, InspectionParameterCode = param,
-        AlgorithmType = algo, SpecimenCount = 3, CreatedAt = "t", UpdatedAt = "t", SortOrder = sortOrder,
+        InspectionObjectCode = obj,
+        InspectionParameterCode = param,
+        AlgorithmType = algo,
+        SpecimenCount = 3,
+        CreatedAt = "t",
+        UpdatedAt = "t",
+        SortOrder = sortOrder,
     };
 
     // === M06.F05 计算规则 ===
@@ -53,7 +58,8 @@ public class RuleAndRequirementServiceTest
 
         var r = service.Create(new CreateCalculationRuleRequest
         {
-            InspectionObjectCode = "OBJ-A", InspectionParameterCode = "P-NEW",
+            InspectionObjectCode = "OBJ-A",
+            InspectionParameterCode = "P-NEW",
         });
 
         Assert.Equal(CalculationAlgorithmType.Manual, r.AlgorithmType); // 默认 manual
@@ -104,11 +110,16 @@ public class RuleAndRequirementServiceTest
 
     private static TechnicalRequirement Req(string obj = "OBJ", string param = "PARAM", string std = "STD",
         RequirementVerificationStatus status = RequirementVerificationStatus.Verified) => new()
-    {
-        TenantId = Tenant, InspectionObjectCode = obj, InspectionParameterCode = param,
-        JudgmentStandardCode = std, VerificationStatus = status,
-        ValueType = RequirementValueType.Numeric, CreatedAt = "t", UpdatedAt = "t",
-    };
+        {
+            TenantId = Tenant,
+            InspectionObjectCode = obj,
+            InspectionParameterCode = param,
+            JudgmentStandardCode = std,
+            VerificationStatus = status,
+            ValueType = RequirementValueType.Numeric,
+            CreatedAt = "t",
+            UpdatedAt = "t",
+        };
 
     [Fact]
     [Trait("Fn", "M06.F06.I01")]
@@ -142,7 +153,9 @@ public class RuleAndRequirementServiceTest
 
         var t = service.Create(Tenant, new CreateTechnicalRequirementRequest
         {
-            InspectionObjectCode = "OBJ", InspectionParameterCode = "PARAM", JudgmentStandardCode = "STD",
+            InspectionObjectCode = "OBJ",
+            InspectionParameterCode = "PARAM",
+            JudgmentStandardCode = "STD",
         });
 
         Assert.Equal(RequirementValueType.Numeric, t.ValueType);
@@ -178,7 +191,10 @@ public class RuleAndRequirementServiceTest
 
         var t = service.Update(Tenant, "OBJ", "PARAM", "STD", new UpdateTechnicalRequirementRequest
         {
-            Brand = "HRB400", Model = "M-1", Grade = "G-1", Spec = "S-1",
+            Brand = "HRB400",
+            Model = "M-1",
+            Grade = "G-1",
+            Spec = "S-1",
         });
 
         Assert.Equal("HRB400", t.Brand);

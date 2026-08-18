@@ -81,6 +81,48 @@
 | M03.F08.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（archived 视角） | sample_receipts | M03.F08.I02 | - | 已上线 |
 | M03.F08.I03 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow（终态/退回/撤回） | sample_receipts.flow_status | M03.F08.I03 | - | 已上线 |
 | M03.F09.I01 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（三视图聚合） | sample_receipts + samples + test_records | M03.F09.I01 | - | 已上线 |
+| M06.F01.I01 | InspectionDictionaryController#ListSpecialties / DictionaryService#ListSpecialties | GET /api/inspection/specialties | inspection_specialties（内存 store 镜像 V008） | M06.F01.I01 | - | 已上线 |
+| M06.F01.I02 | InspectionDictionaryController#UpdateSpecialty / DictionaryService#GetSpecialty | GET /api/inspection/specialties/{code} | inspection_specialties | M06.F01.I02 | - | 已上线 |
+| M06.F01.I03 | InspectionDictionaryController#CreateSpecialty / DictionaryService#CreateSpecialty | POST /api/inspection/specialties | inspection_specialties | M06.F01.I03 | - | 已上线 |
+| M06.F01.I04 | InspectionDictionaryController#UpdateSpecialty / DictionaryService#UpdateSpecialty | PUT /api/inspection/specialties/{code} | inspection_specialties | M06.F01.I04 | - | 已上线 |
+| M06.F01.I05 | InspectionDictionaryController#LinkObjectStandard / JunctionService#LinkObjectStandard | POST /api/inspection/links/object-standard | inspection_object_standards（role 在 PK） | M06.F01.I05 | - | 已上线 |
+| M06.F01.I06 | InspectionDictionaryController#UnlinkObjectStandard / JunctionService#UnlinkObjectStandard | DELETE /api/inspection/links/object-standard | inspection_object_standards | M06.F01.I06 | - | 已上线 |
+| M06.F02.I01 | InspectionDictionaryController#ListObjects / DictionaryService#ListObjects | GET /api/inspection/objects | inspection_objects（V008，FK RESTRICT） | M06.F02.I01 | - | 已上线 |
+| M06.F02.I02 | InspectionDictionaryController#UpdateObject / DictionaryService#GetObject | GET /api/inspection/objects/{code} | inspection_objects | M06.F02.I02 | - | 已上线 |
+| M06.F02.I03 | InspectionDictionaryController#CreateObject / DictionaryService#CreateObject | POST /api/inspection/objects | inspection_objects | M06.F02.I03 | - | 已上线 |
+| M06.F02.I04 | InspectionDictionaryController#UpdateObject / DictionaryService#UpdateObject | PUT /api/inspection/objects/{code} | inspection_objects | M06.F02.I04 | - | 已上线 |
+| M06.F02.I05 | InspectionDictionaryController#LinkSpecialtyObject / JunctionService#LinkSpecialtyObject | POST /api/inspection/links/specialty-object | inspection_specialty_objects（upsert） | M06.F02.I05 | - | 已上线 |
+| M06.F02.I06 | InspectionDictionaryController#UnlinkSpecialtyObject / JunctionService#UnlinkSpecialtyObject | DELETE /api/inspection/links/specialty-object | inspection_specialty_objects | M06.F02.I06 | - | 已上线 |
+| M06.F02.I07 | InspectionDictionaryController#LinkObjectParameter / JunctionService#LinkObjectParameter | POST /api/inspection/links/object-parameter | inspection_object_parameters（qualification PG enum） | M06.F02.I07 | - | 已上线 |
+| M06.F02.I08 | InspectionDictionaryController#UnlinkObjectParameter / JunctionService#UnlinkObjectParameter | DELETE /api/inspection/links/object-parameter | inspection_object_parameters | M06.F02.I08 | - | 已上线 |
+| M06.F03.I01 | InspectionDictionaryController#ListParameters / DictionaryService#ListParameters | GET /api/inspection/parameters | inspection_parameters（aliases jsonb） | M06.F03.I01 | - | 已上线 |
+| M06.F03.I02 | InspectionDictionaryController#UpdateParameter / DictionaryService#GetParameter | GET /api/inspection/parameters/{code} | inspection_parameters | M06.F03.I02 | - | 已上线 |
+| M06.F03.I03 | InspectionDictionaryController#CreateParameter / DictionaryService#CreateParameter | POST /api/inspection/parameters | inspection_parameters | M06.F03.I03 | - | 已上线 |
+| M06.F03.I04 | InspectionDictionaryController#UpdateParameter / DictionaryService#UpdateParameter | PUT /api/inspection/parameters/{code} | inspection_parameters | M06.F03.I04 | - | 已上线 |
+| M06.F03.I05 | InspectionDictionaryController#LinkStandardParameter / JunctionService#LinkStandardParameter | POST /api/inspection/links/standard-parameter | inspection_standard_parameters | M06.F03.I05 | - | 已上线 |
+| M06.F03.I06 | InspectionDictionaryController#UnlinkStandardParameter / JunctionService#UnlinkStandardParameter | DELETE /api/inspection/links/standard-parameter | inspection_standard_parameters | M06.F03.I06 | - | 已上线 |
+| M06.F03.I07 | ParamInterfacesController#UnlinkParamInterface / JunctionService#UnlinkParamInterface | DELETE /api/param-interfaces/links | param_interface_links（参数侧视角） | M06.F03.I07 | - | 已上线 |
+| M06.F04.I01 | InspectionDictionaryController#ListStandards / DictionaryService#ListStandards | GET /api/inspection/standards | inspection_standards（status PG enum） | M06.F04.I01 | - | 已上线 |
+| M06.F04.I02 | InspectionDictionaryController#UpdateStandard / DictionaryService#GetStandard | GET /api/inspection/standards/{code} | inspection_standards | M06.F04.I02 | - | 已上线 |
+| M06.F04.I03 | InspectionDictionaryController#CreateStandard / DictionaryService#CreateStandard | POST /api/inspection/standards | inspection_standards | M06.F04.I03 | - | 已上线 |
+| M06.F04.I04 | InspectionDictionaryController#UpdateStandard / DictionaryService#UpdateStandard | PUT /api/inspection/standards/{code} | inspection_standards | M06.F04.I04 | - | 已上线 |
+| M06.F04.I05 | ReportNamesController#UnlinkObjectReportName / JunctionService#UnlinkObjectReportName | DELETE /api/report-names/links/object | inspection_object_report_names（标准侧视角） | M06.F04.I05 | - | 已上线 |
+| M06.F04.I06 | ReportNamesController#UnlinkReportNameParameter / JunctionService#UnlinkReportNameParameter | DELETE /api/report-names/links/parameter | inspection_report_name_parameters | M06.F04.I06 | - | 已上线 |
+| M06.F04.I07 | ReportNamesController#UnlinkReportNameStandard / JunctionService#UnlinkReportNameStandard | DELETE /api/report-names/links/standard | inspection_report_name_standards（role 在 PK） | M06.F04.I07 | - | 已上线 |
+| M06.F07.I01 | ReportNamesController#ListReportNames / DictionaryService#ListReportNames | GET /api/report-names | inspection_report_names（extFields jsonb） | M06.F07.I01 | - | 已上线 |
+| M06.F07.I02 | ReportNamesController#GetReportName / DictionaryService#GetReportName | GET /api/report-names/{code} | inspection_report_names | M06.F07.I02 | - | 已上线 |
+| M06.F07.I03 | ReportNamesController#CreateReportName / DictionaryService#CreateReportName | POST /api/report-names | inspection_report_names | M06.F07.I03 | - | 已上线 |
+| M06.F07.I04 | ReportNamesController#UpdateReportName / DictionaryService#UpdateReportName | PUT /api/report-names/{code} | inspection_report_names | M06.F07.I04 | - | 已上线 |
+| M06.F07.I05 | ReportNamesController#DeleteReportName / DictionaryService#DeleteReportName | DELETE /api/report-names/{code} | inspection_report_names | M06.F07.I05 | - | 已上线 |
+| M06.F07.I06 | ReportNamesController#LinkObjectReportName / JunctionService#LinkObjectReportName | POST /api/report-names/links/object | inspection_object_report_names | M06.F07.I06 | - | 已上线 |
+| M06.F07.I07 | ReportNamesController#LinkReportNameStandard / JunctionService#LinkReportNameStandard | POST /api/report-names/links/standard | inspection_report_name_standards | M06.F07.I07 | - | 已上线 |
+| M06.F07.I08 | ReportNamesController#LinkReportNameParameter / JunctionService#LinkReportNameParameter | POST /api/report-names/links/parameter | inspection_report_name_parameters | M06.F07.I08 | - | 已上线 |
+| M06.F08.I01 | ParamInterfacesController#ListParamInterfaces / DictionaryService#ListInterfaces | GET /api/param-interfaces | param_interfaces（config jsonb） | M06.F08.I01 | - | 已上线 |
+| M06.F08.I02 | ParamInterfacesController#GetParamInterface / DictionaryService#GetInterface | GET /api/param-interfaces/{code} | param_interfaces | M06.F08.I02 | - | 已上线 |
+| M06.F08.I03 | ParamInterfacesController#CreateParamInterface / DictionaryService#CreateInterface | POST /api/param-interfaces | param_interfaces | M06.F08.I03 | - | 已上线 |
+| M06.F08.I04 | ParamInterfacesController#UpdateParamInterface / DictionaryService#UpdateInterface | PUT /api/param-interfaces/{code} | param_interfaces | M06.F08.I04 | - | 已上线 |
+| M06.F08.I05 | ParamInterfacesController#DeleteParamInterface / DictionaryService#DeleteInterface | DELETE /api/param-interfaces/{code} | param_interfaces | M06.F08.I05 | - | 已上线 |
+| M06.F08.I06 | ParamInterfacesController#LinkParamInterface / JunctionService#LinkParamInterface | POST /api/param-interfaces/links | param_interface_links（行级 config jsonb） | M06.F08.I06 | - | 已上线 |
 
 ## 约定
 

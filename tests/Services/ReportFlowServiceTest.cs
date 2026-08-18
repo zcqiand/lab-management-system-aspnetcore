@@ -18,18 +18,27 @@ public class ReportFlowServiceTest
         var store = new InMemoryFlowStore();
         store.SaveContract(new Contract
         {
-            Id = "C-1", TenantId = Tenant, ContractCode = "HT-A", Status = ContractStatus.Active,
-            CreatedAt = "t", UpdatedAt = "t",
+            Id = "C-1",
+            TenantId = Tenant,
+            ContractCode = "HT-A",
+            Status = ContractStatus.Active,
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         foreach (var (id, stage) in receipts)
         {
             store.SaveReceipt(new SampleReceipt
             {
-                Id = id, TenantId = Tenant, ContractId = "C-1", FlowStatus = stage,
-                FlowHistory = new List<FlowHistoryEntry>(), CreatedAt = "t", UpdatedAt = "t",
+                Id = id,
+                TenantId = Tenant,
+                ContractId = "C-1",
+                FlowStatus = stage,
+                FlowHistory = new List<FlowHistoryEntry>(),
+                CreatedAt = "t",
+                UpdatedAt = "t",
             });
         }
-        return (store, new ReportFlowService(store, new SampleReceiptService(store)));
+        return (store, new ReportFlowService(store));
     }
 
     [Fact]
@@ -62,7 +71,9 @@ public class ReportFlowServiceTest
 
         var results = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-1" }, Action = FlowAction.Submit, Operator = "审核员",
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "审核员",
         });
 
         Assert.True(results[0].Ok);
@@ -80,7 +91,8 @@ public class ReportFlowServiceTest
 
         var results = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-1" }, Action = FlowAction.Return,
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Return,
         });
 
         Assert.True(results[0].Ok);
@@ -95,7 +107,8 @@ public class ReportFlowServiceTest
 
         var results = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-GHOST", "R-1" }, Action = FlowAction.Submit,
+            Ids = new List<string> { "R-GHOST", "R-1" },
+            Action = FlowAction.Submit,
         });
 
         Assert.False(results[0].Ok); // not found
@@ -118,7 +131,8 @@ public class ReportFlowServiceTest
         {
             var results = flow.SubmitAction(Tenant, new FlowActionRequest
             {
-                Ids = new List<string> { "R-1" }, Action = FlowAction.Submit,
+                Ids = new List<string> { "R-1" },
+                Action = FlowAction.Submit,
             });
             Assert.True(results[0].Ok);
             Assert.Equal(expected, results[0].FlowStatus);
@@ -127,7 +141,8 @@ public class ReportFlowServiceTest
         // archived 无 next → 第 7 次 SUBMIT 失败
         var beyond = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-1" }, Action = FlowAction.Submit,
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
         });
         Assert.False(beyond[0].Ok);
     }
@@ -140,14 +155,16 @@ public class ReportFlowServiceTest
 
         var inReceiving = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-1" }, Action = FlowAction.Withdraw,
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Withdraw,
         });
         Assert.True(inReceiving[0].Ok);
         Assert.Equal(FlowStatus.Receiving, inReceiving[0].FlowStatus); // 自转移
 
         var inReview = flow.SubmitAction(Tenant, new FlowActionRequest
         {
-            Ids = new List<string> { "R-2" }, Action = FlowAction.Withdraw,
+            Ids = new List<string> { "R-2" },
+            Action = FlowAction.Withdraw,
         });
         Assert.False(inReview[0].Ok); // 非 receiving 不允许撤回
     }

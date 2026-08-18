@@ -14,8 +14,13 @@ public class ContractServiceTest
 
     private static Contract C(string id, string code, string project, ContractStatus status = ContractStatus.Active) => new()
     {
-        Id = id, TenantId = Tenant, ContractCode = code, ProjectName = project,
-        Status = status, CreatedAt = "2026-01-01", UpdatedAt = "2026-01-01",
+        Id = id,
+        TenantId = Tenant,
+        ContractCode = code,
+        ProjectName = project,
+        Status = status,
+        CreatedAt = "2026-01-01",
+        UpdatedAt = "2026-01-01",
     };
 
     [Fact]
@@ -64,7 +69,10 @@ public class ContractServiceTest
 
         var c = service.Create(Tenant, new CreateContractRequest
         {
-            ContractCode = "HT-NEW", ClientUnit = "甲方", ProjectName = "新工程", ConstructionUnit = "乙方",
+            ContractCode = "HT-NEW",
+            ClientUnit = "甲方",
+            ProjectName = "新工程",
+            ConstructionUnit = "乙方",
         });
 
         Assert.StartsWith("C-", c.Id);
@@ -106,7 +114,11 @@ public class ContractServiceTest
         store.SaveContract(C("C-1", "HT-A", "p"));
         store.SaveReceipt(new SampleReceipt
         {
-            Id = "R-1", TenantId = Tenant, ContractId = "C-1", CreatedAt = "t", UpdatedAt = "t",
+            Id = "R-1",
+            TenantId = Tenant,
+            ContractId = "C-1",
+            CreatedAt = "t",
+            UpdatedAt = "t",
         });
         var service = new ContractService(store);
 
