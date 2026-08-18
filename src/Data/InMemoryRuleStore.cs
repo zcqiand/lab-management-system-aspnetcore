@@ -8,7 +8,7 @@ using Lab.AspNetCore.Controllers.Generated;
 /// 平台级无 tenant（镜像 springboot inspection_calculation_rules V009）。
 /// list 两个可选过滤（空串不过滤），排序 sortOrder asc。
 /// </summary>
-public sealed class InMemoryRuleStore
+public sealed class InMemoryRuleStore : IRuleStore
 {
     private readonly ConcurrentDictionary<(string Obj, string Param), CalculationRule> _rules = new();
 
@@ -36,7 +36,7 @@ public sealed class InMemoryRuleStore
 /// list 四过滤（null=不过滤），排序 sortOrder, objectCode, parameterCode, standardCode。
 /// brand 删除时四维度引用 SET NULL（经 InMemoryCatalogStore.BrandDeleted 事件）。
 /// </summary>
-public sealed class InMemoryRequirementStore
+public sealed class InMemoryRequirementStore : IRequirementStore
 {
     private readonly ConcurrentDictionary<(string Tenant, string Obj, string Param, string Std), TechnicalRequirement> _rows = new();
 

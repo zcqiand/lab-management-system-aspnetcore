@@ -8,7 +8,7 @@ using Lab.AspNetCore.Data;
 /// list receiptId 精确 + keyword 模糊 sampleCode/sampleName，createdAt DESC；
 /// create 校验 receipt FK；ext 默认 {}；id = "S-"+UUID。
 /// </summary>
-public sealed class SampleService(InMemoryFlowStore store)
+public sealed class SampleService(IFlowStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -96,7 +96,7 @@ public sealed class SampleService(InMemoryFlowStore store)
 /// M03.F03.I06-I11 检测记录 CRUD + 改判（B3）。语义镜像 springboot TestRecordService：
 /// list 只按 tenant+sampleId 过滤（parameterCode 接收未用，分页回显）；verdict 直接覆写。
 /// </summary>
-public sealed class TestRecordService(InMemoryFlowStore store)
+public sealed class TestRecordService(IFlowStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

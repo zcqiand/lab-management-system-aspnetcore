@@ -7,7 +7,7 @@ using Lab.AspNetCore.Data;
 /// M06.F05 计算规则 CRUD（B2）。复合主键 (objectCode, parameterCode)，平台级无 tenant。
 /// 创建默认 algorithmType=Manual、specimenCount=1（镜像 springboot CalculationRuleMapper）。
 /// </summary>
-public sealed class CalculationRuleService(InMemoryRuleStore store)
+public sealed class CalculationRuleService(IRuleStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
@@ -70,7 +70,7 @@ public sealed class CalculationRuleService(InMemoryRuleStore store)
 /// M06.F06 技术要求 CRUD（B2）。业务三键 (object, parameter, judgmentStandard) + tenant。
 /// 创建默认 numeric/Ge/Manual/Draft；tenant 从 token claim 注入（controller 层）。
 /// </summary>
-public sealed class TechnicalRequirementService(InMemoryRequirementStore store)
+public sealed class TechnicalRequirementService(IRequirementStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

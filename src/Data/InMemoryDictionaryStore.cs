@@ -8,7 +8,7 @@ using Lab.AspNetCore.Controllers.Generated;
 /// 语义镜像 springboot：keyword 模糊 code/name；aliases/extFields/config 三个 jsonb
 /// 在生成 DTO 侧直接是 List/Dictionary（非 jsonb 字符串）。
 /// </summary>
-public sealed class InMemoryDictionaryStore
+public sealed class InMemoryDictionaryStore : IDictionaryStore
 {
     private readonly ConcurrentDictionary<string, InspectionSpecialty> _specialties = new();
     private readonly ConcurrentDictionary<string, InspectionParameter> _parameters = new();
@@ -115,7 +115,7 @@ public sealed class InMemoryDictionaryStore
 /// link = upsert（同 PK 重复不报错，覆盖更新）；unlink miss → 404。
 /// role 在 PK 内的两组（object-standard / report-name-standard）：同 code 对不同 role 是两行。
 /// </summary>
-public sealed class InMemoryJunctionStore
+public sealed class InMemoryJunctionStore : IJunctionStore
 {
     private readonly ConcurrentDictionary<(string Spec, string Obj), SpecialtyObjectLink> _specialtyObject = new();
     private readonly ConcurrentDictionary<(string Obj, string Param), ObjectParameterLink> _objectParameter = new();

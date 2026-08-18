@@ -8,7 +8,7 @@ using Lab.AspNetCore.Data;
 /// link = upsert（同 PK 重复不报错覆盖）；unlink miss → 404。
 /// role 在 PK 内的两组：object-standard / report-name-standard。
 /// </summary>
-public sealed class JunctionService(InMemoryJunctionStore store)
+public sealed class JunctionService(IJunctionStore store)
 {
     private static string RoleKey(InspectionStandardRole role) => role.ToString().ToUpperInvariant();
 

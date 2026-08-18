@@ -8,7 +8,7 @@ using Lab.AspNetCore.Data;
 /// 语义镜像 springboot：平台级无 tenant；keyword 模糊 code/name；PATCH 语义；
 /// 默认值 isOfficial/enabled=true、sourceType=OFFICIAL、aliases=[]、status=ACTIVE、config={}。
 /// </summary>
-public sealed class DictionaryService(InMemoryDictionaryStore store)
+public sealed class DictionaryService(IDictionaryStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

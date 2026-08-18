@@ -8,7 +8,7 @@ using Lab.AspNetCore.Data;
 /// keyword 模糊 contractCode/projectName（不敏）、status 精确、tenant 收口；
 /// id = "C-"+UUID；创建默认 ACTIVE；删除被接样引用时 RESTRICT 拒。
 /// </summary>
-public sealed class ContractService(InMemoryFlowStore store)
+public sealed class ContractService(IFlowStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

@@ -9,7 +9,7 @@ using Lab.AspNetCore.Data;
 /// flow_history=[]、contract FK 必存在；assignTask 在 receiving 态自动推进到
 /// task_assignment 并写 history，其他态只更新字段。
 /// </summary>
-public sealed class SampleReceiptService(InMemoryFlowStore store)
+public sealed class SampleReceiptService(IFlowStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

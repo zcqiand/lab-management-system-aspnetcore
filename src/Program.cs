@@ -2,8 +2,10 @@ using System.Security.Authentication;
 using Lab.AspNetCore.Data;
 using Lab.AspNetCore.Directory;
 using Lab.AspNetCore.Security;
+using Lab.AspNetCore.Persistence;
 using Lab.AspNetCore.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,28 +52,67 @@ builder.Services.AddSingleton<AuthService>(sp =>
         sp.GetRequiredService<IUserDirectory>(),
         sp.GetRequiredService<IConfiguration>()["Lab:Sso:SaasBase"] ?? "http://localhost:3000"));
 
-// B2：码表/计算规则/技术要求（内存存储，镜像 springboot B2 语义；换 EF 仓储时 service 不动）
+// B2：码表/计算规则/技术要求。双实现可换装（Lab:Data:Provider = memory | ef）：
+//   memory -- InMemory*Store 单例（默认；测试与无 DB dev，语义快照）
+//   ef     -- Ef*Store + LabDbContext（lab_dev 共库；EF 只镜像 shared SQL 不 Migrate，
+//             真实 FK/唯一约束生效，与 springboot JPA 同库同语义）
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
-builder.Services.AddSingleton<InMemoryCatalogStore>();
-builder.Services.AddSingleton<InMemoryRuleStore>();
-builder.Services.AddSingleton<InMemoryRequirementStore>();
-builder.Services.AddSingleton<InMemoryFlowStore>();
-builder.Services.AddSingleton<SummaryService>();
-builder.Services.AddSingleton<ContractService>();
-builder.Services.AddSingleton<SampleReceiptService>();
-builder.Services.AddSingleton<SampleService>();
-builder.Services.AddSingleton<TestRecordService>();
-builder.Services.AddSingleton<ReportFlowService>();
-builder.Services.AddSingleton<InMemoryDictionaryStore>();
-builder.Services.AddSingleton<InMemoryJunctionStore>();
-builder.Services.AddSingleton<DictionaryService>();
-builder.Services.AddSingleton<JunctionService>();
-builder.Services.AddSingleton<CatalogService>();
-builder.Services.AddSingleton<CalculationRuleService>();
-builder.Services.AddSingleton<TechnicalRequirementService>();
-// 牌号删除 → 技术要求 brand 列 SET NULL（V011 FK 语义联动）
-builder.Services.AddHostedService<CatalogBrandFkHook>();
+var dataProvider = builder.Configuration["Lab:Data:Provider"] ?? "memory";
+if (dataProvider == "ef")
+{
+    var connectionString = builder.Configuration["Lab:Data:ConnectionString"]
+        ?? throw new InvalidOperationException("Lab:Data:Provider=ef 需要 Lab:Data:ConnectionString（lab_dev 共库，镜像 springboot LAB_DB_* env）");
+    // IDictionary<string,object> jsonb（config 列）需要 dynamic JSON
+    var dataSource = new Npgsql.NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
+    builder.Services.AddDbContext<LabDbContext>(options => options.UseNpgsql(dataSource));
+    builder.Services.AddScoped<EfCatalogStore>();
+    builder.Services.AddScoped<EfRuleStore>();
+    builder.Services.AddScoped<EfRequirementStore>();
+    builder.Services.AddScoped<EfFlowStore>();
+    builder.Services.AddScoped<EfDictionaryStore>();
+    builder.Services.AddScoped<EfJunctionStore>();
+    builder.Services.AddScoped<ICatalogStore>(sp => sp.GetRequiredService<EfCatalogStore>());
+    builder.Services.AddScoped<IRuleStore>(sp => sp.GetRequiredService<EfRuleStore>());
+    builder.Services.AddScoped<IRequirementStore>(sp => sp.GetRequiredService<EfRequirementStore>());
+    builder.Services.AddScoped<IFlowStore>(sp => sp.GetRequiredService<EfFlowStore>());
+    builder.Services.AddScoped<IDictionaryStore>(sp => sp.GetRequiredService<EfDictionaryStore>());
+    builder.Services.AddScoped<IJunctionStore>(sp => sp.GetRequiredService<EfJunctionStore>());
+    builder.Services.AddScoped<SummaryService>();
+    builder.Services.AddScoped<ContractService>();
+    builder.Services.AddScoped<SampleReceiptService>();
+    builder.Services.AddScoped<SampleService>();
+    builder.Services.AddScoped<TestRecordService>();
+    builder.Services.AddScoped<ReportFlowService>();
+    builder.Services.AddScoped<DictionaryService>();
+    builder.Services.AddScoped<JunctionService>();
+    builder.Services.AddScoped<CatalogService>();
+    builder.Services.AddScoped<CalculationRuleService>();
+    builder.Services.AddScoped<TechnicalRequirementService>();
+    // 牌号删除 SET NULL 由 DB 的 ON DELETE SET NULL 承担（V011），不需要内存事件钩子
+}
+else
+{
+    builder.Services.AddSingleton<InMemoryCatalogStore>();
+    builder.Services.AddSingleton<InMemoryRuleStore>();
+    builder.Services.AddSingleton<InMemoryRequirementStore>();
+    builder.Services.AddSingleton<InMemoryFlowStore>();
+    builder.Services.AddSingleton<InMemoryDictionaryStore>();
+    builder.Services.AddSingleton<InMemoryJunctionStore>();
+    builder.Services.AddSingleton<SummaryService>();
+    builder.Services.AddSingleton<ContractService>();
+    builder.Services.AddSingleton<SampleReceiptService>();
+    builder.Services.AddSingleton<SampleService>();
+    builder.Services.AddSingleton<TestRecordService>();
+    builder.Services.AddSingleton<ReportFlowService>();
+    builder.Services.AddSingleton<DictionaryService>();
+    builder.Services.AddSingleton<JunctionService>();
+    builder.Services.AddSingleton<CatalogService>();
+    builder.Services.AddSingleton<CalculationRuleService>();
+    builder.Services.AddSingleton<TechnicalRequirementService>();
+    // 牌号删除 -> 技术要求 brand 列 SET NULL（V011 FK 语义联动；ef 模式由 DB 承担）
+    builder.Services.AddHostedService<CatalogBrandFkHook>();
+}
 
 var app = builder.Build();
 

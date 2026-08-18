@@ -9,7 +9,7 @@ using Lab.AspNetCore.Data;
 /// 语义镜像 springboot CatalogService：miss → KeyNotFoundException(404)；
 /// 时间戳 ISO UTC 字符串，create 时 createdAt==updatedAt。
 /// </summary>
-public sealed class CatalogService(InMemoryCatalogStore store)
+public sealed class CatalogService(ICatalogStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 

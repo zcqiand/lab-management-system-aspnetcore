@@ -8,7 +8,7 @@ using Lab.AspNetCore.Controllers.Generated;
 /// 语义镜像 springboot JPA repository：tenant 收口 + 各 list 过滤 + 排序；
 /// 删除约束：合同被接样引用 RESTRICT、接样删除 CASCADE 下属样品。
 /// </summary>
-public sealed class InMemoryFlowStore
+public sealed class InMemoryFlowStore : IFlowStore
 {
     private readonly ConcurrentDictionary<(string Tenant, string Id), Contract> _contracts = new();
     private readonly ConcurrentDictionary<(string Tenant, string Id), SampleReceipt> _receipts = new();

@@ -12,7 +12,7 @@ using Lab.AspNetCore.Data;
 ///   - 3 桶：draft=receiving+task_assignment+data_entry；reviewing=review+approval；
 ///     issued=issuance+archived；pendingTask=task_assignment+data_entry+review
 /// </summary>
-public sealed class SummaryService(InMemoryFlowStore store)
+public sealed class SummaryService(IFlowStore store)
 {
     private static readonly (string Key, string Label)[] Columns =
     {

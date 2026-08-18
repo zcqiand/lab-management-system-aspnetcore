@@ -11,7 +11,7 @@ using Lab.AspNetCore.Controllers.Generated;
 /// B2 阶段无 DB（与 B1 ConfigUserDirectory 同哲学）；接口抽象保持 filter/find/save/delete
 /// 语义，后续换 EF Core 仓储时 service/controller/fnTest 不动。
 /// </summary>
-public sealed class InMemoryCatalogStore
+public sealed class InMemoryCatalogStore : ICatalogStore
 {
     private readonly ConcurrentDictionary<(string TenantId, string Code), InspectionModel> _models = new();
     private readonly ConcurrentDictionary<(string TenantId, string Code), InspectionSpec> _specs = new();

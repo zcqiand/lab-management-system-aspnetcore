@@ -14,7 +14,7 @@ using Lab.AspNetCore.Data;
 /// POST /api/receipts/flow 批量：单条失败不炸整批，进 FlowActionResult{ok=false,message}。
 /// 每次转移 append FlowHistoryEntry 到 flow_history。
 /// </summary>
-public sealed class ReportFlowService(InMemoryFlowStore store)
+public sealed class ReportFlowService(IFlowStore store)
 {
     private static readonly IReadOnlyDictionary<FlowStatus, FlowStatus> Next = new Dictionary<FlowStatus, FlowStatus>
     {
