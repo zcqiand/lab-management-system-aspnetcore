@@ -1,200 +1,32 @@
 {
   "schema": 1,
   "approved": true,
-  "base_sha": "d2ba0374ea6038ad",
-  "summary": "B2 码表+计算规则+技术要求落地：M04.F06/F07/F08/F09 各拆 4 个 I 级（16，码表 CRUD）+ M06.F05/F06 各拆 5 个 I 级（10，复合键 CRUD）共 26 个 I 级新增（定义镜像 lab-management-system-springboot 同名 ID）+ 6 个 F 级翻已上线。实现：CatalogController 16 端点 + CalculationRulesController/TechnicalRequirementsController 10 端点（内存 store，语义镜像 springboot B2：tenant 过滤/objectCode 精确/keyword 不敏包含/sortOrder+code 排序/PATCH/404/FK SET NULL 联动）。48 fnTest 全绿（B1 16 + B2 32）。",
+  "base_sha": "1636e23a633336e6",
+  "summary": "B4 报告汇总+仪表盘统计落地：M05.F01.I01 + M05.F02.I01 两个 I 级新增（镜像 springboot 同名 ID）+ 2 个 F 级翻已上线。实现：SummaryController 2 端点（GET /api/summary + /api/summary/stats），语义镜像 springboot SummaryService（ALL 哨兵/commissionDate 闭区间字典序/6 固定列/commissionDate DESC+code 排序/3 桶 draft-reviewing-issued/pendingTask=task+data_entry+review）。54 fnTest 全绿（B1 16 + B2 32 + B4 6）。",
   "changes": [
     {
-      "id": "M04.F06.I01",
+      "id": "M05.F01.I01",
       "action": "新增",
-      "name": "型号列表",
-      "reason": "GET /api/catalog/models：tenant + inspectionObjectCode 精确 + keyword 大小写不敏包含 code/name，排序 sortOrder,code"
+      "name": "报告汇总",
+      "reason": "GET /api/summary?categoryCode=&dateFrom=&dateTo=：ALL 不过滤按报告类别过滤当前租户接样单；SummaryData{summaryName, 6 列, rows}；commissionDate DESC, commissionCode 排序"
     },
     {
-      "id": "M04.F06.I02",
+      "id": "M05.F02.I01",
       "action": "新增",
-      "name": "型号新增",
-      "reason": "POST /api/catalog/models"
+      "name": "仪表盘统计",
+      "reason": "GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount"
     },
     {
-      "id": "M04.F06.I03",
-      "action": "新增",
-      "name": "型号修改",
-      "reason": "PUT /api/catalog/models/{code}：PATCH 语义，未传字段保留"
-    },
-    {
-      "id": "M04.F06.I04",
-      "action": "新增",
-      "name": "型号删除",
-      "reason": "DELETE /api/catalog/models/{code}，miss 404"
-    },
-    {
-      "id": "M04.F07.I01",
-      "action": "新增",
-      "name": "规格列表",
-      "reason": "GET /api/catalog/specs（过滤同型号）"
-    },
-    {
-      "id": "M04.F07.I02",
-      "action": "新增",
-      "name": "规格新增",
-      "reason": "POST /api/catalog/specs"
-    },
-    {
-      "id": "M04.F07.I03",
-      "action": "新增",
-      "name": "规格修改",
-      "reason": "PUT /api/catalog/specs/{code}"
-    },
-    {
-      "id": "M04.F07.I04",
-      "action": "新增",
-      "name": "规格删除",
-      "reason": "DELETE /api/catalog/specs/{code}"
-    },
-    {
-      "id": "M04.F08.I01",
-      "action": "新增",
-      "name": "等级列表",
-      "reason": "GET /api/catalog/grades"
-    },
-    {
-      "id": "M04.F08.I02",
-      "action": "新增",
-      "name": "等级新增",
-      "reason": "POST /api/catalog/grades"
-    },
-    {
-      "id": "M04.F08.I03",
-      "action": "新增",
-      "name": "等级修改",
-      "reason": "PUT /api/catalog/grades/{code}"
-    },
-    {
-      "id": "M04.F08.I04",
-      "action": "新增",
-      "name": "等级删除",
-      "reason": "DELETE /api/catalog/grades/{code}"
-    },
-    {
-      "id": "M04.F09.I01",
-      "action": "新增",
-      "name": "牌号列表",
-      "reason": "GET /api/catalog/brands"
-    },
-    {
-      "id": "M04.F09.I02",
-      "action": "新增",
-      "name": "牌号新增",
-      "reason": "POST /api/catalog/brands"
-    },
-    {
-      "id": "M04.F09.I03",
-      "action": "新增",
-      "name": "牌号修改",
-      "reason": "PUT /api/catalog/brands/{code}"
-    },
-    {
-      "id": "M04.F09.I04",
-      "action": "新增",
-      "name": "牌号删除",
-      "reason": "DELETE /api/catalog/brands/{code}；被 technical_requirements 引用时 brand 列 SET NULL（V011 FK 语义）"
-    },
-    {
-      "id": "M06.F05.I01",
-      "action": "新增",
-      "name": "规则列表",
-      "reason": "GET /api/calculation-rules：objectCode/parameterCode 双过滤（平台级无 tenant）"
-    },
-    {
-      "id": "M06.F05.I02",
-      "action": "新增",
-      "name": "规则详情",
-      "reason": "GET /api/calculation-rules/{object}/{parameter} 复合键"
-    },
-    {
-      "id": "M06.F05.I03",
-      "action": "新增",
-      "name": "规则新增",
-      "reason": "POST：默认 algorithmType=manual、specimenCount=1"
-    },
-    {
-      "id": "M06.F05.I04",
-      "action": "新增",
-      "name": "规则修改",
-      "reason": "PUT 复合键 PATCH 语义"
-    },
-    {
-      "id": "M06.F05.I05",
-      "action": "新增",
-      "name": "规则删除",
-      "reason": "DELETE 复合键，miss 404"
-    },
-    {
-      "id": "M06.F06.I01",
-      "action": "新增",
-      "name": "要求列表",
-      "reason": "GET /api/technical-requirements：object/parameter/standard + verificationStatus 四过滤 + tenant 隔离"
-    },
-    {
-      "id": "M06.F06.I02",
-      "action": "新增",
-      "name": "要求详情",
-      "reason": "GET 三键 (object,parameter,judgmentStandard)"
-    },
-    {
-      "id": "M06.F06.I03",
-      "action": "新增",
-      "name": "要求新增",
-      "reason": "POST：默认 numeric/≥/manual/draft，tenant 从 token 注入"
-    },
-    {
-      "id": "M06.F06.I04",
-      "action": "新增",
-      "name": "要求修改",
-      "reason": "PUT 三键 PATCH 语义（含 brand/model/grade/spec 四维度）"
-    },
-    {
-      "id": "M06.F06.I05",
-      "action": "新增",
-      "name": "要求删除",
-      "reason": "DELETE 三键，miss 404"
-    },
-    {
-      "id": "M04.F06",
+      "id": "M05.F01",
       "action": "变更",
-      "name": "型号维护",
-      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
+      "name": "报告汇总",
+      "reason": "规划→已上线：I01 已实现并有 fnTest"
     },
     {
-      "id": "M04.F07",
+      "id": "M05.F02",
       "action": "变更",
-      "name": "规格维护",
-      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
-    },
-    {
-      "id": "M04.F08",
-      "action": "变更",
-      "name": "等级维护",
-      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
-    },
-    {
-      "id": "M04.F09",
-      "action": "变更",
-      "name": "牌号维护",
-      "reason": "规划→已上线：I01-I04 已实现并有 fnTest"
-    },
-    {
-      "id": "M06.F05",
-      "action": "变更",
-      "name": "计算规则",
-      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
-    },
-    {
-      "id": "M06.F06",
-      "action": "变更",
-      "name": "技术要求",
-      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
+      "name": "仪表盘统计",
+      "reason": "规划→已上线：I01 已实现并有 fnTest"
     }
   ],
   "sync_files": [

@@ -152,8 +152,20 @@
 
 | 功能 ID | 功能名称 | 闭环定义 | 类型 | 状态 |
 |---|---|---|---|---|
-| M05.F01 | 报告汇总 | 按报告类别输出试验报告汇总表 | 查询 | 规划 |
-| M05.F02 | 仪表盘统计 | 工作台仪表盘：合同/接样/样品计数 + 按 3 桶聚合的报告状态 + 任务计数 | 查询 | 规划 |
+| M05.F01 | 报告汇总 | 按报告类别输出试验报告汇总表 | 查询 | 已上线 |
+| M05.F02 | 仪表盘统计 | 工作台仪表盘：合同/接样/样品计数 + 按 3 桶聚合的报告状态 + 任务计数 | 查询 | 已上线 |
+
+### M05.F01 报告汇总
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M05.F01.I01 | 报告汇总 | 接口 | GET /api/summary?categoryCode=&dateFrom=&dateTo=：ALL 不过滤按报告类别过滤当前租户接样单；SummaryData{summaryName, 6 列, rows}；commissionDate DESC, commissionCode 排序 | 已上线 |
+
+### M05.F02 仪表盘统计
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M05.F02.I01 | 仪表盘统计 | 接口 | GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount | 已上线 |
 
 ## M06 检测能力
 

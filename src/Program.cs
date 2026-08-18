@@ -53,6 +53,8 @@ builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 builder.Services.AddSingleton<InMemoryCatalogStore>();
 builder.Services.AddSingleton<InMemoryRuleStore>();
 builder.Services.AddSingleton<InMemoryRequirementStore>();
+builder.Services.AddSingleton<InMemoryFlowStore>();
+builder.Services.AddSingleton<SummaryService>();
 builder.Services.AddSingleton<CatalogService>();
 builder.Services.AddSingleton<CalculationRuleService>();
 builder.Services.AddSingleton<TechnicalRequirementService>();

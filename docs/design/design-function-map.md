@@ -43,6 +43,8 @@
 | M06.F06.I03 | TechnicalRequirementsController#CreateTechnicalRequirement / TechnicalRequirementService#Create | POST /api/technical-requirements | inspection_technical_requirements | M06.F06.I03 | - | 已上线 |
 | M06.F06.I04 | TechnicalRequirementsController#UpdateTechnicalRequirement / TechnicalRequirementService#Update | PUT /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I04 | - | 已上线 |
 | M06.F06.I05 | TechnicalRequirementsController#DeleteTechnicalRequirement / TechnicalRequirementService#Delete | DELETE /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I05 | - | 已上线 |
+| M05.F01.I01 | SummaryController#GetReportSummary / SummaryService#GetReportSummary | GET /api/summary?categoryCode=&dateFrom=&dateTo= | sample_receipts（内存 store 镜像 summary 查询） | M05.F01.I01 | - | 已上线 |
+| M05.F02.I01 | SummaryController#GetDashboardStats / SummaryService#GetDashboardStats | GET /api/summary/stats | sample_receipts / contracts / samples 计数 | M05.F02.I01 | - | 已上线 |
 
 ## 约定
 

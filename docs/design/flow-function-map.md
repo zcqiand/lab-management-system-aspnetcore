@@ -42,6 +42,20 @@ flowchart TD
 | S04 | 审核状态推进 | 审核人 | verificationStatus | reviewed/verified/rejected | draft -> verified | M06.F06.I04 |
 | S05 | 发布供检测引用 | - | - | - | verified | -（下游 M03 消费） |
 
+## FLOW-03 统计分析（B4）
+
+```mermaid
+flowchart TD
+    S01[接样/合同/样品数据] --> S02[报告汇总查询]
+    S01 --> S03[仪表盘聚合]
+```
+
+| 步骤 | 名称 | 角色 | 输入 | 输出 | 状态流转 | 支撑功能子项 |
+|---|---|---|---|---|---|---|
+| S01 | 数据积累（接样推进 + 合同/样品登记） | 所有角色 | - | - | - | -（B2/B3 上游） |
+| S02 | 报告汇总查询 | 管理层 | categoryCode/dateFrom/dateTo | SummaryData 6 列行集 | - | M05.F01.I01 |
+| S03 | 仪表盘聚合 | 所有用户 | - | 计数 + 3 桶 + pendingTask | - | M05.F02.I01 |
+
 ### 评审时问这四个问题
 
 1. 有没有哪个步骤的「支撑功能子项」是空的？→ 功能缺失，或这一步不该存在
