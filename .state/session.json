@@ -1,14 +1,16 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "2026-08-19 B4 报告汇总+仪表盘收口（commit 2198db7，gate L0-L5 全绿 0 软告警，54 fnTest，71 条目）",
+  "current_task": "2026-08-19 B3 合同+接样+样品+流程收口（commit dc0309a，gate L0-L5 全绿 0 软告警，88 fnTest，107 条目）",
   "done": [
     "B1 认证域（7f4e297）：9 端点 + 16 fnTest",
     "B2（cef5300）：码表+规则+技术要求 26 端点 + 32 fnTest",
-    "B4（2198db7）：GET /api/summary + /api/summary/stats；ALL 哨兵/闭区间/6 列/3 桶聚合；6 fnTest",
-    "InMemoryFlowStore 最小形状：B3 落地后由流程域 store 接管合同/样品/接样"
+    "B4（2198db7）：汇总+仪表盘 2 端点 + 6 fnTest",
+    "B3（dc0309a）：合同 5 + 接样 7 + 流程 2 + 样品 5 + 检测记录 6 = 25 路由；7 阶段状态机 + 批量容错 + flow_history；34 fnTest",
+    "B3 教训：InMemoryFlowStore 复制粘贴 bug（ReceiptExists 遍历 _receipts）——FK 校验方法要与被校验实体对应；「复用端点视角」I 级（F05/F06/F07/F08 的 I02/I03）需 Trait 回填到现有测试消软告警",
+    "累计 62 端点 / 88 fnTest / 107 功能条目（springboot 是 97 I 级端点口径）"
   ],
-  "next": "B3：合同+接样+样品+流程 19 端点（M02.F01 5 + M03.F01 6 + M03.F02 1 + M03.F03 5 + M03.F05/F06 各 1）——7 阶段状态机 + flow_history jsonb 是难点；InMemoryFlowStore 届时并入流程 store",
+  "next": "B5/B6：M06 检测能力字典剩余部分（F01 专项/F02 objects+junction/F03 参数/F04 标准/F07 报告名称/F08 参数界面，springboot 是 22+16=38 端点 + junction 8 组）——最大剩余批次；之后 live smoke（端口待定）+ M05 前端 data-fn 入口（前端仓职责）",
   "open_questions": [
     "8080 端口家族分配：springboot 占 8080，本仓 live smoke 用哪个端口需人定",
     "lab_dev 共库：EF Core 镜像模式（不 Migrate）vs 什么都不做直到 B2 需要 DB —— B2 时再定",
@@ -23,7 +25,7 @@
     "dev token 是秒级 epoch JWT：login/refresh 同秒同串，测试别断言 NotEqual(token)",
     "AuthControllerBase.Logout 带 Body 参数（契约 logout 有匿名 body）—— override 签名必须带 [FromBody] Body body"
   ],
-  "last_gate_passed_at": "2026-08-19T15:10+08:00",
+  "last_gate_passed_at": "2026-08-19T16:20+08:00",
   "active_branch": "master",
   "ahead_of_origin": "0"
 }
