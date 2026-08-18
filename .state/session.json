@@ -1,32 +1,28 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "2026-08-19 B5/B6 检测能力字典+junction 收口（commit 2ccf720，gate L0-L5 全绿 0 软告警，136 fnTest，149 条目）—— B1-B6 全批次完成，后端功能域与 springboot 对齐",
+  "current_task": "2026-08-19 live smoke 收口（51/51 PASS，修 2 个真 bug：JwtBearer 拒 alg=none + 枚举线上格式走成员名）",
   "done": [
-    "B1 认证域（7f4e297）：9 端点",
-    "B2（cef5300）：码表+规则+技术要求 26 端点",
-    "B4（2198db7）：汇总+仪表盘 2 端点",
-    "B3（dc0309a）：合同+接样+样品+流程 25 路由（7 阶段状态机）",
-    "B5/B6（2ccf720）：字典 5 实体 22 + objects 4 + 8 组 junction 16 = 42 端点；link=upsert/unlink 404/role 在 PK",
-    "累计 104 端点 / 136 fnTest / 149 功能条目（与 springboot 条目数完全对齐）",
-    "B5/B6 教训：role 枚举 TESTING=0 无 null 态 → 放弃 springboot role 必填校验（分叉已注记）；dotnet format 对多行初始化器的空格要求（WHITESPACE 规则）——写完跑 format 再 gate"
+    "live smoke：scripts/live_smoke.py 可复跑（默认 8081），起真实 HTTP 打 B1-B6 全域 51 项全 PASS",
+    "bug 1：JwtBearer 拒收 alg=none dev token -- RequireSignedTokens=false 不够，补 SignatureValidator 信任 payload（Program.cs，production 必删）",
+    "bug 2：MapInboundClaims=true 与注释意图相反，sub 被映射成 SOAP 长名 -- 改 false",
+    "bug 3：net8 JsonStringEnumConverter<T> 不认 [EnumMember]，枚举线上格式走 C# 成员名（Manual/Active）与契约小写值分叉，前端 msw 发小写会 400 -- EnumMemberEnumConverter<T> 换装（patch-generated.py 第 3 处修补，53 处引用）",
+    "端口定 8081（springboot 占 8080）；gate L0-L5 全绿 149 条目 0 软告警"
   ],
-  "next": "可选收尾：① live smoke（起服务打真实 HTTP，端口待定——springboot 占 8080）② EF Core 仓储换装（lab_dev 共库，镜像 saas 模式不 Migrate）③ 与 nextjs/react/vue 前端仓的 M98 backend registry 挂接（前端职责）。无紧急欠账。",
+  "next": "可选收尾：① EF Core 仓储换装（lab_dev 共库，镜像 saas 模式不 Migrate）② 前端仓 M98 backend registry 挂接（前端职责）。无紧急欠账。",
   "open_questions": [
-    "8080 端口家族分配：springboot 占 8080，本仓 live smoke 用哪个端口需人定",
-    "lab_dev 共库：EF Core 镜像模式（不 Migrate）vs 什么都不做直到 B2 需要 DB —— B2 时再定",
+    "EF Core 镜像模式（不 Migrate）何时做：需要与 lab_dev 共库联调时再定",
     "NSwag 生成的是 abstract 基类 + partial 实现（saas 模式）；springboot 是 interface+impl。两后端风格已分叉但语义对齐，前端无感"
   ],
   "dont": [
     "不要改 .harness/stack.json 让门变松",
     "不要给 skip 的测试挂功能 ID",
-    "不要手改 src/Controllers/Generated/Controllers.cs —— 它是 NSwag 产物，修补走 scripts/patch-generated.py（重跑 codegen 不丢）",
-    "不要在 Controller 里写业务逻辑（进 service）；不要 catch 吞异常；不要硬编码连接串",
-    "NSwag 生成的 DTO 是 class（非 record，虽然 nswag 配了 typeStyle:Record —— openApiToCSharpController 生成器不支持）带 JsonExtensionData AdditionalProperties",
-    "dev token 是秒级 epoch JWT：login/refresh 同秒同串，测试别断言 NotEqual(token)",
-    "AuthControllerBase.Logout 带 Body 参数（契约 logout 有匿名 body）—— override 签名必须带 [FromBody] Body body"
+    "不要手改 src/Controllers/Generated/Controllers.cs -- NSwag 产物，修补走 scripts/patch-generated.py（重跑 codegen 不丢）",
+    "live smoke 经验：非空 query 参数在 net8+NRT 下必填（空串也 400），必传非空值；unlink 端点是 DELETE 带 JSON body；logout body 要 token 字段；contract/receipt create 要 witness/witnessUnit",
+    "Program.cs 的 SignatureValidator 是 dev-only 后门，production 换 issuer-uri 时必须删",
+    "dotnet format 先跑再 gate；不要 catch 吞异常；不要硬编码连接串"
   ],
-  "last_gate_passed_at": "2026-08-19T17:30+08:00",
+  "last_gate_passed_at": "2026-08-19T23:10+08:00",
   "active_branch": "master",
   "ahead_of_origin": "0"
 }

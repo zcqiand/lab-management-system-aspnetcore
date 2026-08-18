@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.MapInboundClaims = true; // claim 名保持 "sub"/"tenant_id" 原样（对齐 spring 侧）
+        options.MapInboundClaims = false; // claim 名保持 "sub"/"tenant_id" 原样（对齐 spring 侧）。live smoke 发现：true 会把 sub 映射成 SOAP 长名，AuthService claims["sub"] 取不到
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
             ValidateIssuer = false,
@@ -21,6 +21,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = false,
             RequireSignedTokens = false, // dev：容忍 alg=none 模拟 token；production 换 true + issuer-uri
+            // dev：alg=none token 无签名可验，默认 SignatureValidator 会拒收（live smoke 发现）--
+            // 信任 payload 交给上面的 claim 校验（exp/有效期仍在验）。production 必须删掉这一行。
+            SignatureValidator = (token, _) => new Microsoft.IdentityModel.JsonWebTokens.JsonWebToken(token),
         };
     });
 builder.Services.AddAuthorization(o =>

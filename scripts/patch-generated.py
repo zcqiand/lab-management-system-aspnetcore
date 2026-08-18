@@ -46,12 +46,26 @@ def patch_requirement_comparison(text: str) -> str:
     return text.replace(block, patched)
 
 
+def patch_enum_converter(text: str) -> str:
+    """net8.0 的 JsonStringEnumConverter<T> 不认 [EnumMember]（.NET 9 才支持），
+    枚举线上格式会走 C# 成员名（"Manual" 而非契约 "manual"）-- 统一换
+    Lab.AspNetCore.Serialization.EnumMemberEnumConverter<T>（live smoke 发现）。"""
+    old = "System.Text.Json.Serialization.JsonStringEnumConverter<"
+    new = "Lab.AspNetCore.Serialization.EnumMemberEnumConverter<"
+    if old in text:
+        return text.replace(old, new)
+    if new in text:
+        return text  # 已修补（幂等）
+    raise SystemExit("patch-generated: 未找到 JsonStringEnumConverter 模式 -- NSwag 输出变了，请更新修补脚本")
+
+
 def main() -> None:
     if not GENERATED.exists():
         raise SystemExit(f"patch-generated: missing {GENERATED}")
     text = GENERATED.read_text(encoding="utf-8")
     text = patch_state_property(text)
     text = patch_requirement_comparison(text)
+    text = patch_enum_converter(text)
     GENERATED.write_text(text, encoding="utf-8")
     print("[patch-generated] OK")
 

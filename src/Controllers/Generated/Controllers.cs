@@ -601,7 +601,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Kind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<Kind>))]
         public Kind Kind { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("value")]
@@ -625,7 +625,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AuthStateAuthenticatedKind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<AuthStateAuthenticatedKind>))]
         public AuthStateAuthenticatedKind Kind { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("value")]
@@ -649,7 +649,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AuthStateAwaiting_tenantKind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<AuthStateAwaiting_tenantKind>))]
         public AuthStateAwaiting_tenantKind Kind { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("value")]
@@ -679,7 +679,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<BackendId>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<BackendId>))]
         public BackendId Id { get; set; }
 
         /// <summary>
@@ -701,7 +701,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("authHeader")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AuthHeaderKind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<AuthHeaderKind>))]
         public AuthHeaderKind AuthHeader { get; set; }
 
         /// <summary>
@@ -791,7 +791,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("active")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<BackendId>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<BackendId>))]
         public BackendId Active { get; set; }
 
         /// <summary>
@@ -859,7 +859,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("algorithmType")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CalculationAlgorithmType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<CalculationAlgorithmType>))]
         public CalculationAlgorithmType AlgorithmType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("specimenCount")]
@@ -967,7 +967,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ContractStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ContractStatus>))]
         public ContractStatus Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
@@ -1020,7 +1020,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string ReportNameCode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("algorithmType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CalculationAlgorithmType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<CalculationAlgorithmType>))]
         public CalculationAlgorithmType AlgorithmType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("specimenCount")]
@@ -1143,7 +1143,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string EntrustedDate { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ContractStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ContractStatus>))]
         public ContractStatus Status { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1234,7 +1234,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Unit { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionParameterSourceType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionParameterSourceType>))]
         public InspectionParameterSourceType SourceType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
@@ -1344,7 +1344,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Version { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardStatus>))]
         public InspectionStandardStatus Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceDocumentId")]
@@ -1611,7 +1611,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Conditions { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("valueType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementValueType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementValueType>))]
         public RequirementValueType ValueType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("minValue")]
@@ -1630,15 +1630,15 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Unit { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("comparison")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementComparison>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementComparison>))]
         public RequirementComparison Comparison { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("judgmentMode")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementJudgmentMode>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementJudgmentMode>))]
         public RequirementJudgmentMode JudgmentMode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementVerificationStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementVerificationStatus>))]
         public RequirementVerificationStatus VerificationStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("clause")]
@@ -1848,7 +1848,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("type")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ExtFieldDefType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ExtFieldDefType>))]
         public ExtFieldDefType Type { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("required")]
@@ -1861,7 +1861,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Tag { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("source")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ExtFieldDefSource>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ExtFieldDefSource>))]
         public ExtFieldDefSource Source { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1930,7 +1930,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("action")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowAction>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowAction>))]
         public FlowAction Action { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("operator")]
@@ -1966,7 +1966,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Message { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("flowStatus")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowStatus>))]
         public FlowStatus FlowStatus { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -1986,17 +1986,17 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("action")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowAction>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowAction>))]
         public FlowAction Action { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("from")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowStatus>))]
         public FlowStatus From { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("to")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowStatus>))]
         public FlowStatus To { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("operator")]
@@ -2297,7 +2297,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceType")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionParameterSourceType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionParameterSourceType>))]
         public InspectionParameterSourceType SourceType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
@@ -2488,7 +2488,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardStatus>))]
         public InspectionStandardStatus Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceDocumentId")]
@@ -2676,7 +2676,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("qualificationLevel")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<QualificationLevel>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<QualificationLevel>))]
         public QualificationLevel QualificationLevel { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourcePage")]
@@ -2736,7 +2736,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardRole>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardRole>))]
         public InspectionStandardRole Role { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("remark")]
@@ -2933,7 +2933,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardRole>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardRole>))]
         public InspectionStandardRole Role { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("remark")]
@@ -3224,7 +3224,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("flowStatus")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<FlowStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowStatus>))]
         public FlowStatus FlowStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("flowHistory")]
@@ -3253,7 +3253,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Conclusion { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("result")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ReceiptResult>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ReceiptResult>))]
         public ReceiptResult Result { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("issuedAt")]
@@ -3467,7 +3467,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("valueType")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementValueType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementValueType>))]
         public RequirementValueType ValueType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("minValue")]
@@ -3487,17 +3487,17 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("comparison")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementComparison>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementComparison>))]
         public RequirementComparison Comparison { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("judgmentMode")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementJudgmentMode>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementJudgmentMode>))]
         public RequirementJudgmentMode JudgmentMode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementVerificationStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementVerificationStatus>))]
         public RequirementVerificationStatus VerificationStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("clause")]
@@ -3617,7 +3617,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("accessToken")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TokenStorageKeysAccessToken>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysAccessToken>))]
         public TokenStorageKeysAccessToken AccessToken { get; set; }
 
         /// <summary>
@@ -3625,7 +3625,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("refreshToken")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TokenStorageKeysRefreshToken>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysRefreshToken>))]
         public TokenStorageKeysRefreshToken RefreshToken { get; set; }
 
         /// <summary>
@@ -3633,7 +3633,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("activeTenantId")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TokenStorageKeysActiveTenantId>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysActiveTenantId>))]
         public TokenStorageKeysActiveTenantId ActiveTenantId { get; set; }
 
         /// <summary>
@@ -3641,7 +3641,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("activeBackend")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TokenStorageKeysActiveBackend>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysActiveBackend>))]
         public TokenStorageKeysActiveBackend ActiveBackend { get; set; }
 
         /// <summary>
@@ -3649,7 +3649,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("permissionsCache")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<TokenStorageKeysPermissionsCache>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysPermissionsCache>))]
         public TokenStorageKeysPermissionsCache PermissionsCache { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -3674,7 +3674,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string ReportNameCode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("algorithmType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<CalculationAlgorithmType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<CalculationAlgorithmType>))]
         public CalculationAlgorithmType AlgorithmType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("specimenCount")]
@@ -3786,7 +3786,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string EntrustedDate { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ContractStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ContractStatus>))]
         public ContractStatus Status { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -3862,7 +3862,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Unit { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionParameterSourceType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionParameterSourceType>))]
         public InspectionParameterSourceType SourceType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
@@ -3956,7 +3956,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Version { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardStatus>))]
         public InspectionStandardStatus Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceDocumentId")]
@@ -4197,7 +4197,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Conditions { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("valueType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementValueType>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementValueType>))]
         public RequirementValueType ValueType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("minValue")]
@@ -4216,15 +4216,15 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Unit { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("comparison")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementComparison>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementComparison>))]
         public RequirementComparison Comparison { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("judgmentMode")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementJudgmentMode>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementJudgmentMode>))]
         public RequirementJudgmentMode JudgmentMode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<RequirementVerificationStatus>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementVerificationStatus>))]
         public RequirementVerificationStatus VerificationStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("clause")]
@@ -4360,7 +4360,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardRole>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardRole>))]
         public InspectionStandardRole Role { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -4457,7 +4457,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("role")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<InspectionStandardRole>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardRole>))]
         public InspectionStandardRole Role { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -4645,7 +4645,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ValueKind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ValueKind>))]
         public ValueKind Kind { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -4674,7 +4674,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Value2Kind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<Value2Kind>))]
         public Value2Kind Kind { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
@@ -4703,7 +4703,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Value3Kind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<Value3Kind>))]
         public Value3Kind Kind { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
@@ -4750,7 +4750,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("kind")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<Value4Kind>))]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<Value4Kind>))]
         public Value4Kind Kind { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("user")]
