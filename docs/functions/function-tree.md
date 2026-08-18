@@ -88,20 +88,101 @@
 
 | 功能 ID | 功能名称 | 闭环定义 | 类型 | 状态 |
 |---|---|---|---|---|
-| M02.F01 | 合同管理 | 合同 CRUD、工程信息维护 | 接口 | 规划 |
+| M02.F01 | 合同管理 | 合同 CRUD、工程信息维护 | 接口 | 已上线 |
+
+### M02.F01 合同管理
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M02.F01.I01 | 合同列表 | 接口 | GET /api/contracts?keyword=&status=：keyword 模糊 contractCode/projectName 不敏、status 精确、tenant 收口 | 已上线 |
+| M02.F01.I02 | 合同详情 | 接口 | GET /api/contracts/{id}，miss 404 | 已上线 |
+| M02.F01.I03 | 创建合同 | 接口 | POST /api/contracts：id=C-UUID、status 默认 active | 已上线 |
+| M02.F01.I04 | 更新合同 | 接口 | PUT /api/contracts/{id}：PATCH 语义 | 已上线 |
+| M02.F01.I05 | 删除合同 | 接口 | DELETE /api/contracts/{id}：被接样引用 FK RESTRICT 拒 | 已上线 |
 
 ## M03 试验过程管理
 
 | 功能 ID | 功能名称 | 闭环定义 | 类型 | 状态 |
 |---|---|---|---|---|
-| M03.F01 | 接样管理 | 接样单 CRUD、报告类别关联、流程状态 | 接口 | 规划 |
-| M03.F02 | 任务分配 | 接样提交后安排检测人员/计划日期，提交进入数据录入；任务字段挂 SampleReceipt | 接口 | 规划 |
-| M03.F03 | 数据录入 | 样品检测数据录入 | 接口 | 规划 |
-| M03.F05 | 报告审核 | 报告审核流程 | 接口 | 规划 |
-| M03.F06 | 报告批准 | 报告批准流程 | 接口 | 规划 |
-| M03.F07 | 报告发放 | 报告发放流程 | 接口 | 规划 |
-| M03.F08 | 报告归档 | 报告归档流程 | 接口 | 规划 |
-| M03.F09 | 接样单详情 | 接样单查看（接样信息+样品信息+检测数据） | 接口 | 规划 |
+| M03.F01 | 接样管理 | 接样单 CRUD、报告类别关联、流程状态 | 接口 | 已上线 |
+| M03.F02 | 任务分配 | 接样提交后安排检测人员/计划日期，提交进入数据录入；任务字段挂 SampleReceipt | 接口 | 已上线 |
+| M03.F03 | 数据录入 | 样品检测数据录入 | 接口 | 已上线 |
+| M03.F05 | 报告审核 | 报告审核流程 | 接口 | 已上线 |
+| M03.F06 | 报告批准 | 报告批准流程 | 接口 | 已上线 |
+| M03.F07 | 报告发放 | 报告发放流程 | 接口 | 已上线 |
+| M03.F08 | 报告归档 | 报告归档流程 | 接口 | 已上线 |
+| M03.F09 | 接样单详情 | 接样单查看（接样信息+样品信息+检测数据） | 接口 | 已上线 |
+
+### M03.F01 接样管理
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F01.I01 | 接样列表 | 接口 | GET /api/receipts?contractId=&flowStatus=&keyword=：keyword 模糊 commissionCode/projectName | 已上线 |
+| M03.F01.I02 | 接样详情 | 接口 | GET /api/receipts/{id}，miss 404 | 已上线 |
+| M03.F01.I03 | 创建接样 | 接口 | POST /api/receipts：contract FK 必存在、flow_status=receiving 起步、flow_history=[] | 已上线 |
+| M03.F01.I04 | 更新接样 | 接口 | PUT /api/receipts/{id}：PATCH 语义（含 3 个 jsonb 列表） | 已上线 |
+| M03.F01.I05 | 删除接样 | 接口 | DELETE /api/receipts/{id}：CASCADE 下属 samples | 已上线 |
+| M03.F01.I06 | 流程历史 | 接口 | GET /api/receipts/{id}/history → FlowHistoryEntry[] | 已上线 |
+
+### M03.F02 任务分配
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F02.I01 | 任务分配 | 接口 | PUT /api/receipts/{id}/task：assignee/plannedDate 挂 SampleReceipt；receiving 态自动推进 task_assignment 并写 history | 已上线 |
+
+### M03.F03 数据录入
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F03.I01 | 样品列表 | 接口 | GET /api/samples?receiptId=&keyword=：keyword 模糊 sampleCode/sampleName，createdAt DESC | 已上线 |
+| M03.F03.I02 | 样品详情 | 接口 | GET /api/samples/{id}，miss 404 | 已上线 |
+| M03.F03.I03 | 创建样品 | 接口 | POST /api/samples：receipt FK 必存在、ext 默认 {} | 已上线 |
+| M03.F03.I04 | 更新样品 | 接口 | PUT /api/samples/{id}：PATCH 语义 | 已上线 |
+| M03.F03.I05 | 删除样品 | 接口 | DELETE /api/samples/{id} | 已上线 |
+| M03.F03.I06 | 检测记录列表 | 接口 | GET /api/test-records?sampleId=：tenant+sampleId 过滤，分页回显 | 已上线 |
+| M03.F03.I07 | 检测记录详情 | 接口 | GET /api/test-records/{id}，miss 404 | 已上线 |
+| M03.F03.I08 | 创建检测记录 | 接口 | POST /api/test-records：sampleId/parameterCode/requirement/result 必填 | 已上线 |
+| M03.F03.I09 | 更新检测记录 | 接口 | PUT /api/test-records/{id}：PATCH 语义 | 已上线 |
+| M03.F03.I10 | 删除检测记录 | 接口 | DELETE /api/test-records/{id} | 已上线 |
+| M03.F03.I11 | 改判 | 接口 | PATCH /api/test-records/{id}/verdict：verdict 直接覆写（生成契约 PATCH；springboot 侧 PUT） | 已上线 |
+
+### M03.F05 报告审核
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F05.I01 | 审核队列 | 接口 | GET /api/receipts/flow/queue?stage=：stage 精确 + tenant 收口，pageSize 默认 50 cap 200 | 已上线 |
+| M03.F05.I02 | 审核查看 | 接口 | GET /api/receipts/{id} review 视角（复用详情端点） | 已上线 |
+| M03.F05.I03 | 通过退回 | 接口 | POST /api/receipts/flow：review 下 SUBMIT→approval / RETURN→data_entry | 已上线 |
+
+### M03.F06 报告批准
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F06.I01 | 阶段推进 | 接口 | POST /api/receipts/flow 批量：SUBMIT/RETURN/WITHDRAW，单条失败进 FlowActionResult 不炸整批 | 已上线 |
+| M03.F06.I02 | 批准查看 | 接口 | GET /api/receipts/{id} approval 视角 | 已上线 |
+| M03.F06.I03 | 批准退回 | 接口 | POST /api/receipts/flow：approval 下 SUBMIT→issuance / RETURN→review | 已上线 |
+
+### M03.F07 报告发放
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F07.I01 | 发放队列 | 接口 | GET /api/receipts/flow/queue?stage=issuance | 已上线 |
+| M03.F07.I02 | 发放查看 | 接口 | GET /api/receipts/{id} issuance 视角（含 issued_at） | 已上线 |
+| M03.F07.I03 | 发放退回 | 接口 | POST /api/receipts/flow：issuance 下 SUBMIT→archived / RETURN→approval | 已上线 |
+
+### M03.F08 报告归档
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F08.I01 | 归档队列 | 接口 | GET /api/receipts/flow/queue?stage=archived | 已上线 |
+| M03.F08.I02 | 归档查看 | 接口 | GET /api/receipts/{id} archived 视角 | 已上线 |
+| M03.F08.I03 | 归档退回 | 接口 | POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移 | 已上线 |
+
+### M03.F09 接样单详情
+
+| 子项 ID | 名称 | 类型 | 说明 | 状态 |
+|---|---|---|---|---|
+| M03.F09.I01 | 接样单详情聚合 | 接口 | GET /api/receipts/{id} + 客户端组合 samples/test-records 三视图 | 已上线 |
 
 ## M04 基础数据
 

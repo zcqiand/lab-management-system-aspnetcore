@@ -45,6 +45,42 @@
 | M06.F06.I05 | TechnicalRequirementsController#DeleteTechnicalRequirement / TechnicalRequirementService#Delete | DELETE /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I05 | - | 已上线 |
 | M05.F01.I01 | SummaryController#GetReportSummary / SummaryService#GetReportSummary | GET /api/summary?categoryCode=&dateFrom=&dateTo= | sample_receipts（内存 store 镜像 summary 查询） | M05.F01.I01 | - | 已上线 |
 | M05.F02.I01 | SummaryController#GetDashboardStats / SummaryService#GetDashboardStats | GET /api/summary/stats | sample_receipts / contracts / samples 计数 | M05.F02.I01 | - | 已上线 |
+| M02.F01.I01 | ContractsController#ListContracts / ContractService#List | GET /api/contracts | contracts（内存 store 镜像 V001+V012） | M02.F01.I01 | - | 已上线 |
+| M02.F01.I02 | ContractsController#GetContract / ContractService#Get | GET /api/contracts/{id} | contracts | M02.F01.I02 | - | 已上线 |
+| M02.F01.I03 | ContractsController#CreateContract / ContractService#Create | POST /api/contracts | contracts | M02.F01.I03 | - | 已上线 |
+| M02.F01.I04 | ContractsController#UpdateContract / ContractService#Update | PUT /api/contracts/{id} | contracts | M02.F01.I04 | - | 已上线 |
+| M02.F01.I05 | ContractsController#DeleteContract / ContractService#Delete | DELETE /api/contracts/{id} | contracts（FK RESTRICT sample_receipts） | M02.F01.I05 | - | 已上线 |
+| M03.F01.I01 | ReceiptsController#ListReceipts / SampleReceiptService#List | GET /api/receipts | sample_receipts（V002+V012） | M03.F01.I01 | - | 已上线 |
+| M03.F01.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id} | sample_receipts | M03.F01.I02 | - | 已上线 |
+| M03.F01.I03 | ReceiptsController#CreateReceipt / SampleReceiptService#Create | POST /api/receipts | sample_receipts（flow_status=receiving 起步） | M03.F01.I03 | - | 已上线 |
+| M03.F01.I04 | ReceiptsController#UpdateReceipt / SampleReceiptService#Update | PUT /api/receipts/{id} | sample_receipts | M03.F01.I04 | - | 已上线 |
+| M03.F01.I05 | ReceiptsController#DeleteReceipt / SampleReceiptService#Delete | DELETE /api/receipts/{id} | sample_receipts（CASCADE → samples） | M03.F01.I05 | - | 已上线 |
+| M03.F01.I06 | ReceiptsController#GetReceiptHistory / SampleReceiptService#History | GET /api/receipts/{id}/history | sample_receipts.flow_history | M03.F01.I06 | - | 已上线 |
+| M03.F02.I01 | ReceiptsController#AssignTask / SampleReceiptService#AssignTask | PUT /api/receipts/{id}/task | sample_receipts.assignee_id/name/planned_test_date | M03.F02.I01 | - | 已上线 |
+| M03.F03.I01 | SamplesController#ListSamples / SampleService#List | GET /api/samples | samples（V002） | M03.F03.I01 | - | 已上线 |
+| M03.F03.I02 | SamplesController#GetSample / SampleService#Get | GET /api/samples/{id} | samples | M03.F03.I02 | - | 已上线 |
+| M03.F03.I03 | SamplesController#CreateSample / SampleService#Create | POST /api/samples | samples（ext 默认 {}） | M03.F03.I03 | - | 已上线 |
+| M03.F03.I04 | SamplesController#UpdateSample / SampleService#Update | PUT /api/samples/{id} | samples | M03.F03.I04 | - | 已上线 |
+| M03.F03.I05 | SamplesController#DeleteSample / SampleService#Delete | DELETE /api/samples/{id} | samples | M03.F03.I05 | - | 已上线 |
+| M03.F03.I06 | TestRecordsController#ListTestRecords / TestRecordService#List | GET /api/test-records | test_records（V003） | M03.F03.I06 | - | 已上线 |
+| M03.F03.I07 | TestRecordsController#GetTestRecord / TestRecordService#Get | GET /api/test-records/{id} | test_records | M03.F03.I07 | - | 已上线 |
+| M03.F03.I08 | TestRecordsController#CreateTestRecord / TestRecordService#Create | POST /api/test-records | test_records | M03.F03.I08 | - | 已上线 |
+| M03.F03.I09 | TestRecordsController#UpdateTestRecord / TestRecordService#Update | PUT /api/test-records/{id} | test_records | M03.F03.I09 | - | 已上线 |
+| M03.F03.I10 | TestRecordsController#DeleteTestRecord / TestRecordService#Delete | DELETE /api/test-records/{id} | test_records | M03.F03.I10 | - | 已上线 |
+| M03.F03.I11 | TestRecordsController#SetVerdict / TestRecordService#SetVerdict | PATCH /api/test-records/{id}/verdict | test_records.verdict | M03.F03.I11 | - | 已上线 |
+| M03.F05.I01 | ReportFlowController#ListFlowQueue / ReportFlowService#FlowQueue | GET /api/receipts/flow/queue?stage= | sample_receipts.flow_status | M03.F05.I01 | - | 已上线 |
+| M03.F05.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（review 视角） | sample_receipts | M03.F05.I02 | - | 已上线 |
+| M03.F05.I03 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow | sample_receipts.flow_status + flow_history | M03.F05.I03 | - | 已上线 |
+| M03.F06.I01 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow（批量） | sample_receipts.flow_status + flow_history | M03.F06.I01 | - | 已上线 |
+| M03.F06.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（approval 视角） | sample_receipts | M03.F06.I02 | - | 已上线 |
+| M03.F06.I03 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow | sample_receipts.flow_status | M03.F06.I03 | - | 已上线 |
+| M03.F07.I01 | ReportFlowController#ListFlowQueue / ReportFlowService#FlowQueue | GET /api/receipts/flow/queue?stage=issuance | sample_receipts.flow_status | M03.F07.I01 | - | 已上线 |
+| M03.F07.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（issuance 视角） | sample_receipts.issued_at | M03.F07.I02 | - | 已上线 |
+| M03.F07.I03 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow | sample_receipts.flow_status | M03.F07.I03 | - | 已上线 |
+| M03.F08.I01 | ReportFlowController#ListFlowQueue / ReportFlowService#FlowQueue | GET /api/receipts/flow/queue?stage=archived | sample_receipts.flow_status | M03.F08.I01 | - | 已上线 |
+| M03.F08.I02 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（archived 视角） | sample_receipts | M03.F08.I02 | - | 已上线 |
+| M03.F08.I03 | ReportFlowController#SubmitFlowAction / ReportFlowService#SubmitAction | POST /api/receipts/flow（终态/退回/撤回） | sample_receipts.flow_status | M03.F08.I03 | - | 已上线 |
+| M03.F09.I01 | ReceiptsController#GetReceipt / SampleReceiptService#Get | GET /api/receipts/{id}（三视图聚合） | sample_receipts + samples + test_records | M03.F09.I01 | - | 已上线 |
 
 ## 约定
 

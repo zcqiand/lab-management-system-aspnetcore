@@ -56,6 +56,38 @@ flowchart TD
 | S02 | 报告汇总查询 | 管理层 | categoryCode/dateFrom/dateTo | SummaryData 6 列行集 | - | M05.F01.I01 |
 | S03 | 仪表盘聚合 | 所有用户 | - | 计数 + 3 桶 + pendingTask | - | M05.F02.I01 |
 
+## FLOW-04 试验流程主流程（B3）
+
+```mermaid
+flowchart TD
+    S00[合同登记] --> S01[接样登记]
+    S01 --> S02[任务分配]
+    S02 --> S03[数据录入]
+    S03 --> S04[提交审核]
+    S04 --> S05[审核通过/退回]
+    S05 -->|退回| S03
+    S05 -->|通过| S06[批准]
+    S06 -->|退回| S04
+    S06 -->|通过| S07[发放]
+    S07 -->|退回| S06
+    S07 -->|发放| S08[归档]
+    S08 -->|退回| S07
+    S01 -->|撤回| S09[删除接样]
+```
+
+| 步骤 | 名称 | 角色 | 输入 | 输出 | 状态流转 | 支撑功能子项 |
+|---|---|---|---|---|---|---|
+| S00 | 合同登记 | 收样员 | 合同信息 | Contract | - | M02.F01.I01, M02.F01.I02, M02.F01.I03, M02.F01.I04, M02.F01.I05 |
+| S01 | 接样登记 | 收样员 | 委托/样品信息 | SampleReceipt（receiving 起步） | -> receiving | M03.F01.I01, M03.F01.I02, M03.F01.I03, M03.F01.I04, M03.F01.I05, M03.F09.I01 |
+| S02 | 任务分配 | 组长 | assignee/plannedDate | 接样单挂任务字段 | receiving -> task_assignment | M03.F02.I01 |
+| S03 | 数据录入（样品+检测记录） | 检测员 | 样品/检测结果/改判 | Sample + TestRecord | task_assignment -> data_entry | M03.F03.I01, M03.F03.I02, M03.F03.I03, M03.F03.I04, M03.F03.I05, M03.F03.I06, M03.F03.I07, M03.F03.I08, M03.F03.I09, M03.F03.I10, M03.F03.I11 |
+| S04 | 流程历史可追溯 | 所有角色 | - | FlowHistoryEntry[] | 全程记录 | M03.F01.I06 |
+| S05 | 审核 | 审核员 | stage=review 队列 | 通过→approval / 退回→data_entry | review <-> | M03.F05.I01, M03.F05.I02, M03.F05.I03 |
+| S06 | 批准 | 批准人 | stage=approval 队列 | 通过→issuance / 退回→review | approval <-> | M03.F06.I01, M03.F06.I02, M03.F06.I03 |
+| S07 | 发放 | 发放员 | stage=issuance 队列 | 发放→archived / 退回→approval | issuance <-> | M03.F07.I01, M03.F07.I02, M03.F07.I03 |
+| S08 | 归档（终态） | - | stage=archived 队列 | SUBMIT 无效 / 退回→issuance | archived（终态） | M03.F08.I01, M03.F08.I02, M03.F08.I03 |
+| S09 | 撤回/删除 | 收样员 | WITHDRAW（仅 receiving 自转移）/ 删除接样 CASCADE | - | receiving 自转移 | M03.F08.I03, M03.F01.I05 |
+
 ### 评审时问这四个问题
 
 1. 有没有哪个步骤的「支撑功能子项」是空的？→ 功能缺失，或这一步不该存在

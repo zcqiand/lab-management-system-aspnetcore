@@ -1,32 +1,278 @@
 {
   "schema": 1,
   "approved": true,
-  "base_sha": "1636e23a633336e6",
-  "summary": "B4 报告汇总+仪表盘统计落地：M05.F01.I01 + M05.F02.I01 两个 I 级新增（镜像 springboot 同名 ID）+ 2 个 F 级翻已上线。实现：SummaryController 2 端点（GET /api/summary + /api/summary/stats），语义镜像 springboot SummaryService（ALL 哨兵/commissionDate 闭区间字典序/6 固定列/commissionDate DESC+code 排序/3 桶 draft-reviewing-issued/pendingTask=task+data_entry+review）。54 fnTest 全绿（B1 16 + B2 32 + B4 6）。",
+  "base_sha": "893ef9d25af19925",
+  "summary": "B3 合同+接样+样品+检测记录+流程落地：37 个 I 级新增（M02.F01 5 + M03.F01 6 + M03.F02 1 + M03.F03 11 + M03.F05/F06/F07/F08 各 3 + M03.F09 1，镜像 springboot 同名 ID）+ 9 个 F 级翻已上线。实现：19 端点（合同 CRUD 5 + 接样 7 + 流程 2 + 样品 5 + 检测记录 6 = 实际 25 路由），7 阶段状态机（SUBMIT 前进/RETURN 退回/WITHDRAW 仅 receiving 自转移）、批量容错、flow_history 全程记录、assignTask 自动推进、FK RESTRICT/CASCADE。88 fnTest 全绿（B1 16 + B2 32 + B3 34 + B4 6）。",
   "changes": [
     {
-      "id": "M05.F01.I01",
+      "id": "M02.F01.I01",
       "action": "新增",
-      "name": "报告汇总",
-      "reason": "GET /api/summary?categoryCode=&dateFrom=&dateTo=：ALL 不过滤按报告类别过滤当前租户接样单；SummaryData{summaryName, 6 列, rows}；commissionDate DESC, commissionCode 排序"
+      "name": "合同列表",
+      "reason": "GET /api/contracts?keyword=&status=：keyword 模糊 contractCode/projectName 不敏、status 精确、tenant 收口"
     },
     {
-      "id": "M05.F02.I01",
+      "id": "M02.F01.I02",
       "action": "新增",
-      "name": "仪表盘统计",
-      "reason": "GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount"
+      "name": "合同详情",
+      "reason": "GET /api/contracts/{id}，miss 404"
     },
     {
-      "id": "M05.F01",
+      "id": "M02.F01.I03",
+      "action": "新增",
+      "name": "创建合同",
+      "reason": "POST /api/contracts：id=C-UUID、status 默认 active"
+    },
+    {
+      "id": "M02.F01.I04",
+      "action": "新增",
+      "name": "更新合同",
+      "reason": "PUT /api/contracts/{id}：PATCH 语义"
+    },
+    {
+      "id": "M02.F01.I05",
+      "action": "新增",
+      "name": "删除合同",
+      "reason": "DELETE /api/contracts/{id}：被接样引用 FK RESTRICT 拒"
+    },
+    {
+      "id": "M03.F01.I01",
+      "action": "新增",
+      "name": "接样列表",
+      "reason": "GET /api/receipts?contractId=&flowStatus=&keyword=：keyword 模糊 commissionCode/projectName"
+    },
+    {
+      "id": "M03.F01.I02",
+      "action": "新增",
+      "name": "接样详情",
+      "reason": "GET /api/receipts/{id}，miss 404"
+    },
+    {
+      "id": "M03.F01.I03",
+      "action": "新增",
+      "name": "创建接样",
+      "reason": "POST /api/receipts：contract FK 必存在、flow_status=receiving 起步、flow_history=[]"
+    },
+    {
+      "id": "M03.F01.I04",
+      "action": "新增",
+      "name": "更新接样",
+      "reason": "PUT /api/receipts/{id}：PATCH 语义（含 3 个 jsonb 列表）"
+    },
+    {
+      "id": "M03.F01.I05",
+      "action": "新增",
+      "name": "删除接样",
+      "reason": "DELETE /api/receipts/{id}：CASCADE 下属 samples"
+    },
+    {
+      "id": "M03.F01.I06",
+      "action": "新增",
+      "name": "流程历史",
+      "reason": "GET /api/receipts/{id}/history → FlowHistoryEntry[]"
+    },
+    {
+      "id": "M03.F02.I01",
+      "action": "新增",
+      "name": "任务分配",
+      "reason": "PUT /api/receipts/{id}/task：assignee/plannedDate 挂 SampleReceipt；receiving 态自动推进 task_assignment 并写 history"
+    },
+    {
+      "id": "M03.F03.I01",
+      "action": "新增",
+      "name": "样品列表",
+      "reason": "GET /api/samples?receiptId=&keyword=：keyword 模糊 sampleCode/sampleName，createdAt DESC"
+    },
+    {
+      "id": "M03.F03.I02",
+      "action": "新增",
+      "name": "样品详情",
+      "reason": "GET /api/samples/{id}，miss 404"
+    },
+    {
+      "id": "M03.F03.I03",
+      "action": "新增",
+      "name": "创建样品",
+      "reason": "POST /api/samples：receipt FK 必存在、ext 默认 {}"
+    },
+    {
+      "id": "M03.F03.I04",
+      "action": "新增",
+      "name": "更新样品",
+      "reason": "PUT /api/samples/{id}：PATCH 语义"
+    },
+    {
+      "id": "M03.F03.I05",
+      "action": "新增",
+      "name": "删除样品",
+      "reason": "DELETE /api/samples/{id}"
+    },
+    {
+      "id": "M03.F03.I06",
+      "action": "新增",
+      "name": "检测记录列表",
+      "reason": "GET /api/test-records?sampleId=：tenant+sampleId 过滤，分页回显"
+    },
+    {
+      "id": "M03.F03.I07",
+      "action": "新增",
+      "name": "检测记录详情",
+      "reason": "GET /api/test-records/{id}，miss 404"
+    },
+    {
+      "id": "M03.F03.I08",
+      "action": "新增",
+      "name": "创建检测记录",
+      "reason": "POST /api/test-records：sampleId/parameterCode/requirement/result 必填"
+    },
+    {
+      "id": "M03.F03.I09",
+      "action": "新增",
+      "name": "更新检测记录",
+      "reason": "PUT /api/test-records/{id}：PATCH 语义"
+    },
+    {
+      "id": "M03.F03.I10",
+      "action": "新增",
+      "name": "删除检测记录",
+      "reason": "DELETE /api/test-records/{id}"
+    },
+    {
+      "id": "M03.F03.I11",
+      "action": "新增",
+      "name": "改判",
+      "reason": "PATCH /api/test-records/{id}/verdict：verdict 直接覆写（生成契约 PATCH；springboot 侧 PUT）"
+    },
+    {
+      "id": "M03.F05.I01",
+      "action": "新增",
+      "name": "审核队列",
+      "reason": "GET /api/receipts/flow/queue?stage=：stage 精确 + tenant 收口，pageSize 默认 50 cap 200"
+    },
+    {
+      "id": "M03.F05.I02",
+      "action": "新增",
+      "name": "审核查看",
+      "reason": "GET /api/receipts/{id} review 视角（复用详情端点）"
+    },
+    {
+      "id": "M03.F05.I03",
+      "action": "新增",
+      "name": "通过退回",
+      "reason": "POST /api/receipts/flow：review 下 SUBMIT→approval / RETURN→data_entry"
+    },
+    {
+      "id": "M03.F06.I01",
+      "action": "新增",
+      "name": "阶段推进",
+      "reason": "POST /api/receipts/flow 批量：SUBMIT/RETURN/WITHDRAW，单条失败进 FlowActionResult 不炸整批"
+    },
+    {
+      "id": "M03.F06.I02",
+      "action": "新增",
+      "name": "批准查看",
+      "reason": "GET /api/receipts/{id} approval 视角"
+    },
+    {
+      "id": "M03.F06.I03",
+      "action": "新增",
+      "name": "批准退回",
+      "reason": "POST /api/receipts/flow：approval 下 SUBMIT→issuance / RETURN→review"
+    },
+    {
+      "id": "M03.F07.I01",
+      "action": "新增",
+      "name": "发放队列",
+      "reason": "GET /api/receipts/flow/queue?stage=issuance"
+    },
+    {
+      "id": "M03.F07.I02",
+      "action": "新增",
+      "name": "发放查看",
+      "reason": "GET /api/receipts/{id} issuance 视角（含 issued_at）"
+    },
+    {
+      "id": "M03.F07.I03",
+      "action": "新增",
+      "name": "发放退回",
+      "reason": "POST /api/receipts/flow：issuance 下 SUBMIT→archived / RETURN→approval"
+    },
+    {
+      "id": "M03.F08.I01",
+      "action": "新增",
+      "name": "归档队列",
+      "reason": "GET /api/receipts/flow/queue?stage=archived"
+    },
+    {
+      "id": "M03.F08.I02",
+      "action": "新增",
+      "name": "归档查看",
+      "reason": "GET /api/receipts/{id} archived 视角"
+    },
+    {
+      "id": "M03.F08.I03",
+      "action": "新增",
+      "name": "归档退回",
+      "reason": "POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移"
+    },
+    {
+      "id": "M03.F09.I01",
+      "action": "新增",
+      "name": "接样单详情聚合",
+      "reason": "GET /api/receipts/{id} + 客户端组合 samples/test-records 三视图"
+    },
+    {
+      "id": "M02.F01",
       "action": "变更",
-      "name": "报告汇总",
+      "name": "合同管理",
+      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
+    },
+    {
+      "id": "M03.F01",
+      "action": "变更",
+      "name": "接样管理",
+      "reason": "规划→已上线：I01-I06 已实现并有 fnTest"
+    },
+    {
+      "id": "M03.F02",
+      "action": "变更",
+      "name": "任务分配",
       "reason": "规划→已上线：I01 已实现并有 fnTest"
     },
     {
-      "id": "M05.F02",
+      "id": "M03.F03",
       "action": "变更",
-      "name": "仪表盘统计",
-      "reason": "规划→已上线：I01 已实现并有 fnTest"
+      "name": "数据录入",
+      "reason": "规划→已上线：I01-I11 已实现并有 fnTest"
+    },
+    {
+      "id": "M03.F05",
+      "action": "变更",
+      "name": "报告审核",
+      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖队列+转移"
+    },
+    {
+      "id": "M03.F06",
+      "action": "变更",
+      "name": "报告批准",
+      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖推进/退回/容错/全周期"
+    },
+    {
+      "id": "M03.F07",
+      "action": "变更",
+      "name": "报告发放",
+      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖 WITHDRAW 语义"
+    },
+    {
+      "id": "M03.F08",
+      "action": "变更",
+      "name": "报告归档",
+      "reason": "规划→已上线：I01-I03 复用流程端点，fnTest 覆盖终态"
+    },
+    {
+      "id": "M03.F09",
+      "action": "变更",
+      "name": "接样单详情",
+      "reason": "规划→已上线：I01 复用详情端点"
     }
   ],
   "sync_files": [
