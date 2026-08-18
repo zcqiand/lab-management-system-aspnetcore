@@ -1,0 +1,87 @@
+{
+  "schema": 1,
+  "approved": true,
+  "base_sha": "1f5fe83f448a7bfd",
+  "summary": "B1 认证域落地：M00.F01/F02 + M01.F04/F05 拆 I 级（9 个，定义镜像 lab-management-system-springboot 同名 ID，保证家族跨仓同 ID 同义）并翻已上线。其余模块保持规划不动。实现：AuthController 9 端点 + AuthService + ConfigUserDirectory（NSwag codegen 自 shared OpenAPI），16 fnTest 全绿。",
+  "changes": [
+    {
+      "id": "M00.F01.I01",
+      "action": "新增",
+      "name": "当前会话",
+      "reason": "GET /api/auth/me：user + 关联租户列表 + currentTenantId（token tenant_id claim，缺省 TENANT-001）"
+    },
+    {
+      "id": "M00.F02.I01",
+      "action": "新增",
+      "name": "选租户换发",
+      "reason": "POST /api/auth/switch-tenant：校验租户归属后换发携带 tenant_id claim 的 token"
+    },
+    {
+      "id": "M01.F04.I01",
+      "action": "新增",
+      "name": "动态菜单",
+      "reason": "GET /api/auth/menus：按角色下发导航树（5 根节点，镜像 lab-msw）"
+    },
+    {
+      "id": "M01.F04.I02",
+      "action": "新增",
+      "name": "权限集",
+      "reason": "GET /api/auth/permissions：RBAC 权限串列表（admin 全量 11 项）"
+    },
+    {
+      "id": "M01.F05.I01",
+      "action": "新增",
+      "name": "密码登录",
+      "reason": "POST /api/auth/login：用户名+密码校验，签发 access/refresh token + 租户列表"
+    },
+    {
+      "id": "M01.F05.I02",
+      "action": "新增",
+      "name": "SSO 跳转",
+      "reason": "GET /api/auth/sso/authorize?redirect=：构造 saas 身份平台登录跳转 URL + state"
+    },
+    {
+      "id": "M01.F05.I03",
+      "action": "新增",
+      "name": "SSO 回调",
+      "reason": "POST /api/auth/sso/callback：dev 直发 demo 会话（真对接待 saas 端点可用）"
+    },
+    {
+      "id": "M01.F05.I04",
+      "action": "新增",
+      "name": "刷新 token",
+      "reason": "POST /api/auth/refresh：refresh token 换发新 access token"
+    },
+    {
+      "id": "M01.F05.I05",
+      "action": "新增",
+      "name": "登出",
+      "reason": "POST /api/auth/logout：无状态 JWT 服务端无 session，前端清存储"
+    },
+    {
+      "id": "M00.F01",
+      "action": "变更",
+      "name": "当前用户会话",
+      "reason": "规划→已上线：I01 已实现并有 fnTest"
+    },
+    {
+      "id": "M00.F02",
+      "action": "变更",
+      "name": "登录选租户",
+      "reason": "规划→已上线：I01 已实现并有 fnTest"
+    },
+    {
+      "id": "M01.F04",
+      "action": "变更",
+      "name": "权限管理",
+      "reason": "规划→已上线：I01/I02 已实现并有 fnTest"
+    },
+    {
+      "id": "M01.F05",
+      "action": "变更",
+      "name": "认证管理",
+      "reason": "规划→已上线：I01-I05 已实现并有 fnTest"
+    }
+  ],
+  "sync_files": []
+}

@@ -1,0 +1,20 @@
+# .NET 构建产物
+bin/
+obj/
+.trx/
+TestResults/
+
+# IDE
+.vscode/
+.vs/
+*.user
+
+# Suite 状态产物 —— 不入库。再生它们只需要 `python scripts/gate.py -p <project>`。
+.state/trace.json
+.state/gate.json
+.state/alignment.json
+.state/gate.partial.json
+
+# 本地环境覆盖（连接串等）—— 脚手架的 appsettings.Development.json 已入库，
+# 真正的机密走环境变量/用户机密，不进 git。
+appsettings.*.local.json
