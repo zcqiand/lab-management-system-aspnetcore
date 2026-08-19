@@ -1,19 +1,41 @@
 namespace Lab.AspNetCore.Tests.Services;
 
 using System.Security.Authentication;
+using Lab.AspNetCore.Auth.Jwt;
+using Lab.AspNetCore.Auth.Sso;
+using Lab.AspNetCore.Auth.State;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Directory;
 using Lab.AspNetCore.Services;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 /// <summary>
-/// B1 认证域 fnTest。语义基准：lab-msw handlers-extra.ts + lab-springboot AuthServiceTest
-/// （DEMO_USER admin / 3 租户 / 11 权限 / dev alg=none JWT）。
+/// B1 认证域 fnTest（真后端）。用 NoopSaasAuthClient/NoopSaasMeClient,无需 saas 联通。JWT 走真 HMAC HS256。
 /// </summary>
 public class AuthServiceTest
 {
-    private readonly AuthService _service =
-        new(new ConfigUserDirectory("dev123456"), "http://localhost:3000");
+    private const string Secret = "test-lab-jwt-secret-test-lab-jwt-secret-test-lab-jwt-secret"; // ≥32B
+
+    private static readonly LabOptions Opts = new()
+    {
+        Sso = new LabOptions.SsoSection
+        {
+            SaasBase = "http://localhost:3000",
+            ClientId = "test-client-id",
+            ClientSecret = "test-client-secret",
+            DefaultTenantId = "00000000-0000-0000-0000-000000000001",
+            CallbackRedirectBase = "http://localhost:5080/api/auth/sso/callback",
+        },
+    };
+
+    private readonly AuthService _service = new(
+        new ConfigUserDirectory("dev123456"),
+        new LabJwtSigner(Secret, "lab-test", 3600, 604800),
+        new NoopSaasAuthClient(),
+        new NoopSaasMeClient(),
+        new StateCookieManager(Secret),
+        Microsoft.Extensions.Options.Options.Create(Opts));
 
     // === M01.F05.I01 密码登录 ===
 
@@ -21,14 +43,13 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I01")]
     public void Login_success_returnsSessionWithTenants()
     {
-        var res = _service.Login(new LoginRequest { Username = "admin", Password = "dev123456" });
-
+        var res = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
         Assert.Equal("USER-A", res.User.Id);
-        Assert.Equal("admin", res.User.Username);
+        Assert.Equal("admin@lab.local", res.User.Username);
         Assert.Equal(3, res.Tenants.Count);
         Assert.Equal("TENANT-001", res.Tenants[0].TenantId);
         Assert.NotNull(res.Token);
-        Assert.StartsWith("refresh-admin-", res.RefreshToken);
+        Assert.NotNull(res.RefreshToken);
     }
 
     [Fact]
@@ -36,7 +57,7 @@ public class AuthServiceTest
     public void Login_wrongPassword_throws()
     {
         Assert.Throws<AuthenticationException>(
-            () => _service.Login(new LoginRequest { Username = "admin", Password = "wrong" }));
+            () => _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "wrong" }));
     }
 
     [Fact]
@@ -53,15 +74,13 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I04")]
     public void Refresh_validToken_returnsNewSession()
     {
-        var login = _service.Login(new LoginRequest { Username = "admin", Password = "dev123456" });
+        var login = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
         var res = _service.Refresh(new RefreshTokenRequest { RefreshToken = login.RefreshToken });
 
-        // dev token/refreshToken 都是秒级 epoch，同秒内可能同串 —— 只断言语义：
-        // 刷新后拿到完整会话（用户/租户/token 三件套）
-        Assert.Equal("admin", res.User.Username);
+        Assert.Equal("USER-A", res.User.Id);
         Assert.Equal(3, res.Tenants.Count);
         Assert.NotEmpty(res.Token);
-        Assert.Matches(@"^refresh-admin-\d+$", res.RefreshToken);
+        Assert.NotEmpty(res.RefreshToken);
     }
 
     [Fact]
@@ -70,8 +89,6 @@ public class AuthServiceTest
     {
         Assert.Throws<AuthenticationException>(
             () => _service.Refresh(new RefreshTokenRequest { RefreshToken = "garbage" }));
-        Assert.Throws<AuthenticationException>(
-            () => _service.Refresh(new RefreshTokenRequest { RefreshToken = "refresh-bad-user-123" }));
     }
 
     // === M00.F01.I01 当前会话 ===
@@ -80,10 +97,10 @@ public class AuthServiceTest
     [Trait("Fn", "M00.F01.I01")]
     public void Me_withTenantClaim_resolvesCurrentTenant()
     {
-        var claims = new Dictionary<string, object> { ["sub"] = "admin", ["tenant_id"] = "TENANT-002" };
+        var claims = new Dictionary<string, object> { ["sub"] = "USER-A", ["tenant_id"] = "TENANT-002" };
         var session = _service.Me(claims);
 
-        Assert.Equal("admin", session.User.Username);
+        Assert.Equal("USER-A", session.User.Id);
         Assert.Equal("TENANT-002", session.CurrentTenantId);
         Assert.Equal(3, session.Tenants.Count);
     }
@@ -92,7 +109,7 @@ public class AuthServiceTest
     [Trait("Fn", "M00.F01.I01")]
     public void Me_withoutTenantClaim_fallsBackToDefaultTenant()
     {
-        var claims = new Dictionary<string, object> { ["sub"] = "admin" };
+        var claims = new Dictionary<string, object> { ["sub"] = "USER-A" };
         var session = _service.Me(claims);
 
         Assert.Equal("TENANT-001", session.CurrentTenantId);
@@ -112,10 +129,9 @@ public class AuthServiceTest
     [Trait("Fn", "M00.F02.I01")]
     public void SwitchTenant_validTenant_reissuesTokenWithClaim()
     {
-        var claims = new Dictionary<string, object> { ["sub"] = "admin" };
+        var claims = new Dictionary<string, object> { ["sub"] = "USER-A" };
         var res = _service.SwitchTenant(claims, new SwitchTenantRequest { TenantId = "TENANT-003" });
 
-        // token payload 里带 tenant_id claim（解 b64url 中段验证）
         var payload = res.Token.Split('.')[1];
         Assert.Contains("\"tenant_id\":\"TENANT-003\"", DecodeB64Url(payload));
     }
@@ -124,7 +140,7 @@ public class AuthServiceTest
     [Trait("Fn", "M00.F02.I01")]
     public void SwitchTenant_unknownTenant_throws()
     {
-        var claims = new Dictionary<string, object> { ["sub"] = "admin" };
+        var claims = new Dictionary<string, object> { ["sub"] = "USER-A" };
         Assert.Throws<KeyNotFoundException>(
             () => _service.SwitchTenant(claims, new SwitchTenantRequest { TenantId = "TENANT-999" }));
     }
@@ -136,11 +152,9 @@ public class AuthServiceTest
     public void Menus_returns5RootNodes()
     {
         var menus = _service.Menus();
-
         Assert.Equal(5, menus.Count);
         Assert.Equal("menu-dashboard", menus[0].Id);
         Assert.Equal("工作台", menus[0].Label);
-        // 试验过程 7 子项（镜像 msw）
         var flow = menus.First(m => m.Id == "menu-m03");
         Assert.Equal(7, flow.Children!.Count);
     }
@@ -150,7 +164,6 @@ public class AuthServiceTest
     public void Permissions_returnsAdminFullSet()
     {
         var perms = _service.Permissions();
-
         Assert.Equal(11, perms.Permissions.Count);
         Assert.Contains("*", perms.Permissions);
     }
@@ -159,23 +172,50 @@ public class AuthServiceTest
 
     [Fact]
     [Trait("Fn", "M01.F05.I02")]
-    public void SsoAuthorize_buildsSaasLoginUrl()
+    public void SsoAuthorize_returnsAuthorizeUrlAndState()
     {
         var res = _service.SsoAuthorize("/receipts");
-
-        Assert.Equal("http://localhost:3000/login?redirect=/receipts&state=mock-state", res.AuthorizeUrl);
-        Assert.Equal("mock-state", res.State);
+        Assert.NotNull(res.Redirect.AuthorizeUrl);
+        Assert.Contains("code=dev-code", res.Redirect.AuthorizeUrl);
+        Assert.NotNull(res.Redirect.State);
+        Assert.NotEmpty(res.CookieValue);
     }
 
     [Fact]
     [Trait("Fn", "M01.F05.I03")]
-    public void SsoCallback_devIssuesDemoSession()
+    public void SsoCallback_returnsDemoSession()
     {
-        var res = _service.SsoCallback();
+        var auth = _service.SsoAuthorize("/receipts");
+        var body = new SsoCallbackRequest
+        {
+            Grant_type = OAuthGrantType.Authorization_code,
+            Code = "dev-code",
+            Redirect_uri = "http://localhost:5080/api/auth/sso/callback",
+            State = auth.Redirect.State,
+        };
+        var res = _service.SsoCallback(body, auth.CookieValue);
 
-        Assert.Equal("admin", res.User.Username);
+        Assert.Equal("USER-A", res.User.Id);
         Assert.Equal(3, res.Tenants.Count);
         Assert.NotNull(res.Token);
+        // refresh token 嵌 saas refresh token
+        var refreshPayload = res.RefreshToken!.Split('.')[1];
+        Assert.Contains("\"saas_refresh_token\":\"dev-refresh-token\"", DecodeB64Url(refreshPayload));
+    }
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I03")]
+    public void SsoCallback_mismatchedState_throws()
+    {
+        var auth = _service.SsoAuthorize("/receipts");
+        var body = new SsoCallbackRequest
+        {
+            Grant_type = OAuthGrantType.Authorization_code,
+            Code = "dev-code",
+            Redirect_uri = "http://localhost:5080/api/auth/sso/callback",
+            State = "forged-state",
+        };
+        Assert.Throws<InvalidOperationException>(() => _service.SsoCallback(body, auth.CookieValue));
     }
 
     // === M01.F05.I05 登出 ===
@@ -184,7 +224,6 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I05")]
     public void Logout_stateless_noop()
     {
-        // 无状态 JWT：服务端无 session store，logout 是 no-op（前端清存储）
         _service.Logout();
     }
 

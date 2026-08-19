@@ -1,35 +1,46 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "2026-08-19 B7 EF Core 镜像模式（IStores 接口抽离 + 6 Ef*Store + LabDbContext + Program.cs 配置切换 memory|ef），默认 memory 行为不变",
+  "current_task": "B12 真后端 OAuth 2.0 + JWT 签发完成（HMAC HS256 + 真调 saas /oauth/authorize + /oauth/token + State cookie + saas refresh）",
   "done": [
-    "B7.1 IStores.cs：抽出 ICatalogStore / IRuleStore / IRequirementStore / IFlowStore / IDictionaryStore / IJunctionStore 六个仓储契约，签名 = InMemory*Store 公共面原样上提",
-    "B7.2 InMemory*Store 全部 : 实现接口，service 构造函数类型 InMemory* → I*，service/controller/fnTest 逻辑零改动",
-    "B7.3 Persistence/LabDbContext：29 实体映射 V001-V014（UseSnakeCaseNamingConvention + 枚举列 Wire 字符串转换器 + jsonb 透传）",
-    "B7.4 Persistence/EfCatalogStore / EfDictionaryStore / EfJunctionStore / EfFlowStore / EfRuleStore / EfRequirementStore（EfRuleRequirementStore.cs 内含两 store）",
-    "B7.5 Program.cs：Lab:Data:Provider 配置分支（memory 默认 / ef 选装），appsettings.Development.json 加 Provider + ConnectionString 槽位",
-    "lab_aspnetcore 验证：dotnet build 0 warning 0 error；dotnet test 136/136 PASS；gate -p 全绿 149 条目 0 软告警",
-    "lab 全家桶 --all 门禁 15/15 全绿（顺手修 shared sql.replay 测试 stale 断言，V012 后查 pg_indexes）",
-    "springboot 清理：129 文件 codegen timestamp-only 噪声 git restore（按 B9.1 上推 shared 的惯例）",
-    "live smoke 51/51 基线不动（仍是 memory 模式默认）；EF 模式 opt-in 未联调"
+    "shared: tsp/routes/auth.tsp SsoCallbackRequest 增 state 字段（RFC 6749 §4.1.4）;npm run build 重生 openapi.yaml;两后端 codegen 同步",
+    "aspnetcore 新增 Auth/Jwt/LabJwtSigner.cs（HMAC HS256 真签发,Lab:Jwt:Secret ≥32B 启动校验）",
+    "aspnetcore 新增 Auth/Jwt/LabTokenValidationFactory.cs（HS256 真签名验证 + iss/lifetime）",
+    "aspnetcore 新增 Auth/Jwt/LabOptions.cs（IOptions 配置）",
+    "aspnetcore 新增 Auth/Sso/ISaasAuthClient.cs + ISaasMeClient.cs + SaasErrorMappingHandler.cs（HttpClient + 4xx/5xx 映射 SaasAuthException）",
+    "aspnetcore 新增 Auth/State/StateCookieManager.cs（HS256 签 state,HttpOnly Secure Cookie 防 CSRF）",
+    "aspnetcore 改 IUserDirectory + ConfigUserDirectory：增 FindByEmail / FindById / Upsert;主键从 username 改 email",
+    "aspnetcore 改 AuthService 6 个 ctor 实参：完整 5 端点链路 + saas refresh grant",
+    "aspnetcore 改 AuthController：ssoAuthorize 4-arg 签名 + Set-Cookie 头",
+    "aspnetcore 改 Program.cs：替换 SignatureValidator 为 LabTokenValidationFactory;SsoBeansConfig 用 Profile 切 noop / real,IOptions<LabOptions> 注入",
+    "aspnetcore 改 appsettings.Development.json：加 Lab:Jwt + Lab:Sso 配置段,Profile 默认 no-sso",
+    "aspnetcore 测试 138/138 PASS（含 AuthServiceTest 16）",
+    "aspnetcore dotnet format 应用 + L1 全绿",
+    "aspnetcore gate L0-L5 全绿 149 条目 0 软告警",
+    "aspnetcore 改 docs/functions/function-tree.md M01.F05.I02/I03/I04 描述更新（per 改功能与改功能清单必须同一个 commit 硬约束）",
+    "aspnetcore docs/adr/0008-real-backend-oauth-jwt.md ADR 写完"
   ],
-  "next": "M98 backend registry 挂接（前端职责，非本仓）；EF 模式需人决策联调时机再做真 lab_dev 联调。本仓无紧急欠账。",
+  "next": [
+    "git add -A + commit（本仓内未提交所有改动）",
+    "Optional: 切 Lab:Sso:Profile=dev 走真实 saas 联通验证（需 saas-identity-platform-* 端点起）",
+    "Optional: V014 identity 表 workspace + ConfigUserDirectory 改 DB 实现（ADR-0008 T2 长期工单）",
+    "Optional: lab_saas_token_store 表 + per-user encrypt（ADR-0008 T1 长期工单）"
+  ],
   "open_questions": [
-    "EF 模式何时开 Provider=ef 真联调：需与 springboot 同库协商窗口（lab_dev 共库，Flyway baseline 已冻结），且接口契约层（NSwag 生成的 DTO）EF 与 JPA 在 nullable/id 类型有分叉预期",
-    "NSwag 生成 abstract 基类 + partial 实现（saas 模式）vs springboot interface+impl：两后端风格已分叉但语义对齐，前端无感 —— 是否要拉齐？默认否（不动）"
+    "saas 端 /oauth/authorize 契约是 POST body（TypeSpec 派生），saas-springboot 真实现是否完全 follow 待确认",
+    "T4 跨仓时序：shared 先发 + 两后端并发,gen-shared.sh 脚本开头 npm run build 校验,未做"
   ],
   "dont": [
-    "不要改 .harness/stack.json 让门变松",
-    "不要给 skip 的测试挂功能 ID",
-    "不要手改 src/Controllers/Generated/Controllers.cs -- NSwag 产物，修补走 scripts/patch-generated.py（重跑 codegen 不丢）",
-    "live smoke 经验：非空 query 参数在 net8+NRT 下必填（空串也 400），必传非空值；unlink 端点是 DELETE 带 JSON body；logout body 要 token 字段；contract/receipt create 要 witness/witnessUnit",
-    "Program.cs 的 SignatureValidator 是 dev-only 后门，production 换 issuer-uri 时必须删",
-    "dotnet format 先跑再 gate；不要 catch 吞异常；不要硬编码连接串",
-    "dotnet build 遇 MSB3027（文件被锁）= 旧进程没退，先 taskkill //F //IM lab-management-system-aspnetcore.exe 再重跑（live smoke 残留）",
-    "EF 模式不要在没清空 lab_dev 时直接打开 Provider=ef：springboot 也在写同库，先锁租户 scope 或起快照库",
-    "EF 仓储 upsert 用 EfStoreOps.Upsert（先查后 Add/SetValues），不要写裸 Attach/Update（会绕过 FK 校验）"
+    "不要走 lab-shared SQL 路径：B1 真后端 OAuth 独立于 DB schema（sql/migrations 不变）",
+    "不要换 RSA（ADR-0008 §1 选 HMAC，对称密钥）",
+    "不要给 msw / nextjs 仓做修改（本 PR scope 仅 springboot + aspnetcore）",
+    "不要把 Lab:Sso:Profile=no-sso 改成 dev 默认值（dev 不启 saas 体验断裂）",
+    "不要 catch 吞异常;不要硬编码连接串/密钥",
+    "dotnet build 遇 MSB3027（文件被锁）= 旧进程没退，先 taskkill //F //IM lab-management-system-aspnetcore.exe 再重跑",
+    "EF 模式不要在没清空 lab_dev 时直接打开 Provider=ef：springboot 也在写同库",
+    "dotnet format 先跑再 gate（L1 强制）",
+    "不要让 dotnet format 把 MyTenant 等 DTO record 拆成 multi-line"
   ],
-  "last_gate_passed_at": "2026-08-19T23:50+08:00",
   "active_branch": "master",
   "ahead_of_origin": "0"
 }

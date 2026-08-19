@@ -2,19 +2,20 @@ namespace Lab.AspNetCore.Services;
 
 using System.Security.Authentication;
 using System.Text;
+using Lab.AspNetCore.Auth.Jwt;
+using Lab.AspNetCore.Auth.Sso;
+using Lab.AspNetCore.Auth.State;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Directory;
+using Microsoft.Extensions.Options;
 
 /// <summary>
-/// M00.F01/F02 + M01.F04/F05 — 认证域（B1）。
-///
-/// 语义镜像 lab-msw handlers-extra.ts 与 lab-springboot AuthService（DEMO_USER /
-/// 3 租户 / 固定菜单与权限集 / SSO 跳 saas 登录页）。token 是自签 dev alg=none JWT，
-/// switch-tenant 换发携带 tenant_id claim 的 token，me 从 token claim 解 currentTenantId。
+/// M00.F01/F02 + M01.F04/F05 — 认证域（B1，真后端）。对齐 B1 真后端 OAuth 2.0 + JWT 方案（ADR-0008）：
+/// JWT HMAC HS256（{@link LabJwtSigner}）+ 真 OAuth 2.0 authorization_code flow（{@link ISaasAuthClient}）
+/// + saas /me/whoami + /me/tenants（{@link ISaasMeClient}）+ CSRF state cookie（{@link StateCookieManager}）。
 /// </summary>
 public sealed class AuthService
 {
-    /// <summary>msw 权限集（admin 全量 11 项，handlers-extra.ts:160-175）。</summary>
     internal static readonly IReadOnlyList<string> DemoPermissions = new[]
     {
         "contract:read", "contract:write", "sample:read", "sample:write",
@@ -23,31 +24,44 @@ public sealed class AuthService
     };
 
     private readonly IUserDirectory _directory;
-    private readonly string _saasBase;
+    private readonly LabJwtSigner _jwt;
+    private readonly ISaasAuthClient _saasAuth;
+    private readonly ISaasMeClient _saasMe;
+    private readonly StateCookieManager _stateMgr;
+    private readonly IOptions<LabOptions> _opts;
 
-    public AuthService(IUserDirectory directory, string saasBase)
+    public AuthService(
+        IUserDirectory directory,
+        LabJwtSigner jwt,
+        ISaasAuthClient saasAuth,
+        ISaasMeClient saasMe,
+        StateCookieManager stateMgr,
+        IOptions<LabOptions> opts)
     {
         _directory = directory;
-        _saasBase = saasBase;
+        _jwt = jwt;
+        _saasAuth = saasAuth;
+        _saasMe = saasMe;
+        _stateMgr = stateMgr;
+        _opts = opts;
     }
 
     // === M01.F05.I01 密码登录 ===
 
     public LoginResponse Login(LoginRequest body)
     {
-        var username = body.Username is null ? "" : body.Username.Trim();
+        var username = body.Username ?? "";
         var password = body.Password ?? "";
         if (username.Length == 0 || password.Length == 0)
         {
             throw new ArgumentException("username and password are required");
         }
-
         if (!_directory.CheckPassword(username, password))
         {
             throw new AuthenticationException("Invalid username or password");
         }
-
-        return Session(_directory.FindByUsername(username) ?? throw new AuthenticationException("Invalid username or password"));
+        var user = _directory.FindByUsername(username) ?? throw new AuthenticationException("Invalid username or password");
+        return Session(user, null, null);
     }
 
     // === M01.F05.I04 刷新 token ===
@@ -58,51 +72,46 @@ public sealed class AuthService
         {
             throw new AuthenticationException("missing refresh_token");
         }
-
-        // refreshToken 形如 "refresh-<userId>-<epoch>"；userId 自身含 '-'，按前缀 + 末段剥离
-        // （saas AuthService.refresh 同款 split bug 的修法）。
-        var token = body.RefreshToken;
-        const string prefix = "refresh-";
-        if (!token.StartsWith(prefix, StringComparison.Ordinal))
+        Dictionary<string, object> claims;
+        try
         {
-            throw new AuthenticationException("invalid refresh_token");
+            claims = _jwt.Verify(body.RefreshToken);
         }
-
-        var tokenBody = token[prefix.Length..];
-        var lastDash = tokenBody.LastIndexOf('-');
-        if (lastDash <= 0)
+        catch (ArgumentException e)
         {
-            throw new AuthenticationException("invalid refresh_token");
+            throw new AuthenticationException("invalid refresh_token: " + e.Message);
         }
-
-        var username = tokenBody[..lastDash];
-        var user = _directory.FindByUsername(username);
-        if (user is null)
+        if (claims.GetValueOrDefault("typ")?.ToString() != "refresh")
         {
-            throw new AuthenticationException("invalid refresh_token");
+            throw new AuthenticationException("invalid refresh_token: not a refresh token");
         }
-
-        return Session(user);
+        var tenantId = claims.GetValueOrDefault("tenant_id")?.ToString();
+        var saasRefresh = claims.GetValueOrDefault("saas_refresh_token")?.ToString();
+        if (string.IsNullOrEmpty(saasRefresh))
+        {
+            throw new AuthenticationException("invalid refresh_token: missing saas_refresh_token claim");
+        }
+        var t = _saasAuth.TokenAsync("refresh_token", null, saasRefresh, null).GetAwaiter().GetResult();
+        var saasUser = _saasMe.WhoamiAsync(t.AccessToken).GetAwaiter().GetResult();
+        var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
+        var labUser = _directory.FindByEmail(saasUser.Email)
+            ?? throw new AuthenticationException("unknown user");
+        return Session(labUser, tenantId, TenantsFrom(memberships), t.RefreshToken);
     }
 
-    // === M01.F05.I05 登出（无状态 JWT，服务端无 session store） ===
+    // === M01.F05.I05 登出（无状态 JWT,服务端无 session store） ===
 
     public void Logout()
     {
-        // 前端清存储；服务端无操作。
+        // 前端清存储;服务端无操作
     }
 
     // === M00.F01.I01 当前会话 ===
 
     public CurrentUserSession Me(IReadOnlyDictionary<string, object> claims)
     {
-        var user = _directory.FindByUsername(claims["sub"].ToString() ?? "");
-        if (user is null)
-        {
-            throw new AuthenticationException("unknown user");
-        }
-
-        var currentTenantId = claims.TryGetValue("tenant_id", out var tenantClaim)
+        var user = ResolveUser(claims);
+        var currentTenantId = claims.TryGetValue("tenant_id", out var tenantClaim) && tenantClaim != null
             ? tenantClaim.ToString() ?? ""
             : _directory.DefaultTenant().TenantId;
         return new CurrentUserSession
@@ -117,38 +126,21 @@ public sealed class AuthService
 
     public LoginResponse SwitchTenant(IReadOnlyDictionary<string, object> claims, SwitchTenantRequest body)
     {
-        var user = _directory.FindByUsername(claims["sub"].ToString() ?? "");
-        if (user is null)
-        {
-            throw new AuthenticationException("unknown user");
-        }
-
+        var user = ResolveUser(claims);
         var tenantId = body?.TenantId ?? "";
-        var target = _directory.FindByTenantId(tenantId);
-        if (target is null)
-        {
-            throw new KeyNotFoundException("Tenant not found");
-        }
-
-        return Session(user, target.TenantId);
+        var target = _directory.FindByTenantId(tenantId)
+            ?? throw new KeyNotFoundException("Tenant not found");
+        return Session(user, target.TenantId, null);
     }
 
     // === M01.F04.I01 动态菜单 / I02 权限集 ===
 
-    public List<MenuNode> Menus() => new()
-    {
-        // 镜像 lab-msw handlers-extra.ts:178-225（5 根节点）
+    public List<MenuNode> Menus() => new() { /* mirror springboot */
         new() { Id = "menu-dashboard", Label = "工作台", Path = "/dashboard", Icon = "dashboard" },
-        new()
-        {
-            Id = "menu-m02", Label = "资源管理", Icon = "resource",
-            Children = new List<MenuNode> { Menu("menu-contracts", "合同管理", "/contracts") },
-        },
-        new()
-        {
-            Id = "menu-m03", Label = "试验过程", Icon = "flow",
-            Children = new List<MenuNode>
-            {
+        new() { Id = "menu-m02", Label = "资源管理", Icon = "resource",
+            Children = new List<MenuNode> { Menu("menu-contracts", "合同管理", "/contracts") } },
+        new() { Id = "menu-m03", Label = "试验过程", Icon = "flow",
+            Children = new List<MenuNode> {
                 Menu("menu-receipts", "接样管理", "/receipts"),
                 Menu("menu-task", "任务分配", "/receipts?stage=task_assignment"),
                 Menu("menu-entry", "数据录入", "/receipts?stage=data_entry"),
@@ -156,76 +148,111 @@ public sealed class AuthService
                 Menu("menu-approve", "报告批准", "/receipts?stage=approval"),
                 Menu("menu-issue", "报告发放", "/receipts?stage=issuance"),
                 Menu("menu-archive", "报告归档", "/receipts?stage=archived"),
-            },
-        },
-        new()
-        {
-            Id = "menu-m04", Label = "基础数据", Icon = "data",
-            Children = new List<MenuNode>
-            {
+            } },
+        new() { Id = "menu-m04", Label = "基础数据", Icon = "data",
+            Children = new List<MenuNode> {
                 Menu("menu-techreq", "技术要求", "/technical-requirements"),
                 Menu("menu-models", "型号维护", "/catalog/models"),
                 Menu("menu-specs", "规格维护", "/catalog/specs"),
                 Menu("menu-grades", "等级维护", "/catalog/grades"),
                 Menu("menu-brands", "牌号维护", "/catalog/brands"),
-            },
-        },
-        new()
-        {
-            Id = "menu-m05", Label = "数据统计", Icon = "stats",
-            Children = new List<MenuNode> { Menu("menu-summary", "报告汇总", "/summary") },
-        },
+            } },
+        new() { Id = "menu-m05", Label = "数据统计", Icon = "stats",
+            Children = new List<MenuNode> { Menu("menu-summary", "报告汇总", "/summary") } },
     };
 
     public PermissionSet Permissions() => new() { Permissions = DemoPermissions.ToList() };
 
     // === M01.F05.I02 SSO 跳转 / I03 SSO 回调 ===
 
-    public SsoRedirect SsoAuthorize(string redirect)
+    public SsoAuthResult SsoAuthorize(string businessRedirect)
     {
-        // v0.1.x 语义（msw 同款）：authorizeUrl 直接指 saas /login?redirect=...，
-        // 浏览器真能跳过去；state 用 dev 固定值（真对接待 saas 端点就绪后换随机 + 校验）。
-        var target = string.IsNullOrEmpty(redirect) ? "/" : redirect;
-        return new SsoRedirect
+        var target = string.IsNullOrEmpty(businessRedirect) ? "/" : businessRedirect;
+        var ss = _stateMgr.Issue(target);
+        var resp = _saasAuth.AuthorizeAsync(
+            _opts.Value.Sso.CallbackRedirectBase,
+            "openid profile email",
+            ss.Nonce).GetAwaiter().GetResult();
+        var authorizeUrl = $"{_opts.Value.Sso.SaasBase}/login?code={resp.Code}&state={resp.State}&redirect_uri={_opts.Value.Sso.CallbackRedirectBase}";
+        return new SsoAuthResult(
+            new SsoRedirect { AuthorizeUrl = authorizeUrl, State = ss.Nonce },
+            ss.CookieValue);
+    }
+
+    public LoginResponse SsoCallback(SsoCallbackRequest body, string cookieValue)
+    {
+        if (body == null) throw new ArgumentException("missing body");
+        // verify validates cookie + state 配对;redirect 返回值只为校验 context
+        _stateMgr.Verify(cookieValue, body.State);
+        var redirectUri = body.Redirect_uri ?? _opts.Value.Sso.CallbackRedirectBase;
+        var t = _saasAuth.TokenAsync("authorization_code", body.Code, null, redirectUri).GetAwaiter().GetResult();
+        var saasUser = _saasMe.WhoamiAsync(t.AccessToken).GetAwaiter().GetResult();
+        var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
+        var labUser = _directory.FindByEmail(saasUser.Email)
+            ?? _directory.Upsert(saasUser.Id, saasUser.Email, saasUser.DisplayName ?? "", "viewer");
+        return Session(labUser, null, TenantsFrom(memberships), t.RefreshToken);
+    }
+
+    // === helpers ===
+
+    private CurrentUser ResolveUser(IReadOnlyDictionary<string, object> claims)
+    {
+        if (!claims.TryGetValue("sub", out var sub) || sub == null)
         {
-            AuthorizeUrl = _saasBase + "/login?redirect=" + target + "&state=mock-state",
-            State = "mock-state",
-        };
+            throw new AuthenticationException("missing sub claim");
+        }
+        var subStr = sub.ToString() ?? "";
+        return _directory.FindById(subStr)
+            ?? _directory.FindByEmail(subStr)
+            ?? _directory.FindByUsername(subStr)
+            ?? throw new AuthenticationException("unknown user: " + subStr);
     }
 
-    public LoginResponse SsoCallback()
+    private LoginResponse Session(CurrentUser user, string? tenantId, string? saasRefreshToken) =>
+        Session(user, tenantId, null, saasRefreshToken);
+
+    private LoginResponse Session(CurrentUser user, string? tenantId, List<MyTenant>? tenants, string? saasRefreshToken)
     {
-        // dev 直发 demo 会话（msw 同款）；真 code/state 校验待 saas 端点可用。
-        return Session(_directory.FindByUsername("admin") ?? throw new AuthenticationException("unknown user"));
-    }
-
-    // === token 签发（dev alg=none，镜像 saas AuthService.issueAccessToken） ===
-
-    private LoginResponse Session(CurrentUser user) => Session(user, null);
-
-    private LoginResponse Session(CurrentUser user, string? tenantId)
-    {
-        var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        var accessToken = _jwt.Issue(user.Id, tenantId);
+        var refreshToken = saasRefreshToken == null
+            ? _jwt.IssueRefresh(user.Id, "dev-placeholder")
+            : _jwt.IssueRefresh(user.Id, saasRefreshToken);
+        var useTenants = tenants ?? _directory.TenantsOf(user.Username).ToList();
         return new LoginResponse
         {
-            Token = IssueAccessToken(user.Username, tenantId, now),
-            RefreshToken = "refresh-" + user.Username + "-" + now,
+            Token = accessToken,
+            RefreshToken = refreshToken,
             User = user,
-            Tenants = _directory.TenantsOf(user.Username).ToList(),
+            Tenants = useTenants,
         };
     }
 
-    /// <summary>dev alg=none JWT。sub 放 username（me/switchTenant 据此查目录）；tenant_id 仅在选过租户后携带。</summary>
-    private static string IssueAccessToken(string username, string? tenantId, long now)
+    private static List<MyTenant> TenantsFrom(List<SaasTenantMembership> memberships)
     {
-        var header = B64Url("{\"alg\":\"none\",\"typ\":\"JWT\"}");
-        var tenantClaim = tenantId is null ? "" : ",\"tenant_id\":\"" + tenantId + "\"";
-        var payload = B64Url("{\"sub\":\"" + username + "\"" + tenantClaim + ",\"iat\":" + now + ",\"exp\":" + (now + 3600) + "}");
-        return header + "." + payload + ".dev-placeholder";
+        return memberships.Select(m => new MyTenant
+        {
+            TenantId = m.TenantId,
+            Code = m.TenantId,
+            Name = m.TenantId,
+            RoleIds = m.RoleIds?.ToList() ?? new List<string>(),
+        }).ToList();
     }
 
-    private static string B64Url(string s) =>
-        Convert.ToBase64String(Encoding.UTF8.GetBytes(s)).TrimEnd('=').Replace('+', '-').Replace('/', '_');
+    private static MenuNode Menu(string id, string label, string path) => new()
+    {
+        Id = id,
+        Label = label,
+        Path = path,
+    };
 
-    private static MenuNode Menu(string id, string label, string path) => new() { Id = id, Label = label, Path = path };
+    public sealed class SsoAuthResult
+    {
+        public SsoRedirect Redirect { get; }
+        public string CookieValue { get; }
+        public SsoAuthResult(SsoRedirect redirect, string cookieValue)
+        {
+            Redirect = redirect;
+            CookieValue = cookieValue;
+        }
+    }
 }

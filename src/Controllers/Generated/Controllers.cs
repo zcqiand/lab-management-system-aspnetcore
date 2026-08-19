@@ -64,7 +64,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/auth/sso/authorize")]
-        public abstract System.Threading.Tasks.Task<SsoRedirect> SsoAuthorize([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string redirect);
+        public abstract System.Threading.Tasks.Task<SsoRedirect> SsoAuthorize([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] OAuthResponseType response_type, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string client_id, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string redirect_uri, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string state);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/auth/sso/callback")]
@@ -2663,6 +2663,24 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum OAuthGrantType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"authorization_code")]
+        Authorization_code = 0,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum OAuthResponseType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"code")]
+        Code = 0,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class ObjectParameterLink
     {
 
@@ -3308,9 +3326,18 @@ namespace Lab.AspNetCore.Controllers.Generated
     public partial class SsoCallbackRequest
     {
 
+        [System.Text.Json.Serialization.JsonPropertyName("grant_type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<OAuthGrantType>))]
+        public OAuthGrantType Grant_type { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("code")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
         public string Code { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("redirect_uri")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Redirect_uri { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("state")]
         [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
