@@ -165,27 +165,31 @@ public sealed class AuthService
 
     // === M01.F05.I02 SSO 跳转 / I03 SSO 回调 ===
 
-    public SsoAuthResult SsoAuthorize(string businessRedirect)
+    public SsoAuthResult SsoAuthorize(string redirectUri, string state)
     {
-        var target = string.IsNullOrEmpty(businessRedirect) ? "/" : businessRedirect;
-        var ss = _stateMgr.Issue(target);
-        var resp = _saasAuth.AuthorizeAsync(
-            _opts.Value.Sso.CallbackRedirectBase,
-            "openid profile email",
-            ss.Nonce).GetAwaiter().GetResult();
-        var authorizeUrl = $"{_opts.Value.Sso.SaasBase}/login?code={resp.Code}&state={resp.State}&redirect_uri={_opts.Value.Sso.CallbackRedirectBase}";
+        // RFC 6749 §4.1.1：redirect_uri + state 由客户端（前端）发起，原样透传给授权服务器。
+        // lab 后端是 confidential client：替浏览器向 saas /oauth/authorize 领 code，
+        // 同时把前端 state 存入签名 cookie（§10.12 CSRF），callback 时校验回传的 state。
+        if (string.IsNullOrEmpty(redirectUri)) throw new ArgumentException("missing redirect_uri");
+        if (string.IsNullOrEmpty(state)) throw new ArgumentException("missing state");
+        var ss = _stateMgr.Issue(redirectUri, state);
+        var resp = _saasAuth.AuthorizeAsync(redirectUri, "openid profile email", state).GetAwaiter().GetResult();
+        var authorizeUrl = $"{_opts.Value.Sso.SaasBase}/login?code={resp.Code}&state={resp.State}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
         return new SsoAuthResult(
-            new SsoRedirect { AuthorizeUrl = authorizeUrl, State = ss.Nonce },
+            new SsoRedirect { AuthorizeUrl = authorizeUrl, State = state },
             ss.CookieValue);
     }
 
     public LoginResponse SsoCallback(SsoCallbackRequest body, string cookieValue)
     {
         if (body == null) throw new ArgumentException("missing body");
-        // verify validates cookie + state 配对;redirect 返回值只为校验 context
+        // RFC 6749 §4.1.3：grant_type=authorization_code + code + redirect_uri（须与
+        // authorize 时一致，saas 侧校验）+ state（§10.12，与 authorize 响应一致）。
+        if (body.Grant_type != OAuthGrantType.Authorization_code)
+            throw new AuthenticationException("unsupported grant_type");
+        // cookie 内 state 与 body.state 配对校验（CSRF）；redirect 一致性由 saas token 端点校验
         _stateMgr.Verify(cookieValue, body.State);
-        var redirectUri = body.Redirect_uri ?? _opts.Value.Sso.CallbackRedirectBase;
-        var t = _saasAuth.TokenAsync("authorization_code", body.Code, null, redirectUri).GetAwaiter().GetResult();
+        var t = _saasAuth.TokenAsync("authorization_code", body.Code, null, body.Redirect_uri).GetAwaiter().GetResult();
         var saasUser = _saasMe.WhoamiAsync(t.AccessToken).GetAwaiter().GetResult();
         var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
         var labUser = _directory.FindByEmail(saasUser.Email)

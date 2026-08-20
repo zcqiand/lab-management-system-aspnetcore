@@ -1,46 +1,36 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "B12 真后端 OAuth 2.0 + JWT 签发完成（HMAC HS256 + 真调 saas /oauth/authorize + /oauth/token + State cookie + saas refresh）",
+  "current_task": "B7：aspnetcore 第一次 regen + 18 个 list endpoint 改 Page<T> 4 字段包裹(InMemory + EF 双 store + 10 个 controller override)",
   "done": [
-    "shared: tsp/routes/auth.tsp SsoCallbackRequest 增 state 字段（RFC 6749 §4.1.4）;npm run build 重生 openapi.yaml;两后端 codegen 同步",
-    "aspnetcore 新增 Auth/Jwt/LabJwtSigner.cs（HMAC HS256 真签发,Lab:Jwt:Secret ≥32B 启动校验）",
-    "aspnetcore 新增 Auth/Jwt/LabTokenValidationFactory.cs（HS256 真签名验证 + iss/lifetime）",
-    "aspnetcore 新增 Auth/Jwt/LabOptions.cs（IOptions 配置）",
-    "aspnetcore 新增 Auth/Sso/ISaasAuthClient.cs + ISaasMeClient.cs + SaasErrorMappingHandler.cs（HttpClient + 4xx/5xx 映射 SaasAuthException）",
-    "aspnetcore 新增 Auth/State/StateCookieManager.cs（HS256 签 state,HttpOnly Secure Cookie 防 CSRF）",
-    "aspnetcore 改 IUserDirectory + ConfigUserDirectory：增 FindByEmail / FindById / Upsert;主键从 username 改 email",
-    "aspnetcore 改 AuthService 6 个 ctor 实参：完整 5 端点链路 + saas refresh grant",
-    "aspnetcore 改 AuthController：ssoAuthorize 4-arg 签名 + Set-Cookie 头",
-    "aspnetcore 改 Program.cs：替换 SignatureValidator 为 LabTokenValidationFactory;SsoBeansConfig 用 Profile 切 noop / real,IOptions<LabOptions> 注入",
-    "aspnetcore 改 appsettings.Development.json：加 Lab:Jwt + Lab:Sso 配置段,Profile 默认 no-sso",
-    "aspnetcore 测试 138/138 PASS（含 AuthServiceTest 16）",
-    "aspnetcore dotnet format 应用 + L1 全绿",
-    "aspnetcore gate L0-L5 全绿 149 条目 0 软告警",
-    "aspnetcore 改 docs/functions/function-tree.md M01.F05.I02/I03/I04 描述更新（per 改功能与改功能清单必须同一个 commit 硬约束）",
-    "aspnetcore docs/adr/0008-real-backend-oauth-jwt.md ADR 写完"
+    "scripts/gen-shared.sh 跑通:NSwag 重生 Controllers.cs (19 个 Page<T> wrapper inline Response1-19) + 4 junction GET 接口 + IStores/JunctionService 全接口签名重整",
+    "src/Data/IStores.cs:IJunctionStore 加 4 List 方法 (ListSpecialtyObject / ListObjectParameter / ListObjectStandard / ListStandardParameter) 接 ?string / ?role 过滤",
+    "src/Data/InMemoryDictionaryStore.cs:InMemoryJunctionStore 4 个 List 用 ConcurrentDictionary.Values + Where LINQ 过滤",
+    "src/Persistence/EfDictionaryStore.cs:EfJunctionStore 4 个 List 用 db.JunctionLinks.AsNoTracking() + Where 过滤",
+    "src/Services/JunctionService.cs:加 4 List*Links 转发方法",
+    "src/Controllers/Implementation/DictionaryController.cs:4 主表 (ListSpecialties/Wrap12, ListParameters/Wrap11, ListStandards/Wrap13, ListObjects/Wrap10) + 4 junction list (Response8/6/7/9 WrapShort) + ReportNamesController ListReportNames (Response17) + ParamInterfacesController ListParamInterfaces (Response14) — 全部 Page<T> 4 字段包裹",
+    "src/Controllers/Implementation/CatalogController.cs:4 码表 list (ListBrands/Response, ListModels/Response3, ListSpecs/Response4, ListGrades/Response2) Page<T>",
+    "src/Controllers/Implementation/ContractController.cs:Response N 重映射(Contracts/Receipts/FlowQueue/Samples/TestRecords 5 个 list 编号错位修复)",
+    "dotnet format 应用,L1 format 全绿",
+    "aspnetcore 仓 gate L0-L5 全绿 149 条目 0 软告警"
   ],
   "next": [
-    "git add -A + commit（本仓内未提交所有改动）",
-    "Optional: 切 Lab:Sso:Profile=dev 走真实 saas 联通验证（需 saas-identity-platform-* 端点起）",
-    "Optional: V014 identity 表 workspace + ConfigUserDirectory 改 DB 实现（ADR-0008 T2 长期工单）",
-    "Optional: lab_saas_token_store 表 + per-user encrypt（ADR-0008 T1 长期工单）"
+    "git add -A + commit（src/Data + src/Persistence + src/Services + src/Controllers + scripts/gen-shared.sh 重产物）",
+    "Optional: 计算规则 + 技术要求 list 仍返裸数组(TypeSpec 保留 T[]);若未来切 Page<T> 走 /tree-change + 同样 regen",
+    "Optional: aspnetcore 测试只有 service 层 mock,controller Page<T> 包装逻辑 0 覆盖率 — 若 L5 软告警开始触发(controller 方法没 @Fn 引用),需补 WebApplicationFactory 集成测试"
   ],
   "open_questions": [
-    "saas 端 /oauth/authorize 契约是 POST body（TypeSpec 派生），saas-springboot 真实现是否完全 follow 待确认",
-    "T4 跨仓时序：shared 先发 + 两后端并发,gen-shared.sh 脚本开头 npm run build 校验,未做"
+    "LabJwtSigner.cs HMAC HS256 — 此前 batch (B12) 已落地;与本 batch (B7 Page<T>) 无冲突"
   ],
   "dont": [
-    "不要走 lab-shared SQL 路径：B1 真后端 OAuth 独立于 DB schema（sql/migrations 不变）",
-    "不要换 RSA（ADR-0008 §1 选 HMAC，对称密钥）",
-    "不要给 msw / nextjs 仓做修改（本 PR scope 仅 springboot + aspnetcore）",
-    "不要把 Lab:Sso:Profile=no-sso 改成 dev 默认值（dev 不启 saas 体验断裂）",
-    "不要 catch 吞异常;不要硬编码连接串/密钥",
-    "dotnet build 遇 MSB3027（文件被锁）= 旧进程没退，先 taskkill //F //IM lab-management-system-aspnetcore.exe 再重跑",
-    "EF 模式不要在没清空 lab_dev 时直接打开 Provider=ef：springboot 也在写同库",
-    "dotnet format 先跑再 gate（L1 强制）",
-    "不要让 dotnet format 把 MyTenant 等 DTO record 拆成 multi-line"
+    "不要在 Controller / Program.cs 写业务逻辑(CLAUDE.md §2 硬约束)",
+    "不要 catch 后吞掉异常(CLAUDE.md §2 硬约束)",
+    "不要硬编码连接串/密钥(CLAUDE.md §2 硬约束 — appsettings.Development.json)",
+    "不要直接修改 docs/functions/function-tree.md → 走 /tree-change 提案",
+    "不要在 aspnetcore 仓加新的 NuGet 包(CLAUDE.md §1 'xUnit + dotnet format + TRX trace' 锁定)",
+    "不要手改 src/Controllers/Generated/Controllers.cs(NSwag 产物 — 下次 gen-shared.sh 会覆盖)",
+    "不要修改 src/Models/Generated/Models.cs (inline in Controllers.cs,不独立生成)",
+    "Response5 / Response15 / Response16 / Response18 / Response19 是 NSwag 自动编号 — 顺序依赖 regen 时序,不要硬编码预期编号"
   ],
-  "active_branch": "master",
-  "ahead_of_origin": "0"
+  "active_branch": "master"
 }

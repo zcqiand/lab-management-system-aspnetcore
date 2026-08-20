@@ -26,13 +26,16 @@ public sealed class StateCookieManager
         _key = Encoding.UTF8.GetBytes(secret);
     }
 
-    public SignedState Issue(string businessRedirect)
+    public SignedState Issue(string redirectUri, string clientState)
     {
+        // RFC 6749 §10.12：state 由客户端生成，授权服务器原样回传。lab 后端作为
+        // confidential client 把「前端 state + redirect_uri」打包签名存 cookie，
+        // callback 时校验 cookie 内 state == body.state（防 CSRF）+ 签名 + 时效。
         var nonceBytes = new byte[16];
         RandomNumberGenerator.Fill(nonceBytes);
         var nonce = Base64UrlEncode(nonceBytes);
         var ts = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-        var payload = $"{{\"nonce\":\"{Escape(nonce)}\",\"redirect\":\"{Escape(businessRedirect ?? "")}\",\"ts\":{ts}}}";
+        var payload = $"{{\"nonce\":\"{Escape(nonce)}\",\"state\":\"{Escape(clientState)}\",\"redirect\":\"{Escape(redirectUri ?? "")}\",\"ts\":{ts}}}";
         var payloadB64 = Base64UrlEncode(Encoding.UTF8.GetBytes(payload));
         var sig = Hmac($"{nonce}.{payloadB64}");
         return new SignedState(nonce, $"{nonce}.{sig}.{payloadB64}", ts);
@@ -61,13 +64,14 @@ public sealed class StateCookieManager
         {
             throw new InvalidOperationException("lab_sso_state signature mismatch");
         }
-        if (nonce != bodyState)
-        {
-            throw new InvalidOperationException("state nonce mismatch (CSRF suspected)");
-        }
         var json = Encoding.UTF8.GetString(Base64UrlDecode(payload));
         var sp = JsonSerializer.Deserialize<StatePayload>(json)
             ?? throw new InvalidOperationException("invalid state payload");
+        // cookie 内存的「authorize 时前端发的 state」必须与 body 回传的一致（§10.12）
+        if (sp.state is null || sp.state != bodyState)
+        {
+            throw new InvalidOperationException("client state mismatch (CSRF suspected)");
+        }
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         if (sp.ts == 0 || now - sp.ts > MaxAgeSeconds)
         {
@@ -133,6 +137,7 @@ public sealed class StateCookieManager
     private sealed class StatePayload
     {
         public string? nonce { get; set; }
+        public string? state { get; set; }
         public string? redirect { get; set; }
         public long ts { get; set; }
     }

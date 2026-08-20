@@ -16,17 +16,21 @@ var builder = WebApplication.CreateBuilder(args);
 //   permitAll = login / refresh / sso/**，其余 authenticated。
 builder.Services.AddControllers();
 builder.Services.Configure<LabOptions>(builder.Configuration.GetSection("Lab"));
+// signer 必须在 AddJwtBearer lambda 外创建+注册：该 lambda 惰性执行
+//（首个认证请求才跑 OptionsFactory），那时容器已 build、ServiceCollection 只读，
+// 在 lambda 里 AddSingleton 会抛 "collection cannot be modified because it is read-only"
+// 且 AuthService 也从容器解析 LabJwtSigner（不能只做局部变量）。
+var jwtSigner = new LabJwtSigner(
+    builder.Configuration["Lab:Jwt:Secret"] ?? "dev-lab-jwt-secret-dev-lab-jwt-secret-dev-lab-jwt-secret",
+    builder.Configuration["Lab:Jwt:Issuer"] ?? "lab-management-system",
+    int.TryParse(builder.Configuration["Lab:Jwt:TtlSeconds"], out var t) ? t : 3600,
+    int.TryParse(builder.Configuration["Lab:Jwt:RefreshTtlSeconds"], out var rt) ? rt : 604800);
+builder.Services.AddSingleton(jwtSigner);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false; // claim 名保持 "sub"/"tenant_id" 原样（对齐 spring 侧）
-        var signer = new LabJwtSigner(
-            builder.Configuration["Lab:Jwt:Secret"] ?? "dev-lab-jwt-secret-dev-lab-jwt-secret-dev-lab-jwt-secret",
-            builder.Configuration["Lab:Jwt:Issuer"] ?? "lab-management-system",
-            int.TryParse(builder.Configuration["Lab:Jwt:TtlSeconds"], out var t) ? t : 3600,
-            int.TryParse(builder.Configuration["Lab:Jwt:RefreshTtlSeconds"], out var rt) ? rt : 604800);
-        options.TokenValidationParameters = LabTokenValidationFactory.Build(signer);
-        builder.Services.AddSingleton(signer);
+        options.TokenValidationParameters = LabTokenValidationFactory.Build(jwtSigner);
     });
 builder.Services.AddAuthorization(o =>
 {
@@ -41,7 +45,10 @@ var allowedOrigins = (builder.Configuration["Lab:Cors:AllowedOrigins"]
 builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
     .WithOrigins(allowedOrigins)
     .AllowAnyMethod()
-    .AllowAnyHeader()));
+    .AllowAnyHeader()
+    // SSO state cookie 跨源往返必需：前端 axios withCredentials=true 时，
+    // CORS 响应必须带 Access-Control-Allow-Credentials 才生效
+    .AllowCredentials()));
 
 // State cookie manager（HS256 签 state,签名密钥复用 Lab:Jwt:Secret）
 builder.Services.AddSingleton(sp => new StateCookieManager(

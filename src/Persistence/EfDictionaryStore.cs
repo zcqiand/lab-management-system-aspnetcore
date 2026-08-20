@@ -202,6 +202,11 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
             .Where(x => x.InspectionSpecialtyCode == spec && x.InspectionObjectCode == obj)
             .ExecuteDelete() > 0;
 
+    public IReadOnlyList<SpecialtyObjectLink> ListSpecialtyObject(string? spec) =>
+        string.IsNullOrWhiteSpace(spec)
+            ? db.SpecialtyObjectLinks.AsNoTracking().ToList()
+            : db.SpecialtyObjectLinks.AsNoTracking().Where(x => x.InspectionSpecialtyCode == spec).ToList();
+
     public void SaveObjectParameter(ObjectParameterLink l)
     {
         Require(db.InspectionObjects.Any(o => o.Code == l.InspectionObjectCode), "object", l.InspectionObjectCode);
@@ -215,6 +220,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
         db.ObjectParameterLinks
             .Where(x => x.InspectionObjectCode == obj && x.InspectionParameterCode == param)
             .ExecuteDelete() > 0;
+
+    public IReadOnlyList<ObjectParameterLink> ListObjectParameter(string? obj, string? param) =>
+        db.ObjectParameterLinks.AsNoTracking()
+            .Where(x => obj == null || x.InspectionObjectCode == obj)
+            .Where(x => param == null || x.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveObjectStandard(ObjectStandardLink l)
     {
@@ -231,6 +242,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
             .Where(x => x.InspectionObjectCode == obj && x.InspectionStandardCode == std && x.Role == ParseRole(role))
             .ExecuteDelete() > 0;
 
+    public IReadOnlyList<ObjectStandardLink> ListObjectStandard(string? obj, InspectionStandardRole? role) =>
+        db.ObjectStandardLinks.AsNoTracking()
+            .Where(x => obj == null || x.InspectionObjectCode == obj)
+            .Where(x => role == null || x.Role == role)
+            .ToList();
+
     public void SaveStandardParameter(StandardParameterLink l)
     {
         Require(db.InspectionStandards.Any(s => s.Code == l.InspectionStandardCode), "standard", l.InspectionStandardCode);
@@ -244,6 +261,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
         db.StandardParameterLinks
             .Where(x => x.InspectionStandardCode == std && x.InspectionParameterCode == param)
             .ExecuteDelete() > 0;
+
+    public IReadOnlyList<StandardParameterLink> ListStandardParameter(string? std, string? param) =>
+        db.StandardParameterLinks.AsNoTracking()
+            .Where(x => std == null || x.InspectionStandardCode == std)
+            .Where(x => param == null || x.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveObjectReportName(ObjectReportNameLink l)
     {

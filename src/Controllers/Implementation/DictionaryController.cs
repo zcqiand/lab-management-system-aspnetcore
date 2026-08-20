@@ -19,10 +19,14 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
 
     // === M06.F01 专项 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionSpecialty>> ListSpecialties(
-        [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionSpecialty>>(
-            _service.ListSpecialties(keyword).ToList());
+    public override Task<Response12> ListSpecialties(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListSpecialties(keyword).ToList();
+        return Task.FromResult(Wrap12(items, page, pageSize));
+    }
 
     public override Task<InspectionSpecialty> CreateSpecialty([FromBody] CreateInspectionSpecialtyRequest body) =>
         Task.FromResult(_service.CreateSpecialty(body));
@@ -38,10 +42,15 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
 
     // === M06.F03 参数 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionParameter>> ListParameters(
-        [FromQuery] string keyword, [FromQuery] InspectionParameterSourceType? sourceType) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionParameter>>(
-            _service.ListParameters(keyword, sourceType).ToList());
+    public override Task<Response11> ListParameters(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string keyword,
+        [FromQuery] InspectionParameterSourceType? sourceType)
+    {
+        var items = _service.ListParameters(keyword, sourceType).ToList();
+        return Task.FromResult(Wrap11(items, page, pageSize));
+    }
 
     public override Task<InspectionParameter> CreateParameter([FromBody] CreateInspectionParameterRequest body) =>
         Task.FromResult(_service.CreateParameter(body));
@@ -57,10 +66,15 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
 
     // === M06.F04 标准 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionStandard>> ListStandards(
-        [FromQuery] string keyword, [FromQuery] InspectionStandardStatus? status) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionStandard>>(
-            _service.ListStandards(keyword, status).ToList());
+    public override Task<Response13> ListStandards(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string keyword,
+        [FromQuery] InspectionStandardStatus? status)
+    {
+        var items = _service.ListStandards(keyword, status).ToList();
+        return Task.FromResult(Wrap13(items, page, pageSize));
+    }
 
     public override Task<InspectionStandard> CreateStandard([FromBody] CreateInspectionStandardRequest body) =>
         Task.FromResult(_service.CreateStandard(body));
@@ -76,10 +90,15 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
 
     // === M06.F02 objects ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionObject>> ListObjects(
-        [FromQuery] string inspectionSpecialtyCode, [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionObject>>(
-            _service.ListObjects(inspectionSpecialtyCode, keyword).ToList());
+    public override Task<Response10> ListObjects(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string inspectionSpecialtyCode,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListObjects(inspectionSpecialtyCode, keyword).ToList();
+        return Task.FromResult(Wrap10(items, page, pageSize));
+    }
 
     public override Task<InspectionObject> CreateObject([FromBody] CreateInspectionObjectRequest body) =>
         Task.FromResult(_service.CreateObject(body));
@@ -107,6 +126,12 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.CompletedTask;
     }
 
+    public override Task<Response8> ListSpecialtyObjectLinks([FromQuery] string inspectionSpecialtyCode)
+    {
+        var items = _junction.ListSpecialtyObjectLinks(inspectionSpecialtyCode).ToList();
+        return Task.FromResult(WrapShort(items));
+    }
+
     public override Task LinkObjectParameter([FromBody] ObjectParameterLink body)
     {
         _junction.LinkObjectParameter(body);
@@ -117,6 +142,14 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     {
         _junction.UnlinkObjectParameter(body.InspectionObjectCode, body.InspectionParameterCode);
         return Task.CompletedTask;
+    }
+
+    public override Task<Response6> ListObjectParameterLinks(
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string inspectionParameterCode)
+    {
+        var items = _junction.ListObjectParameterLinks(inspectionObjectCode, inspectionParameterCode).ToList();
+        return Task.FromResult(WrapShort(items));
     }
 
     public override Task LinkObjectStandard([FromBody] ObjectStandardLink body)
@@ -131,6 +164,14 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.CompletedTask;
     }
 
+    public override Task<Response7> ListObjectStandardLinks(
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] InspectionStandardRole? role)
+    {
+        var items = _junction.ListObjectStandardLinks(inspectionObjectCode, role).ToList();
+        return Task.FromResult(WrapShort(items));
+    }
+
     public override Task LinkStandardParameter([FromBody] StandardParameterLink body)
     {
         _junction.LinkStandardParameter(body);
@@ -141,6 +182,113 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     {
         _junction.UnlinkStandardParameter(body);
         return Task.CompletedTask;
+    }
+
+    public override Task<Response9> ListStandardParameterLinks(
+        [FromQuery] string inspectionStandardCode,
+        [FromQuery] string inspectionParameterCode)
+    {
+        var items = _junction.ListStandardParameterLinks(inspectionStandardCode, inspectionParameterCode).ToList();
+        return Task.FromResult(WrapShort(items));
+    }
+
+    // === Page<T> 包裹 helper（4 字段 items/page/pageSize/total）===
+
+    private static Response12 Wrap12(IReadOnlyList<InspectionSpecialty> items, int? page, int? pageSize)
+    {
+        int count = items.Count;
+        return new Response12
+        {
+            Items = items.ToList(),
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        };
+    }
+
+    private static Response11 Wrap11(IReadOnlyList<InspectionParameter> items, int? page, int? pageSize)
+    {
+        int count = items.Count;
+        return new Response11
+        {
+            Items = items.ToList(),
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        };
+    }
+
+    private static Response13 Wrap13(IReadOnlyList<InspectionStandard> items, int? page, int? pageSize)
+    {
+        int count = items.Count;
+        return new Response13
+        {
+            Items = items.ToList(),
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        };
+    }
+
+    private static Response10 Wrap10(IReadOnlyList<InspectionObject> items, int? page, int? pageSize)
+    {
+        int count = items.Count;
+        return new Response10
+        {
+            Items = items.ToList(),
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        };
+    }
+
+    // 短 envelope（junction GET 不带分页，按 TypeSpec Page<T> 但 pageSize=items.length）
+    private static Response8 WrapShort(IReadOnlyList<SpecialtyObjectLink> items)
+    {
+        int count = items.Count;
+        return new Response8
+        {
+            Items = items.ToList(),
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        };
+    }
+
+    private static Response6 WrapShort(IReadOnlyList<ObjectParameterLink> items)
+    {
+        int count = items.Count;
+        return new Response6
+        {
+            Items = items.ToList(),
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        };
+    }
+
+    private static Response7 WrapShort(IReadOnlyList<ObjectStandardLink> items)
+    {
+        int count = items.Count;
+        return new Response7
+        {
+            Items = items.ToList(),
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        };
+    }
+
+    private static Response9 WrapShort(IReadOnlyList<StandardParameterLink> items)
+    {
+        int count = items.Count;
+        return new Response9
+        {
+            Items = items.ToList(),
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        };
     }
 }
 
@@ -153,10 +301,21 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     private readonly DictionaryService _service = service;
     private readonly JunctionService _junction = junction;
 
-    public override Task<System.Collections.Generic.ICollection<InspectionReportName>> ListReportNames(
-        [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionReportName>>(
-            _service.ListReportNames(keyword).ToList());
+    public override Task<Response17> ListReportNames(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListReportNames(keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response17
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<InspectionReportName> CreateReportName([FromBody] CreateInspectionReportNameRequest body) =>
         Task.FromResult(_service.CreateReportName(body));
@@ -219,10 +378,21 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
     private readonly DictionaryService _service = service;
     private readonly JunctionService _junction = junction;
 
-    public override Task<System.Collections.Generic.ICollection<ParamInterface>> ListParamInterfaces(
-        [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<ParamInterface>>(
-            _service.ListInterfaces(keyword).ToList());
+    public override Task<Response14> ListParamInterfaces(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListInterfaces(keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response14
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<ParamInterface> CreateParamInterface([FromBody] CreateParamInterfaceRequest body) =>
         Task.FromResult(_service.CreateInterface(body));

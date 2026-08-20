@@ -24,6 +24,9 @@ public sealed class JunctionService(IJunctionStore store)
         }
     }
 
+    public IReadOnlyList<SpecialtyObjectLink> ListSpecialtyObjectLinks(string? inspectionSpecialtyCode) =>
+        store.ListSpecialtyObject(inspectionSpecialtyCode);
+
     // === object-parameter（M06.F02.I07/I08） ===
 
     public void LinkObjectParameter(ObjectParameterLink body)
@@ -39,6 +42,9 @@ public sealed class JunctionService(IJunctionStore store)
             throw new KeyNotFoundException("object-parameter link not found");
         }
     }
+
+    public IReadOnlyList<ObjectParameterLink> ListObjectParameterLinks(string? inspectionObjectCode, string? inspectionParameterCode) =>
+        store.ListObjectParameter(inspectionObjectCode, inspectionParameterCode);
 
     // === object-standard（M06.F01.I05/I06，role 在 PK） ===
 
@@ -58,6 +64,9 @@ public sealed class JunctionService(IJunctionStore store)
         }
     }
 
+    public IReadOnlyList<ObjectStandardLink> ListObjectStandardLinks(string? inspectionObjectCode, InspectionStandardRole? role) =>
+        store.ListObjectStandard(inspectionObjectCode, role);
+
     // === standard-parameter（M06.F03.I05/I06） ===
 
     public void LinkStandardParameter(StandardParameterLink body) => store.SaveStandardParameter(body);
@@ -69,6 +78,9 @@ public sealed class JunctionService(IJunctionStore store)
             throw new KeyNotFoundException("standard-parameter link not found");
         }
     }
+
+    public IReadOnlyList<StandardParameterLink> ListStandardParameterLinks(string? inspectionStandardCode, string? inspectionParameterCode) =>
+        store.ListStandardParameter(inspectionStandardCode, inspectionParameterCode);
 
     // === report-name-object（M06.F07.I06 link / M06.F04.I05 unlink） ===
 

@@ -35,14 +35,16 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
     public override Task<LoginResponse> Refresh([FromBody] RefreshTokenRequest body) =>
         Task.FromResult(_service.Refresh(body));
 
-    /** M01.F05.I02 — 写 HttpOnly Secure Cookie 包装 state,body 给前端跳转 URL。 */
+    /** M01.F05.I02 — RFC 6749 §4.1.1：透传前端 state/redirect_uri，写签名 state cookie。 */
+    // 参数名必须与生成基类一致（response_type 等 snake_case）：模型绑定按实现方法
+    // 的参数名取 query，改成 responseType 会让前端发的 ?response_type= 绑不上 → 400。
     public override Task<SsoRedirect> SsoAuthorize(
-        [FromQuery] OAuthResponseType responseType,
+        [FromQuery] OAuthResponseType response_type,
         [FromQuery] string client_id,
         [FromQuery] string redirect_uri,
         [FromQuery] string state)
     {
-        var result = _service.SsoAuthorize(redirect_uri);
+        var result = _service.SsoAuthorize(redirect_uri, state);
         AppendStateCookie(result.CookieValue);
         return Task.FromResult(result.Redirect);
     }
@@ -66,8 +68,11 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
         var opts = new CookieOptions
         {
             HttpOnly = true,
-            Secure = false, // dev:false;prod 切 true（环境变量控制）
-            SameSite = SameSiteMode.Lax,
+            // 跨源 cookie（5173 前端 ↔ 5000 后端）必须 SameSite=None + Secure：
+            // Lax 不随跨站 XHR POST 携带，None 要求 Secure（localhost 是浏览器
+            // 可信上下文，http://localhost 可写 Secure cookie）。dev/prod 统一。
+            Secure = true,
+            SameSite = SameSiteMode.None,
             Path = "/api/auth/sso/callback",
             MaxAge = TimeSpan.FromSeconds(300),
         };

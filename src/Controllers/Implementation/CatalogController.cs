@@ -20,10 +20,22 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F06 型号 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionModel>> ListModels(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionModel>>(
-            _service.ListModels(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList());
+    public override Task<Response3> ListModels(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListModels(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response3
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<InspectionModel> CreateModel([FromBody] CreateCatalogEntryRequest body) =>
         Task.FromResult(_service.CreateModel(_tenantContext.TenantId, body));
@@ -39,10 +51,22 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F07 规格 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionSpec>> ListSpecs(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionSpec>>(
-            _service.ListSpecs(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList());
+    public override Task<Response4> ListSpecs(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListSpecs(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response4
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<InspectionSpec> CreateSpec([FromBody] CreateCatalogEntryRequest body) =>
         Task.FromResult(_service.CreateSpec(_tenantContext.TenantId, body));
@@ -58,10 +82,22 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F08 等级 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionGrade>> ListGrades(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionGrade>>(
-            _service.ListGrades(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList());
+    public override Task<Response2> ListGrades(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListGrades(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response2
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<InspectionGrade> CreateGrade([FromBody] CreateCatalogEntryRequest body) =>
         Task.FromResult(_service.CreateGrade(_tenantContext.TenantId, body));
@@ -77,10 +113,22 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F09 牌号 ===
 
-    public override Task<System.Collections.Generic.ICollection<InspectionBrand>> ListBrands(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string keyword) =>
-        Task.FromResult<System.Collections.Generic.ICollection<InspectionBrand>>(
-            _service.ListBrands(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList());
+    public override Task<Response> ListBrands(
+        [FromQuery] int? page,
+        [FromQuery] int? pageSize,
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string keyword)
+    {
+        var items = _service.ListBrands(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response
+        {
+            Items = items,
+            Page = page ?? 1,
+            PageSize = pageSize ?? count,
+            Total = count,
+        });
+    }
 
     public override Task<InspectionBrand> CreateBrand([FromBody] CreateCatalogEntryRequest body) =>
         Task.FromResult(_service.CreateBrand(_tenantContext.TenantId, body));

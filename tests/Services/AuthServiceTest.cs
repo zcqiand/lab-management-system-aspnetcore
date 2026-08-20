@@ -174,10 +174,11 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I02")]
     public void SsoAuthorize_returnsAuthorizeUrlAndState()
     {
-        var res = _service.SsoAuthorize("/receipts");
+        // RFC 6749 §4.1.1：前端 state 原样透传，SsoRedirect.state 返回同一值
+        var res = _service.SsoAuthorize("http://localhost:5173/login", "client-state-abc");
         Assert.NotNull(res.Redirect.AuthorizeUrl);
         Assert.Contains("code=dev-code", res.Redirect.AuthorizeUrl);
-        Assert.NotNull(res.Redirect.State);
+        Assert.Equal("client-state-abc", res.Redirect.State);
         Assert.NotEmpty(res.CookieValue);
     }
 
@@ -185,13 +186,13 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I03")]
     public void SsoCallback_returnsDemoSession()
     {
-        var auth = _service.SsoAuthorize("/receipts");
+        var auth = _service.SsoAuthorize("http://localhost:5173/login", "client-state-abc");
         var body = new SsoCallbackRequest
         {
             Grant_type = OAuthGrantType.Authorization_code,
             Code = "dev-code",
-            Redirect_uri = "http://localhost:5080/api/auth/sso/callback",
-            State = auth.Redirect.State,
+            Redirect_uri = "http://localhost:5173/login",
+            State = "client-state-abc",
         };
         var res = _service.SsoCallback(body, auth.CookieValue);
 
@@ -207,12 +208,12 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I03")]
     public void SsoCallback_mismatchedState_throws()
     {
-        var auth = _service.SsoAuthorize("/receipts");
+        var auth = _service.SsoAuthorize("http://localhost:5173/login", "client-state-abc");
         var body = new SsoCallbackRequest
         {
             Grant_type = OAuthGrantType.Authorization_code,
             Code = "dev-code",
-            Redirect_uri = "http://localhost:5080/api/auth/sso/callback",
+            Redirect_uri = "http://localhost:5173/login",
             State = "forged-state",
         };
         Assert.Throws<InvalidOperationException>(() => _service.SsoCallback(body, auth.CookieValue));

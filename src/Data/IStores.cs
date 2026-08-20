@@ -123,15 +123,19 @@ public interface IJunctionStore
 {
     void SaveSpecialtyObject(SpecialtyObjectLink l);
     bool DeleteSpecialtyObject(string spec, string obj);
+    IReadOnlyList<SpecialtyObjectLink> ListSpecialtyObject(string? spec);
 
     void SaveObjectParameter(ObjectParameterLink l);
     bool DeleteObjectParameter(string obj, string param);
+    IReadOnlyList<ObjectParameterLink> ListObjectParameter(string? obj, string? param);
 
     void SaveObjectStandard(ObjectStandardLink l);
     bool DeleteObjectStandard(string obj, string std, string role);
+    IReadOnlyList<ObjectStandardLink> ListObjectStandard(string? obj, InspectionStandardRole? role);
 
     void SaveStandardParameter(StandardParameterLink l);
     bool DeleteStandardParameter(string std, string param);
+    IReadOnlyList<StandardParameterLink> ListStandardParameter(string? std, string? param);
 
     void SaveObjectReportName(ObjectReportNameLink l);
     bool DeleteObjectReportName(string obj, string report);

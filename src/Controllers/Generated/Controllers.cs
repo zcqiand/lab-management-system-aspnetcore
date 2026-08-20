@@ -106,7 +106,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/brands")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionBrand>> ListBrands([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response> ListBrands([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/catalog/brands")]
@@ -122,7 +122,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/grades")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionGrade>> ListGrades([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response2> ListGrades([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/catalog/grades")]
@@ -138,7 +138,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/models")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionModel>> ListModels([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response3> ListModels([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/catalog/models")]
@@ -154,7 +154,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/specs")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionSpec>> ListSpecs([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response4> ListSpecs([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/catalog/specs")]
@@ -175,7 +175,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/contracts")]
-        public abstract System.Threading.Tasks.Task<Response> ListContracts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] ContractStatus? status);
+        public abstract System.Threading.Tasks.Task<Response5> ListContracts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] ContractStatus? status);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/contracts")]
@@ -206,6 +206,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/object-parameter")]
         public abstract System.Threading.Tasks.Task UnlinkObjectParameter([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] Body2 body);
 
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/object-parameter")]
+        public abstract System.Threading.Tasks.Task<Response6> ListObjectParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionParameterCode);
+
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/object-standard")]
         public abstract System.Threading.Tasks.Task LinkObjectStandard([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] ObjectStandardLink body);
@@ -214,6 +218,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/object-standard")]
         public abstract System.Threading.Tasks.Task UnlinkObjectStandard([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] Body3 body);
 
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/object-standard")]
+        public abstract System.Threading.Tasks.Task<Response7> ListObjectStandardLinks([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardRole? role);
+
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/specialty-object")]
         public abstract System.Threading.Tasks.Task LinkSpecialtyObject([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] SpecialtyObjectLink body);
@@ -221,6 +229,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/specialty-object")]
         public abstract System.Threading.Tasks.Task UnlinkSpecialtyObject([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] SpecialtyObjectLink body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/specialty-object")]
+        public abstract System.Threading.Tasks.Task<Response8> ListSpecialtyObjectLinks([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionSpecialtyCode);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/standard-parameter")]
@@ -231,8 +243,12 @@ namespace Lab.AspNetCore.Controllers.Generated
         public abstract System.Threading.Tasks.Task UnlinkStandardParameter([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] StandardParameterLink body);
 
         /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/standard-parameter")]
+        public abstract System.Threading.Tasks.Task<Response9> ListStandardParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionStandardCode, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionParameterCode);
+
+        /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/objects")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionObject>> ListObjects([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionSpecialtyCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response10> ListObjects([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionSpecialtyCode, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/objects")]
@@ -248,7 +264,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/parameters")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionParameter>> ListParameters([Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionParameterSourceType? sourceType);
+        public abstract System.Threading.Tasks.Task<Response11> ListParameters([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionParameterSourceType? sourceType);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/parameters")]
@@ -264,7 +280,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/specialties")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionSpecialty>> ListSpecialties([Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response12> ListSpecialties([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/specialties")]
@@ -280,7 +296,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/standards")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionStandard>> ListStandards([Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardStatus? status);
+        public abstract System.Threading.Tasks.Task<Response13> ListStandards([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardStatus? status);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/inspection/standards")]
@@ -301,7 +317,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/param-interfaces")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<ParamInterface>> ListParamInterfaces([Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response14> ListParamInterfaces([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/param-interfaces")]
@@ -334,7 +350,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts")]
-        public abstract System.Threading.Tasks.Task<Response2> ListReceipts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] string contractId, [Microsoft.AspNetCore.Mvc.FromQuery] FlowStatus? flowStatus);
+        public abstract System.Threading.Tasks.Task<Response15> ListReceipts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword, [Microsoft.AspNetCore.Mvc.FromQuery] string contractId, [Microsoft.AspNetCore.Mvc.FromQuery] FlowStatus? flowStatus);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts")]
@@ -371,7 +387,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/flow/queue")]
-        public abstract System.Threading.Tasks.Task<Response3> ListFlowQueue([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowStatus stage, [Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
+        public abstract System.Threading.Tasks.Task<Response16> ListFlowQueue([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowStatus stage, [Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
 
     }
 
@@ -380,7 +396,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<InspectionReportName>> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response17> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
@@ -429,7 +445,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/samples")]
-        public abstract System.Threading.Tasks.Task<Response4> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
+        public abstract System.Threading.Tasks.Task<Response18> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/samples")]
@@ -492,7 +508,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/test-records")]
-        public abstract System.Threading.Tasks.Task<Response5> ListTestRecords([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string sampleId, [Microsoft.AspNetCore.Mvc.FromQuery] string parameterCode);
+        public abstract System.Threading.Tasks.Task<Response19> ListTestRecords([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string sampleId, [Microsoft.AspNetCore.Mvc.FromQuery] string parameterCode);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/test-records")]
@@ -4523,7 +4539,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<Contract> Items { get; set; } = new System.Collections.Generic.List<Contract>();
+        public System.Collections.Generic.List<InspectionBrand> Items { get; set; } = new System.Collections.Generic.List<InspectionBrand>();
 
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }
@@ -4551,7 +4567,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SampleReceipt> Items { get; set; } = new System.Collections.Generic.List<SampleReceipt>();
+        public System.Collections.Generic.List<InspectionGrade> Items { get; set; } = new System.Collections.Generic.List<InspectionGrade>();
 
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }
@@ -4579,7 +4595,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SampleReceipt> Items { get; set; } = new System.Collections.Generic.List<SampleReceipt>();
+        public System.Collections.Generic.List<InspectionModel> Items { get; set; } = new System.Collections.Generic.List<InspectionModel>();
 
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }
@@ -4607,7 +4623,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<Sample> Items { get; set; } = new System.Collections.Generic.List<Sample>();
+        public System.Collections.Generic.List<InspectionSpec> Items { get; set; } = new System.Collections.Generic.List<InspectionSpec>();
 
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }
@@ -4631,6 +4647,398 @@ namespace Lab.AspNetCore.Controllers.Generated
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class Response5
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<Contract> Items { get; set; } = new System.Collections.Generic.List<Contract>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response6
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<ObjectParameterLink> Items { get; set; } = new System.Collections.Generic.List<ObjectParameterLink>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response7
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<ObjectStandardLink> Items { get; set; } = new System.Collections.Generic.List<ObjectStandardLink>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response8
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<SpecialtyObjectLink> Items { get; set; } = new System.Collections.Generic.List<SpecialtyObjectLink>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response9
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<StandardParameterLink> Items { get; set; } = new System.Collections.Generic.List<StandardParameterLink>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response10
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<InspectionObject> Items { get; set; } = new System.Collections.Generic.List<InspectionObject>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response11
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<InspectionParameter> Items { get; set; } = new System.Collections.Generic.List<InspectionParameter>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response12
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<InspectionSpecialty> Items { get; set; } = new System.Collections.Generic.List<InspectionSpecialty>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response13
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<InspectionStandard> Items { get; set; } = new System.Collections.Generic.List<InspectionStandard>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response14
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<ParamInterface> Items { get; set; } = new System.Collections.Generic.List<ParamInterface>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response15
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<SampleReceipt> Items { get; set; } = new System.Collections.Generic.List<SampleReceipt>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response16
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<SampleReceipt> Items { get; set; } = new System.Collections.Generic.List<SampleReceipt>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response17
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<InspectionReportName> Items { get; set; } = new System.Collections.Generic.List<InspectionReportName>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response18
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.List<Sample> Items { get; set; } = new System.Collections.Generic.List<Sample>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("page")]
+        public int Page { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
+        public int PageSize { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public long Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Response19
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]

@@ -130,15 +130,34 @@ public sealed class InMemoryJunctionStore : IJunctionStore
 
     public void SaveSpecialtyObject(SpecialtyObjectLink l) => _specialtyObject[(l.InspectionSpecialtyCode, l.InspectionObjectCode)] = l;
     public bool DeleteSpecialtyObject(string spec, string obj) => _specialtyObject.TryRemove((spec, obj), out _);
+    public IReadOnlyList<SpecialtyObjectLink> ListSpecialtyObject(string? spec) =>
+        string.IsNullOrWhiteSpace(spec)
+            ? _specialtyObject.Values.ToList()
+            : _specialtyObject.Values.Where(l => l.InspectionSpecialtyCode == spec).ToList();
 
     public void SaveObjectParameter(ObjectParameterLink l) => _objectParameter[(l.InspectionObjectCode, l.InspectionParameterCode)] = l;
     public bool DeleteObjectParameter(string obj, string param) => _objectParameter.TryRemove((obj, param), out _);
+    public IReadOnlyList<ObjectParameterLink> ListObjectParameter(string? obj, string? param) =>
+        _objectParameter.Values
+            .Where(l => obj == null || l.InspectionObjectCode == obj)
+            .Where(l => param == null || l.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveObjectStandard(ObjectStandardLink l) => _objectStandard[(l.InspectionObjectCode, l.InspectionStandardCode, l.Role.ToString())] = l;
     public bool DeleteObjectStandard(string obj, string std, string role) => _objectStandard.TryRemove((obj, std, role), out _);
+    public IReadOnlyList<ObjectStandardLink> ListObjectStandard(string? obj, InspectionStandardRole? role) =>
+        _objectStandard.Values
+            .Where(l => obj == null || l.InspectionObjectCode == obj)
+            .Where(l => role == null || l.Role == role)
+            .ToList();
 
     public void SaveStandardParameter(StandardParameterLink l) => _standardParameter[(l.InspectionStandardCode, l.InspectionParameterCode)] = l;
     public bool DeleteStandardParameter(string std, string param) => _standardParameter.TryRemove((std, param), out _);
+    public IReadOnlyList<StandardParameterLink> ListStandardParameter(string? std, string? param) =>
+        _standardParameter.Values
+            .Where(l => std == null || l.InspectionStandardCode == std)
+            .Where(l => param == null || l.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveObjectReportName(ObjectReportNameLink l) => _objectReportName[(l.InspectionObjectCode, l.ReportNameCode)] = l;
     public bool DeleteObjectReportName(string obj, string report) => _objectReportName.TryRemove((obj, report), out _);
