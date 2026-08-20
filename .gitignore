@@ -18,3 +18,9 @@ TestResults/
 # 本地环境覆盖（连接串等）—— 脚手架的 appsettings.Development.json 已入库，
 # 真正的机密走环境变量/用户机密，不进 git。
 appsettings.*.local.json
+
+# Claude 临时文件
+.claude/
+.superpowers/
+CLAUDE.md
+.mcp.json
