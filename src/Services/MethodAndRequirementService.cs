@@ -4,23 +4,23 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 
 /// <summary>
-/// M06.F05 计算规则 CRUD（B2）。复合主键 (objectCode, parameterCode)，平台级无 tenant。
-/// 创建默认 algorithmType=Manual、specimenCount=1（镜像 springboot CalculationRuleMapper）。
+/// M06.F05 计算方法 CRUD（B2）。复合主键 (objectCode, parameterCode)，平台级无 tenant。
+/// 创建默认 algorithmType=Manual、specimenCount=1（镜像 springboot CalculationMethodMapper）。
 /// </summary>
-public sealed class CalculationRuleService(IRuleStore store)
+public sealed class CalculationMethodService(IMethodStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public IReadOnlyList<CalculationRule> List(string? objectCode, string? parameterCode) =>
+    public IReadOnlyList<CalculationMethod> List(string? objectCode, string? parameterCode) =>
         store.Filter(objectCode, parameterCode);
 
-    public CalculationRule Get(string objectCode, string parameterCode) =>
+    public CalculationMethod Get(string objectCode, string parameterCode) =>
         store.Find(objectCode, parameterCode) ?? throw new KeyNotFoundException($"rule {objectCode}/{parameterCode} not found");
 
-    public CalculationRule Create(CreateCalculationRuleRequest body)
+    public CalculationMethod Create(CreateCalculationMethodRequest body)
     {
         var now = Now();
-        var r = new CalculationRule
+        var r = new CalculationMethod
         {
             InspectionObjectCode = body.InspectionObjectCode,
             InspectionParameterCode = body.InspectionParameterCode,
@@ -40,7 +40,7 @@ public sealed class CalculationRuleService(IRuleStore store)
         return r;
     }
 
-    public CalculationRule Update(string objectCode, string parameterCode, UpdateCalculationRuleRequest body)
+    public CalculationMethod Update(string objectCode, string parameterCode, UpdateCalculationMethodRequest body)
     {
         var r = Get(objectCode, parameterCode);
         if (body.TestingStandardCode is not null) r.TestingStandardCode = body.TestingStandardCode;

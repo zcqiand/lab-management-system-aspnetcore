@@ -35,7 +35,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     public DbSet<InspectionModel> InspectionModels => Set<InspectionModel>();
     public DbSet<InspectionSpec> InspectionSpecs => Set<InspectionSpec>();
     public DbSet<InspectionGrade> InspectionGrades => Set<InspectionGrade>();
-    public DbSet<CalculationRule> CalculationRules => Set<CalculationRule>();
+    public DbSet<CalculationMethod> CalculationMethods => Set<CalculationMethod>();
     public DbSet<TechnicalRequirement> TechnicalRequirements => Set<TechnicalRequirement>();
 
     // B5 字典 + B6 objects
@@ -101,9 +101,9 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         CatalogEntity(b.Entity<InspectionSpec>(), "inspection_specs");
         CatalogEntity(b.Entity<InspectionGrade>(), "inspection_grades");
 
-        b.Entity<CalculationRule>(e =>
+        b.Entity<CalculationMethod>(e =>
         {
-            e.ToTable("inspection_calculation_rules");
+            e.ToTable("inspection_calculation_methods");
             e.HasKey(x => new { x.InspectionObjectCode, x.InspectionParameterCode });
             e.Property(x => x.AlgorithmType).HasConversion(Wire<CalculationAlgorithmType>());
             e.Ignore(x => x.AdditionalProperties);

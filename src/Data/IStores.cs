@@ -32,11 +32,11 @@ public interface ICatalogStore
     bool DeleteBrand(string tenantId, string code);
 }
 
-public interface IRuleStore
+public interface IMethodStore
 {
-    IReadOnlyList<CalculationRule> Filter(string? objectCode, string? parameterCode);
-    CalculationRule? Find(string objectCode, string parameterCode);
-    void Save(CalculationRule r);
+    IReadOnlyList<CalculationMethod> Filter(string? objectCode, string? parameterCode);
+    CalculationMethod? Find(string objectCode, string parameterCode);
+    void Save(CalculationMethod r);
     bool Delete(string objectCode, string parameterCode);
 }
 

@@ -77,27 +77,27 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public abstract class CalculationRulesControllerBase : ControllerBase
+    public abstract class CalculationMethodsControllerBase : ControllerBase
     {
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/calculation-rules")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CalculationRule>> ListCalculationRules([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionParameterCode);
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/calculation-methods")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<CalculationMethod>> ListCalculationMethods([Microsoft.AspNetCore.Mvc.FromQuery] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string inspectionParameterCode);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/calculation-rules")]
-        public abstract System.Threading.Tasks.Task<CalculationRule> CreateCalculationRule([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] CreateCalculationRuleRequest body);
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/calculation-methods")]
+        public abstract System.Threading.Tasks.Task<CalculationMethod> CreateCalculationMethod([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] CreateCalculationMethodRequest body);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/calculation-rules/{inspectionObjectCode}/{inspectionParameterCode}")]
-        public abstract System.Threading.Tasks.Task<CalculationRule> GetCalculationRule([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode);
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/calculation-methods/{inspectionObjectCode}/{inspectionParameterCode}")]
+        public abstract System.Threading.Tasks.Task<CalculationMethod> GetCalculationMethod([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpPut, Microsoft.AspNetCore.Mvc.Route("api/calculation-rules/{inspectionObjectCode}/{inspectionParameterCode}")]
-        public abstract System.Threading.Tasks.Task<CalculationRule> UpdateCalculationRule([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode, [Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] UpdateCalculationRuleRequest body);
+        [Microsoft.AspNetCore.Mvc.HttpPut, Microsoft.AspNetCore.Mvc.Route("api/calculation-methods/{inspectionObjectCode}/{inspectionParameterCode}")]
+        public abstract System.Threading.Tasks.Task<CalculationMethod> UpdateCalculationMethod([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode, [Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] UpdateCalculationMethodRequest body);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/calculation-rules/{inspectionObjectCode}/{inspectionParameterCode}")]
-        public abstract System.Threading.Tasks.Task DeleteCalculationRule([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode);
+        [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/calculation-methods/{inspectionObjectCode}/{inspectionParameterCode}")]
+        public abstract System.Threading.Tasks.Task DeleteCalculationMethod([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionObjectCode, [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string inspectionParameterCode);
 
     }
 
@@ -581,6 +581,9 @@ namespace Lab.AspNetCore.Controllers.Generated
 
     }
 
+    /// <summary>
+    /// 已废弃 (ADR-0014)
+    /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum AuthHeaderKind
     {
@@ -684,7 +687,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     /// <summary>
-    /// 4-backend 运行时切换配置。运行时由消费方仓各自实现(React Context / Vue pinia store)
+    /// 已废弃 (ADR-0014):用 VITE_API_BASE_URL / NEXT_PUBLIC_API_BASE_URL 替代;4-backend 运行时切换配置
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class BackendConfig
@@ -745,7 +748,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     /// <summary>
-    /// 后端能力矩阵
+    /// 已废弃 (ADR-0014);后端能力矩阵
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class BackendFeatures
@@ -775,7 +778,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     /// <summary>
-    /// 4 个槽位;id 锁定,避免拼写漂移
+    /// 已废弃 (ADR-0014);4 个槽位,id 锁定避免拼写漂移
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum BackendId
@@ -796,7 +799,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     /// <summary>
-    /// 运行时注册表:当前激活 + 可切列表。切换/订阅方法由消费方实现,TS 签名见 .state/decision-log.md §2.1
+    /// 已废弃 (ADR-0014);运行时注册表:当前激活 + 可切列表
     /// </summary>
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class BackendRegistry
@@ -856,7 +859,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class CalculationRule
+    public partial class CalculationMethod
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("inspectionObjectCode")]
@@ -1018,7 +1021,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class CreateCalculationRuleRequest
+    public partial class CreateCalculationMethodRequest
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("inspectionObjectCode")]
@@ -2071,6 +2074,9 @@ namespace Lab.AspNetCore.Controllers.Generated
     public partial class FrontendBindSnapshot
     {
 
+        /// <summary>
+        /// 已废弃 (ADR-0014);保留以维持 BackendRegistry schema 在 openapi.yaml 里的可达性
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("registry")]
         [System.ComponentModel.DataAnnotations.Required]
         public BackendRegistry Registry { get; set; } = new BackendRegistry();
@@ -3680,14 +3686,6 @@ namespace Lab.AspNetCore.Controllers.Generated
         public TokenStorageKeysActiveTenantId ActiveTenantId { get; set; }
 
         /// <summary>
-        /// 当前激活后端槽位(用于跨刷新记忆)
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("activeBackend")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<TokenStorageKeysActiveBackend>))]
-        public TokenStorageKeysActiveBackend ActiveBackend { get; set; }
-
-        /// <summary>
         /// permissions 缓存(避免每次路由跳转都打 /auth/permissions)
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("permissionsCache")]
@@ -3707,7 +3705,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class UpdateCalculationRuleRequest
+    public partial class UpdateCalculationMethodRequest
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("testingStandardCode")]
@@ -5255,15 +5253,6 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Runtime.Serialization.EnumMember(Value = @"lab.activeTenantId")]
         Lab_activeTenantId = 0,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum TokenStorageKeysActiveBackend
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"lab.activeBackend")]
-        Lab_activeBackend = 0,
 
     }
 

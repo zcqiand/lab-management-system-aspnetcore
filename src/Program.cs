@@ -83,7 +83,7 @@ builder.Services.AddSingleton<AuthService>(sp =>
         sp.GetRequiredService<StateCookieManager>(),
         sp.GetRequiredService<Microsoft.Extensions.Options.IOptions<LabOptions>>()));
 
-// B2：码表/计算规则/技术要求。
+// B2：码表/计算方法/技术要求。
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 var dataProvider = builder.Configuration["Lab:Data:Provider"] ?? "memory";
@@ -94,13 +94,13 @@ if (dataProvider == "ef")
     var dataSource = new Npgsql.NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
     builder.Services.AddDbContext<LabDbContext>(options => options.UseNpgsql(dataSource));
     builder.Services.AddScoped<EfCatalogStore>();
-    builder.Services.AddScoped<EfRuleStore>();
+    builder.Services.AddScoped<EfMethodStore>();
     builder.Services.AddScoped<EfRequirementStore>();
     builder.Services.AddScoped<EfFlowStore>();
     builder.Services.AddScoped<EfDictionaryStore>();
     builder.Services.AddScoped<EfJunctionStore>();
     builder.Services.AddScoped<ICatalogStore>(sp => sp.GetRequiredService<EfCatalogStore>());
-    builder.Services.AddScoped<IRuleStore>(sp => sp.GetRequiredService<EfRuleStore>());
+    builder.Services.AddScoped<IMethodStore>(sp => sp.GetRequiredService<EfMethodStore>());
     builder.Services.AddScoped<IRequirementStore>(sp => sp.GetRequiredService<EfRequirementStore>());
     builder.Services.AddScoped<IFlowStore>(sp => sp.GetRequiredService<EfFlowStore>());
     builder.Services.AddScoped<IDictionaryStore>(sp => sp.GetRequiredService<EfDictionaryStore>());
@@ -114,19 +114,19 @@ if (dataProvider == "ef")
     builder.Services.AddScoped<DictionaryService>();
     builder.Services.AddScoped<JunctionService>();
     builder.Services.AddScoped<CatalogService>();
-    builder.Services.AddScoped<CalculationRuleService>();
+    builder.Services.AddScoped<CalculationMethodService>();
     builder.Services.AddScoped<TechnicalRequirementService>();
 }
 else
 {
     builder.Services.AddSingleton<InMemoryCatalogStore>();
-    builder.Services.AddSingleton<InMemoryRuleStore>();
+    builder.Services.AddSingleton<InMemoryMethodStore>();
     builder.Services.AddSingleton<InMemoryRequirementStore>();
     builder.Services.AddSingleton<InMemoryFlowStore>();
     builder.Services.AddSingleton<InMemoryDictionaryStore>();
     builder.Services.AddSingleton<InMemoryJunctionStore>();
     builder.Services.AddSingleton<ICatalogStore>(sp => sp.GetRequiredService<InMemoryCatalogStore>());
-    builder.Services.AddSingleton<IRuleStore>(sp => sp.GetRequiredService<InMemoryRuleStore>());
+    builder.Services.AddSingleton<IMethodStore>(sp => sp.GetRequiredService<InMemoryMethodStore>());
     builder.Services.AddSingleton<IRequirementStore>(sp => sp.GetRequiredService<InMemoryRequirementStore>());
     builder.Services.AddSingleton<IFlowStore>(sp => sp.GetRequiredService<InMemoryFlowStore>());
     builder.Services.AddSingleton<IDictionaryStore>(sp => sp.GetRequiredService<InMemoryDictionaryStore>());
@@ -140,7 +140,7 @@ else
     builder.Services.AddSingleton<DictionaryService>();
     builder.Services.AddSingleton<JunctionService>();
     builder.Services.AddSingleton<CatalogService>();
-    builder.Services.AddSingleton<CalculationRuleService>();
+    builder.Services.AddSingleton<CalculationMethodService>();
     builder.Services.AddSingleton<TechnicalRequirementService>();
     builder.Services.AddHostedService<CatalogBrandFkHook>();
 }

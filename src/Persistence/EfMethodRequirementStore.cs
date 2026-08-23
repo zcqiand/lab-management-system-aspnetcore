@@ -4,32 +4,32 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 using Microsoft.EntityFrameworkCore;
 
-public sealed class EfRuleStore(LabDbContext db) : IRuleStore
+public sealed class EfMethodStore(LabDbContext db) : IMethodStore
 {
-    public IReadOnlyList<CalculationRule> Filter(string? objectCode, string? parameterCode) =>
-        db.CalculationRules
+    public IReadOnlyList<CalculationMethod> Filter(string? objectCode, string? parameterCode) =>
+        db.CalculationMethods
             .Where(r => objectCode == null || objectCode == "" || r.InspectionObjectCode == objectCode)
             .Where(r => parameterCode == null || parameterCode == "" || r.InspectionParameterCode == parameterCode)
             .OrderBy(r => r.SortOrder)
             .ToList();
 
-    public CalculationRule? Find(string objectCode, string parameterCode) =>
-        db.CalculationRules.Find(objectCode, parameterCode);
+    public CalculationMethod? Find(string objectCode, string parameterCode) =>
+        db.CalculationMethods.Find(objectCode, parameterCode);
 
-    public void Save(CalculationRule r) =>
-        EfStoreOps.Upsert(db, db.CalculationRules, r,
+    public void Save(CalculationMethod r) =>
+        EfStoreOps.Upsert(db, db.CalculationMethods, r,
             x => x.InspectionObjectCode == r.InspectionObjectCode
                 && x.InspectionParameterCode == r.InspectionParameterCode);
 
     public bool Delete(string objectCode, string parameterCode)
     {
-        var existing = db.CalculationRules.Find(objectCode, parameterCode);
+        var existing = db.CalculationMethods.Find(objectCode, parameterCode);
         if (existing is null)
         {
             return false;
         }
 
-        db.CalculationRules.Remove(existing);
+        db.CalculationMethods.Remove(existing);
         db.SaveChanges();
         return true;
     }

@@ -4,27 +4,27 @@ using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
 
 /// <summary>
-/// M06.F05 计算规则内存存储。复合主键 = (inspectionObjectCode, inspectionParameterCode)，
-/// 平台级无 tenant（镜像 springboot inspection_calculation_rules V009）。
+/// M06.F05 计算方法内存存储。复合主键 = (inspectionObjectCode, inspectionParameterCode)，
+/// 平台级无 tenant（镜像 springboot inspection_calculation_methods V009）。
 /// list 两个可选过滤（空串不过滤），排序 sortOrder asc。
 /// </summary>
-public sealed class InMemoryRuleStore : IRuleStore
+public sealed class InMemoryMethodStore : IMethodStore
 {
-    private readonly ConcurrentDictionary<(string Obj, string Param), CalculationRule> _rules = new();
+    private readonly ConcurrentDictionary<(string Obj, string Param), CalculationMethod> _rules = new();
 
     private static string N(string? s) => s ?? "";
 
-    public IReadOnlyList<CalculationRule> Filter(string? objectCode, string? parameterCode) =>
+    public IReadOnlyList<CalculationMethod> Filter(string? objectCode, string? parameterCode) =>
         _rules.Values
             .Where(r => N(objectCode) == "" || r.InspectionObjectCode == N(objectCode))
             .Where(r => N(parameterCode) == "" || r.InspectionParameterCode == N(parameterCode))
             .OrderBy(r => r.SortOrder)
             .ToList();
 
-    public CalculationRule? Find(string objectCode, string parameterCode) =>
+    public CalculationMethod? Find(string objectCode, string parameterCode) =>
         _rules.TryGetValue((objectCode, parameterCode), out var r) ? r : null;
 
-    public void Save(CalculationRule r) => _rules[(r.InspectionObjectCode, r.InspectionParameterCode)] = r;
+    public void Save(CalculationMethod r) => _rules[(r.InspectionObjectCode, r.InspectionParameterCode)] = r;
 
     public bool Delete(string objectCode, string parameterCode) =>
         _rules.TryRemove((objectCode, parameterCode), out _);

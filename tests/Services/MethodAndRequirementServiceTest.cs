@@ -6,15 +6,15 @@ using Lab.AspNetCore.Services;
 using Xunit;
 
 /// <summary>
-/// M06.F05 计算规则 + M06.F06 技术要求 fnTest（B2）。
-/// 语义基准：lab-springboot CalculationRuleServiceTest / TechnicalRequirementServiceTest
+/// M06.F05 计算方法 + M06.F06 技术要求 fnTest（B2）。
+/// 语义基准：lab-springboot CalculationMethodServiceTest / TechnicalRequirementServiceTest
 /// （复合键 / 默认值 manual+1 / 四过滤 / PATCH / 404）。
 /// </summary>
-public class RuleAndRequirementServiceTest
+public class MethodAndRequirementServiceTest
 {
     private const string Tenant = "TENANT-001";
 
-    private static CalculationRule Rule(string obj, string param, int sortOrder = 0, CalculationAlgorithmType algo = CalculationAlgorithmType.Formula) => new()
+    private static CalculationMethod Rule(string obj, string param, int sortOrder = 0, CalculationAlgorithmType algo = CalculationAlgorithmType.Formula) => new()
     {
         InspectionObjectCode = obj,
         InspectionParameterCode = param,
@@ -25,17 +25,17 @@ public class RuleAndRequirementServiceTest
         SortOrder = sortOrder,
     };
 
-    // === M06.F05 计算规则 ===
+    // === M06.F05 计算方法 ===
 
     [Fact]
     [Trait("Fn", "M06.F05.I01")]
     public void ListRules_dualFilter()
     {
-        var store = new InMemoryRuleStore();
+        var store = new InMemoryMethodStore();
         store.Save(Rule("OBJ-A", "P-1"));
         store.Save(Rule("OBJ-A", "P-2"));
         store.Save(Rule("OBJ-B", "P-1"));
-        var service = new CalculationRuleService(store);
+        var service = new CalculationMethodService(store);
 
         Assert.Equal(2, service.List("OBJ-A", null).Count);
         Assert.Single(service.List("OBJ-A", "P-2"));
@@ -46,7 +46,7 @@ public class RuleAndRequirementServiceTest
     [Trait("Fn", "M06.F05.I02")]
     public void GetRule_compositeKey_missing404()
     {
-        var service = new CalculationRuleService(new InMemoryRuleStore());
+        var service = new CalculationMethodService(new InMemoryMethodStore());
         Assert.Throws<KeyNotFoundException>(() => service.Get("OBJ-A", "GHOST"));
     }
 
@@ -54,9 +54,9 @@ public class RuleAndRequirementServiceTest
     [Trait("Fn", "M06.F05.I03")]
     public void CreateRule_defaultsManualAndSpecimen1()
     {
-        var service = new CalculationRuleService(new InMemoryRuleStore());
+        var service = new CalculationMethodService(new InMemoryMethodStore());
 
-        var r = service.Create(new CreateCalculationRuleRequest
+        var r = service.Create(new CreateCalculationMethodRequest
         {
             InspectionObjectCode = "OBJ-A",
             InspectionParameterCode = "P-NEW",
@@ -71,11 +71,11 @@ public class RuleAndRequirementServiceTest
     [Trait("Fn", "M06.F05.I04")]
     public void UpdateRule_patchKeepsUnset()
     {
-        var store = new InMemoryRuleStore();
+        var store = new InMemoryMethodStore();
         store.Save(Rule("OBJ-A", "P-1"));
-        var service = new CalculationRuleService(store);
+        var service = new CalculationMethodService(store);
 
-        var r = service.Update("OBJ-A", "P-1", new UpdateCalculationRuleRequest { Formula = "f = m*a" });
+        var r = service.Update("OBJ-A", "P-1", new UpdateCalculationMethodRequest { Formula = "f = m*a" });
 
         Assert.Equal("f = m*a", r.Formula);
         Assert.Equal(3, r.SpecimenCount); // 未传保留
@@ -86,19 +86,19 @@ public class RuleAndRequirementServiceTest
     [Trait("Fn", "M06.F05.I04")]
     public void UpdateRule_missing404()
     {
-        var service = new CalculationRuleService(new InMemoryRuleStore());
+        var service = new CalculationMethodService(new InMemoryMethodStore());
         Assert.Throws<KeyNotFoundException>(
-            () => service.Update("GHOST", "P", new UpdateCalculationRuleRequest()));
+            () => service.Update("GHOST", "P", new UpdateCalculationMethodRequest()));
     }
 
     [Fact]
     [Trait("Fn", "M06.F05.I05")]
     public void DeleteRule_compositeKey()
     {
-        var store = new InMemoryRuleStore();
+        var store = new InMemoryMethodStore();
         store.Save(Rule("OBJ-A", "P-1"));
         store.Save(Rule("OBJ-A", "P-2"));
-        var service = new CalculationRuleService(store);
+        var service = new CalculationMethodService(store);
 
         service.Delete("OBJ-A", "P-1");
 

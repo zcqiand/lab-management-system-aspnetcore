@@ -24,13 +24,13 @@ public class MemoryDiResolutionTest
 
         // === 镜像 Program.cs memory 分支（写红时与 Program.cs 保持一致） ===
         builder.Services.AddSingleton<InMemoryCatalogStore>();
-        builder.Services.AddSingleton<InMemoryRuleStore>();
+        builder.Services.AddSingleton<InMemoryMethodStore>();
         builder.Services.AddSingleton<InMemoryRequirementStore>();
         builder.Services.AddSingleton<InMemoryFlowStore>();
         builder.Services.AddSingleton<InMemoryDictionaryStore>();
         builder.Services.AddSingleton<InMemoryJunctionStore>();
         builder.Services.AddSingleton<ICatalogStore>(sp => sp.GetRequiredService<InMemoryCatalogStore>());
-        builder.Services.AddSingleton<IRuleStore>(sp => sp.GetRequiredService<InMemoryRuleStore>());
+        builder.Services.AddSingleton<IMethodStore>(sp => sp.GetRequiredService<InMemoryMethodStore>());
         builder.Services.AddSingleton<IRequirementStore>(sp => sp.GetRequiredService<InMemoryRequirementStore>());
         builder.Services.AddSingleton<IFlowStore>(sp => sp.GetRequiredService<InMemoryFlowStore>());
         builder.Services.AddSingleton<IDictionaryStore>(sp => sp.GetRequiredService<InMemoryDictionaryStore>());
@@ -44,7 +44,7 @@ public class MemoryDiResolutionTest
         builder.Services.AddSingleton<DictionaryService>();
         builder.Services.AddSingleton<JunctionService>();
         builder.Services.AddSingleton<CatalogService>();
-        builder.Services.AddSingleton<CalculationRuleService>();
+        builder.Services.AddSingleton<CalculationMethodService>();
         builder.Services.AddSingleton<TechnicalRequirementService>();
 
         using var sp = builder.Services.BuildServiceProvider();
@@ -58,7 +58,7 @@ public class MemoryDiResolutionTest
         sp.GetRequiredService<DictionaryService>();
         sp.GetRequiredService<JunctionService>();
         sp.GetRequiredService<CatalogService>();
-        sp.GetRequiredService<CalculationRuleService>();
+        sp.GetRequiredService<CalculationMethodService>();
         sp.GetRequiredService<TechnicalRequirementService>();
     }
 }

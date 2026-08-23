@@ -16,7 +16,7 @@
   ],
   "next": [
     "git add -A + commit（src/Data + src/Persistence + src/Services + src/Controllers + scripts/gen-shared.sh 重产物）",
-    "Optional: 计算规则 + 技术要求 list 仍返裸数组(TypeSpec 保留 T[]);若未来切 Page<T> 走 /tree-change + 同样 regen",
+    "Optional: 计算方法 + 技术要求 list 仍返裸数组(TypeSpec 保留 T[]);若未来切 Page<T> 走 /tree-change + 同样 regen",
     "Optional: aspnetcore 测试只有 service 层 mock,controller Page<T> 包装逻辑 0 覆盖率 — 若 L5 软告警开始触发(controller 方法没 @Fn 引用),需补 WebApplicationFactory 集成测试"
   ],
   "open_questions": [

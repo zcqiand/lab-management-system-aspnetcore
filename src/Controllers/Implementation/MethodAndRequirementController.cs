@@ -6,30 +6,30 @@ using Lab.AspNetCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-/// <summary>M06.F05 计算规则 CRUD（B2，5 端点，平台级无 tenant）。</summary>
+/// <summary>M06.F05 计算方法 CRUD（B2，5 端点，平台级无 tenant）。</summary>
 [ApiController]
 [Authorize]
-public sealed class CalculationRulesController(CalculationRuleService service)
-    : CalculationRulesControllerBase
+public sealed class CalculationMethodsController(CalculationMethodService service)
+    : CalculationMethodsControllerBase
 {
-    private readonly CalculationRuleService _service = service;
+    private readonly CalculationMethodService _service = service;
 
-    public override Task<System.Collections.Generic.ICollection<CalculationRule>> ListCalculationRules(
+    public override Task<System.Collections.Generic.ICollection<CalculationMethod>> ListCalculationMethods(
         [FromQuery] string inspectionObjectCode, [FromQuery] string inspectionParameterCode) =>
-        Task.FromResult<System.Collections.Generic.ICollection<CalculationRule>>(
+        Task.FromResult<System.Collections.Generic.ICollection<CalculationMethod>>(
             _service.List(inspectionObjectCode, inspectionParameterCode).ToList());
 
-    public override Task<CalculationRule> CreateCalculationRule([FromBody] CreateCalculationRuleRequest body) =>
+    public override Task<CalculationMethod> CreateCalculationMethod([FromBody] CreateCalculationMethodRequest body) =>
         Task.FromResult(_service.Create(body));
 
-    public override Task<CalculationRule> GetCalculationRule(string inspectionObjectCode, string inspectionParameterCode) =>
+    public override Task<CalculationMethod> GetCalculationMethod(string inspectionObjectCode, string inspectionParameterCode) =>
         Task.FromResult(_service.Get(inspectionObjectCode, inspectionParameterCode));
 
-    public override Task<CalculationRule> UpdateCalculationRule(
-        string inspectionObjectCode, string inspectionParameterCode, [FromBody] UpdateCalculationRuleRequest body) =>
+    public override Task<CalculationMethod> UpdateCalculationMethod(
+        string inspectionObjectCode, string inspectionParameterCode, [FromBody] UpdateCalculationMethodRequest body) =>
         Task.FromResult(_service.Update(inspectionObjectCode, inspectionParameterCode, body));
 
-    public override Task DeleteCalculationRule(string inspectionObjectCode, string inspectionParameterCode)
+    public override Task DeleteCalculationMethod(string inspectionObjectCode, string inspectionParameterCode)
     {
         _service.Delete(inspectionObjectCode, inspectionParameterCode);
         return Task.CompletedTask;
