@@ -167,6 +167,9 @@ app.UseExceptionHandler(errorApp =>
         await context.Response.WriteAsJsonAsync(new { error = ex?.Message ?? "internal error" });
     }));
 
+// 匿名 /health 探针（deploy 脚本 wget 探 200；与 saas-aspnetcore MapGet("/health") 同模式）
+app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
+
 app.MapControllers();
 
 app.Run();
