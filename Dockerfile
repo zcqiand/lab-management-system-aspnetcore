@@ -36,6 +36,12 @@ RUN dotnet publish src/Lab.AspNetCore.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 
+# 装 ca-certificates + wget —— mcr.microsoft.com/dotnet/aspnet:8.0 基于 debian-slim,
+# 不带 wget;Docker HEALTHCHECK 用它探 /health。无 netcat/curl, wget 是最小依赖。
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    ca-certificates wget \
+ && rm -rf /var/lib/apt/lists/*
+
 # 非 root 跑（dotnet 镜像默认内置，非 0 即可；显式声明便于 security scan）
 RUN groupadd --system --gid 1001 labasp \
  && useradd  --system --uid 1001 --gid labasp labasp
@@ -54,7 +60,12 @@ EXPOSE 8080
 
 USER labasp
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+# ASP.NET Core 8 冷启动在 1C2G VPS 上 5-15s;start-period=10s 太紧,第一次
+# HEALTHCHECK 经常撞上 Application started 之前 → exit 1 → retries=3 在前 100s
+# 内连续失败 → Docker 永久标 (unhealthy),即使容器实际在跑 /health 200。
+# start-period=30s 给启动留余量;deploy.sh wget 探针仍是 ground truth
+# (Docker HEALTHCHECK 跨 daemon 行为不一致 —— saas-springboot v0.1.8/09/10 教训)。
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --tries=1 --timeout=3 -qO- http://127.0.0.1:8080/health >/dev/null || exit 1
 
 ENTRYPOINT ["dotnet", "lab-management-system-aspnetcore.dll"]

@@ -13,6 +13,9 @@
   <ItemGroup>
     <!-- B1 认证域：JWT 校验 + CORS（镜像 lab-springboot SecurityConfig） -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+    <!-- Swagger / OpenAPI UI：与 saas-identity-platform-aspnetcore v0.1.5 同位, 服务于
+         前端 orval 复核契约 + QA curl 试验端点（v0.1.8 接入, 此前无 OpenAPI 文档）。 -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
     <!-- DB：EF Core + Npgsql（lab_dev 共库，EF 只镜像 shared SQL，不 Migrate） -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
     <PackageReference Include="EFCore.NamingConventions" Version="8.0.0" />

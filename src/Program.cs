@@ -16,6 +16,19 @@ var builder = WebApplication.CreateBuilder(args);
 //   permitAll = login / refresh / sso/**，其余 authenticated。
 builder.Services.AddControllers();
 builder.Services.Configure<LabOptions>(builder.Configuration.GetSection("Lab"));
+
+// Swagger / OpenAPI UI：与 saas-identity-platform-aspnetcore v0.1.5 同位,
+// 服务于前端 orval 复核契约 + QA curl 试验端点（v0.1.8 接入）。
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "lab-management-system-aspnetcore",
+        Version = "v1",
+        Description = "ASP.NET Core 8 后端。NSwag 读 ../lab-management-system-shared/generated/openapi/openapi.yaml 产 Controllers.cs（待 B2 接 NSwag 后启用）；当前为 B1 认证域 9 端点手写。",
+    });
+});
 // signer 必须在 AddJwtBearer lambda 外创建+注册：该 lambda 惰性执行
 //（首个认证请求才跑 OptionsFactory），那时容器已 build、ServiceCollection 只读，
 // 在 lambda 里 AddSingleton 会抛 "collection cannot be modified because it is read-only"
@@ -148,6 +161,17 @@ else
 var app = builder.Build();
 
 app.UseCors("labFrontend");
+
+// Swagger UI（与 saas-aspnetcore v0.1.5 同位：dev/staging 在线暴露, prod 暂全开 —
+// 与 springboot springdoc-openapi 一致;生产 gating 走 ASPNETCORE_ENVIRONMENT
+// 之外的策略独立 PR）。
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "lab-management-system-aspnetcore v1");
+    c.RoutePrefix = "swagger";
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 
