@@ -42,12 +42,12 @@ if [ -z "$USERNAME" ] || [ -z "$PASSWORD" ]; then
 fi
 
 # aspnetcore.env 自举保护: 缺失时, 如 $DATABASE_URL + $DATABASE_USER + $DATABASE_PASSWORD + $LAB_JWT_SECRET
-# 在环境里, 自动生成（含 CORS 默认白名单）; 否则 fail fast。
+# + $LAB_SAAS_CLIENT_SECRET 在环境里, 自动生成（含 CORS 默认白名单 + SSO 配置）; 否则 fail fast。
 # setup-vps.sh 仍是首推（VPS 一次性, 生成 nginx vhost + 目录 + sudoers）, 本分支仅给
 # "先有 DATABASE_URL 临时上线"的场景。
 if [ ! -f "$BASE/aspnetcore.env" ]; then
-  if [ -n "${DATABASE_URL:-}" ] && [ -n "${DATABASE_USER:-}" ] && [ -n "${DATABASE_PASSWORD:-}" ] && [ -n "${LAB_JWT_SECRET:-}" ]; then
-    echo "→ bootstrapping $BASE/aspnetcore.env from env DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET"
+  if [ -n "${DATABASE_URL:-}" ] && [ -n "${DATABASE_USER:-}" ] && [ -n "${DATABASE_PASSWORD:-}" ] && [ -n "${LAB_JWT_SECRET:-}" ] && [ -n "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
+    echo "→ bootstrapping $BASE/aspnetcore.env from env DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET + LAB_SAAS_*"
     umask 077
     {
       printf 'ConnectionStrings__Postgres=%s\n' "$DATABASE_URL"
@@ -62,11 +62,21 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
       printf 'Lab__Jwt__RefreshTtlSeconds=604800\n'
       # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
       printf 'Lab__Cors__AllowedOrigins=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
+      # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
+      # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
+      # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
+      # saas-nextjs 走 string. 固定 UUID 是跨 3 saas 后端的最小公约数. (后续 PR 改 TypeSpec
+      # 移除 @format 后可改回 'lab-mgmt')
+      printf 'Lab__Sso__Profile=real\n'
+      printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
+      printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
+      printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
+      printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
     } > "$BASE/aspnetcore.env"
     chown deploy:deploy "$BASE/aspnetcore.env" 2>/dev/null || true
     chmod 600 "$BASE/aspnetcore.env"
   else
-    echo "ERROR: $BASE/aspnetcore.env missing. Set DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET env (e.g. DATABASE_URL='Host=100.79.128.25;Port=5432;Database=lab_prod;Username=postgres;Password=...' DATABASE_USER=postgres DATABASE_PASSWORD=... LAB_JWT_SECRET=<32B+ random> sudo -E sh deploy/setup-vps.sh lab-aspnetcore.example.com) or run setup-vps.sh first." >&2
+    echo "ERROR: $BASE/aspnetcore.env missing. Set DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET + LAB_SAAS_CLIENT_SECRET env (e.g. DATABASE_URL='Host=100.79.128.25;Port=5432;Database=lab_prod;Username=postgres;Password=...' DATABASE_USER=postgres DATABASE_PASSWORD=... LAB_JWT_SECRET=<32B+ random> LAB_SAAS_CLIENT_SECRET=<saas-aspnetcore V014 seeded client secret> sudo -E sh deploy/setup-vps.sh lab-aspnetcore.example.com) or run setup-vps.sh first." >&2
     exit 1
   fi
 fi
@@ -79,6 +89,24 @@ fi
 if ! grep -q '^Lab__Jwt__Secret=' "$BASE/aspnetcore.env"; then
   echo "ERROR: $BASE/aspnetcore.env has no Lab__Jwt__Secret line" >&2
   exit 1
+fi
+# v0.1.9: SSO 配置校验（缺失则降级到 no-sso profile，不阻断 deploy）
+# 已有部署可能没装 SSO env, deploy.sh append-only 写缺失的 4 行, 不覆盖运维手工的。
+if ! grep -q '^Lab__Sso__Profile=' "$BASE/aspnetcore.env"; then
+  if [ -n "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
+    echo "→ append Lab SS_SO_* to existing $BASE/aspnetcore.env"
+    umask 077
+    {
+      printf 'Lab__Sso__Profile=real\n'
+      printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
+      printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
+      printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
+      printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
+    } >> "$BASE/aspnetcore.env"
+    chmod 600 "$BASE/aspnetcore.env"
+  else
+    echo "→ WARNING: LAB_SAAS_CLIENT_SECRET missing, SSO env not appended (lab-aspnetcore will run with Lab__Sso__Profile=no-sso, /api/auth/sso/authorize returns 500)" >&2
+  fi
 fi
 
 # nginx vhost 自举（缺时创建, 不 reload —— reload 要 root）:

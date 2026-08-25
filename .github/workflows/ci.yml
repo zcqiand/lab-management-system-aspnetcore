@@ -65,13 +65,15 @@ jobs:
           DATABASE_USER: ${{ secrets.DATABASE_USER }}
           DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
           LAB_JWT_SECRET: ${{ secrets.LAB_JWT_SECRET }}
+          LAB_SAAS_CLIENT_SECRET: ${{ secrets.LAB_SAAS_CLIENT_SECRET }}
+          LAB_SAAS_DEFAULT_TENANT_ID: ${{ secrets.LAB_SAAS_DEFAULT_TENANT_ID }}
           NGINX_DOMAIN: ${{ vars.NGINX_DOMAIN }}
           NGINX_CERT_BASENAME: ${{ vars.NGINX_CERT_BASENAME }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: DATABASE_URL,DATABASE_USER,DATABASE_PASSWORD,LAB_JWT_SECRET,NGINX_DOMAIN,NGINX_CERT_BASENAME
+          envs: DATABASE_URL,DATABASE_USER,DATABASE_PASSWORD,LAB_JWT_SECRET,LAB_SAAS_CLIENT_SECRET,LAB_SAAS_DEFAULT_TENANT_ID,NGINX_DOMAIN,NGINX_CERT_BASENAME
           script: |
             # 自举: 首次部署无 /home/deploy/<repo>/ 时自动建 + 总是重拉 deploy 脚本
             # （避免 v0.x.y 修了 deploy 脚本但 VPS 还跑着旧版的坑）
@@ -87,14 +89,14 @@ jobs:
               curl -fsSL "https://raw.githubusercontent.com/zcqiand/${REPO}/refs/heads/master/deploy/nginx-vps.conf.example" -o "nginx-vps.conf.example" || true
             fi
             # 缺 aspnetcore.env 时, deploy 脚本会从 SSH env 透传过来的
-            # DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET 自举 (UMASK 077, chmod 600).
+            # DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET + LAB_SAAS_CLIENT_SECRET 自举 (UMASK 077, chmod 600).
             # 后续 deploy 不需要这些 env (env-file 已存在).
-            echo "→ env on remote: DATABASE_URL_set=$([ -n \"${DATABASE_URL:-}\" ] && echo yes || echo no)"
+            echo "→ env on remote: DATABASE_URL_set=$([ -n \"${DATABASE_URL:-}\" ] && echo yes || echo no) LAB_SAAS_CLIENT_SECRET_set=$([ -n \"${LAB_SAAS_CLIENT_SECRET:-}\" ] && echo yes || echo no)"
             if [ ! -f "aspnetcore.env" ]; then
-              if [ -n "$DATABASE_URL" ] && [ -n "$DATABASE_USER" ] && [ -n "$DATABASE_PASSWORD" ] && [ -n "$LAB_JWT_SECRET" ]; then
-                echo "→ aspnetcore.env will be bootstrapped by deploy script from SSH env"
+              if [ -n "$DATABASE_URL" ] && [ -n "$DATABASE_USER" ] && [ -n "$DATABASE_PASSWORD" ] && [ -n "$LAB_JWT_SECRET" ] && [ -n "$LAB_SAAS_CLIENT_SECRET" ]; then
+                echo "→ aspnetcore.env will be bootstrapped by deploy script from SSH env (含 SSO 4 字段)"
               else
-                echo "ERROR: aspnetcore.env missing AND DATABASE_URL/USER/PASSWORD/LAB_JWT_SECRET secrets not forwarded, deploy script will fail-fast" >&2
+                echo "ERROR: aspnetcore.env missing AND DATABASE_URL/USER/PASSWORD/LAB_JWT_SECRET/LAB_SAAS_CLIENT_SECRET secrets not forwarded, deploy script will fail-fast" >&2
               fi
             fi
             sh "$REPO.sh" "${{ secrets.DOCKER_USERNAME }}" "${{ secrets.DOCKER_PASSWORD }}" "${{ github.ref_name }}"
