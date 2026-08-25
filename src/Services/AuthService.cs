@@ -177,7 +177,8 @@ public sealed class AuthService
         // saas 侧 Contains 是单值精确匹配，不接受 space-separated）。
         // 曾发 "openid profile email" → saas Authorize 抛 INVALID_SCOPE 500，浏览器只见 502。
         var resp = _saasAuth.AuthorizeAsync(redirectUri, "lab.read", state).GetAwaiter().GetResult();
-        var authorizeUrl = $"{_opts.Value.Sso.SaasBase}/login?code={resp.Code}&state={resp.State}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
+        // 登录跳板在 saas 前端域名（LoginUrl），不是 API 域名（SaasBase 的 /login 是 404）
+        var authorizeUrl = $"{_opts.Value.Sso.EffectiveLoginUrl}/login?code={resp.Code}&state={resp.State}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
         return new SsoAuthResult(
             new SsoRedirect { AuthorizeUrl = authorizeUrl, State = state },
             ss.CookieValue);
