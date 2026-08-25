@@ -173,7 +173,9 @@ public sealed class AuthService
         if (string.IsNullOrEmpty(redirectUri)) throw new ArgumentException("missing redirect_uri");
         if (string.IsNullOrEmpty(state)) throw new ArgumentException("missing state");
         var ss = _stateMgr.Issue(redirectUri, state);
-        var resp = _saasAuth.AuthorizeAsync(redirectUri, "openid profile email", state).GetAwaiter().GetResult();
+        // scope 必须 ∈ apps.scopes 种子（shared V014: lab.read, lab.write）。
+        // 曾发 "openid profile email" → saas Authorize 抛 INVALID_SCOPE 500，浏览器只见 502。
+        var resp = _saasAuth.AuthorizeAsync(redirectUri, "lab.read lab.write", state).GetAwaiter().GetResult();
         var authorizeUrl = $"{_opts.Value.Sso.SaasBase}/login?code={resp.Code}&state={resp.State}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
         return new SsoAuthResult(
             new SsoRedirect { AuthorizeUrl = authorizeUrl, State = state },
