@@ -127,7 +127,7 @@ lab-management-system-aspnetcore/
 | 维度 | saas-aspnetcore | lab-aspnetcore |
 |---|---|---|
 | 持久化 | InMemoryStore（Tenants/Users/Roles/Menus/Apps） | InMemory + EF；5 张 store（contracts/receipts/samples/methods/dictionary/junction） |
-| 业务领域 | OAuth IdP（authorize/callback/refresh/menus） | 实验室检测业务（合同 → 接样 → 样品 → 检测 → 报告 → 归档） |
+| 业务领域 | OAuth IdP（authorize/callback/refresh/menus） | 建筑工程实验室管理系统（合同 → 接样 → 样品 → 检测 → 报告 → 归档） |
 | 业务表 | 平台级（无 tenant 收口） | tenant 收口为主（calculation-rules 平台级除外） |
 | SSO 真对接 | 否（自身就是 saas） | 是（[ADR-0008](adr/0008-real-backend-oauth-jwt.md) 调 saas /oauth/token） |
 | 数据规模 | 小（IdP 元数据） | 中（业务表 12 张 + link 表 5 张 + flow 历史） |
