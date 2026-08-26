@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "B7：aspnetcore 第一次 regen + 18 个 list endpoint 改 Page<T> 4 字段包裹(InMemory + EF 双 store + 10 个 controller override)",
+  "current_task": "junction GET 4 端点实现 + Response 编号错位修复 + service 测试（12a9867, v0.1.14）",
   "done": [
     "scripts/gen-shared.sh 跑通:NSwag 重生 Controllers.cs (19 个 Page<T> wrapper inline Response1-19) + 4 junction GET 接口 + IStores/JunctionService 全接口签名重整",
     "src/Data/IStores.cs:IJunctionStore 加 4 List 方法 (ListSpecialtyObject / ListObjectParameter / ListObjectStandard / ListStandardParameter) 接 ?string / ?role 过滤",
@@ -15,9 +15,7 @@
     "aspnetcore 仓 gate L0-L5 全绿 149 条目 0 软告警"
   ],
   "next": [
-    "git add -A + commit（src/Data + src/Persistence + src/Services + src/Controllers + scripts/gen-shared.sh 重产物）",
-    "Optional: 计算方法 + 技术要求 list 仍返裸数组(TypeSpec 保留 T[]);若未来切 Page<T> 走 /tree-change + 同样 regen",
-    "Optional: aspnetcore 测试只有 service 层 mock,controller Page<T> 包装逻辑 0 覆盖率 — 若 L5 软告警开始触发(controller 方法没 @Fn 引用),需补 WebApplicationFactory 集成测试"
+    "无"
   ],
   "open_questions": [
     "LabJwtSigner.cs HMAC HS256 — 此前 batch (B12) 已落地;与本 batch (B7 Page<T>) 无冲突"
