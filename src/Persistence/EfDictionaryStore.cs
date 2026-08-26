@@ -282,6 +282,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
             .Where(x => x.InspectionObjectCode == obj && x.ReportNameCode == report)
             .ExecuteDelete() > 0;
 
+    public IReadOnlyList<ObjectReportNameLink> ListObjectReportName(string? obj, string? report) =>
+        db.ObjectReportNameLinks.AsNoTracking()
+            .Where(x => obj == null || x.InspectionObjectCode == obj)
+            .Where(x => report == null || x.ReportNameCode == report)
+            .ToList();
+
     public void SaveReportNameStandard(ReportNameStandardLink l)
     {
         Require(db.InspectionReportNames.Any(r => r.Code == l.ReportNameCode), "report-name", l.ReportNameCode);
@@ -297,6 +303,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
             .Where(x => x.ReportNameCode == report && x.InspectionStandardCode == std && x.Role == ParseRole(role))
             .ExecuteDelete() > 0;
 
+    public IReadOnlyList<ReportNameStandardLink> ListReportNameStandard(string? report, InspectionStandardRole? role) =>
+        db.ReportNameStandardLinks.AsNoTracking()
+            .Where(x => report == null || x.ReportNameCode == report)
+            .Where(x => role == null || x.Role == role)
+            .ToList();
+
     public void SaveReportNameParameter(ReportNameParameterLink l)
     {
         Require(db.InspectionReportNames.Any(r => r.Code == l.ReportNameCode), "report-name", l.ReportNameCode);
@@ -310,6 +322,12 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
         db.ReportNameParameterLinks
             .Where(x => x.ReportNameCode == report && x.InspectionParameterCode == param)
             .ExecuteDelete() > 0;
+
+    public IReadOnlyList<ReportNameParameterLink> ListReportNameParameter(string? report, string? param) =>
+        db.ReportNameParameterLinks.AsNoTracking()
+            .Where(x => report == null || x.ReportNameCode == report)
+            .Where(x => param == null || x.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveParamInterface(ParamInterfaceLink l)
     {
@@ -327,4 +345,10 @@ public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
         db.ParamInterfaceLinks
             .Where(x => x.InspectionParameterCode == param && x.ParamInterfaceCode == iface)
             .ExecuteDelete() > 0;
+
+    public IReadOnlyList<ParamInterfaceLink> ListParamInterface(string? param, string? iface) =>
+        db.ParamInterfaceLinks.AsNoTracking()
+            .Where(x => param == null || x.InspectionParameterCode == param)
+            .Where(x => iface == null || x.ParamInterfaceCode == iface)
+            .ToList();
 }

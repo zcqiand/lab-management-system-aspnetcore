@@ -94,6 +94,9 @@ public sealed class JunctionService(IJunctionStore store)
         }
     }
 
+    public IReadOnlyList<ObjectReportNameLink> ListObjectReportNameLinks(string? inspectionObjectCode, string? reportNameCode) =>
+        store.ListObjectReportName(inspectionObjectCode, reportNameCode);
+
     // === report-name-standard（M06.F07.I07+F04.I07 link / unlink，role 在 PK） ===
 
     public void LinkReportNameStandard(ReportNameStandardLink body)
@@ -110,6 +113,9 @@ public sealed class JunctionService(IJunctionStore store)
         }
     }
 
+    public IReadOnlyList<ReportNameStandardLink> ListReportNameStandardLinks(string? reportNameCode, InspectionStandardRole? role) =>
+        store.ListReportNameStandard(reportNameCode, role);
+
     // === report-name-parameter（M06.F07.I08+F03.I07 link / M06.F04.I06 unlink） ===
 
     public void LinkReportNameParameter(ReportNameParameterLink body) => store.SaveReportNameParameter(body);
@@ -122,6 +128,9 @@ public sealed class JunctionService(IJunctionStore store)
         }
     }
 
+    public IReadOnlyList<ReportNameParameterLink> ListReportNameParameterLinks(string? reportNameCode, string? inspectionParameterCode) =>
+        store.ListReportNameParameter(reportNameCode, inspectionParameterCode);
+
     // === param-interface-parameter（M06.F08.I06 link / M06.F03.I07 unlink） ===
 
     public void LinkParamInterface(ParamInterfaceLink body) => store.SaveParamInterface(body);
@@ -133,4 +142,7 @@ public sealed class JunctionService(IJunctionStore store)
             throw new KeyNotFoundException("param-interface link not found");
         }
     }
+
+    public IReadOnlyList<ParamInterfaceLink> ListParamInterfaceLinks(string? inspectionParameterCode, string? paramInterfaceCode) =>
+        store.ListParamInterface(inspectionParameterCode, paramInterfaceCode);
 }

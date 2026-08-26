@@ -161,13 +161,33 @@ public sealed class InMemoryJunctionStore : IJunctionStore
 
     public void SaveObjectReportName(ObjectReportNameLink l) => _objectReportName[(l.InspectionObjectCode, l.ReportNameCode)] = l;
     public bool DeleteObjectReportName(string obj, string report) => _objectReportName.TryRemove((obj, report), out _);
+    public IReadOnlyList<ObjectReportNameLink> ListObjectReportName(string? obj, string? report) =>
+        _objectReportName.Values
+            .Where(l => obj == null || l.InspectionObjectCode == obj)
+            .Where(l => report == null || l.ReportNameCode == report)
+            .ToList();
 
     public void SaveReportNameStandard(ReportNameStandardLink l) => _reportNameStandard[(l.ReportNameCode, l.InspectionStandardCode, l.Role.ToString())] = l;
     public bool DeleteReportNameStandard(string report, string std, string role) => _reportNameStandard.TryRemove((report, std, role), out _);
+    public IReadOnlyList<ReportNameStandardLink> ListReportNameStandard(string? report, InspectionStandardRole? role) =>
+        _reportNameStandard.Values
+            .Where(l => report == null || l.ReportNameCode == report)
+            .Where(l => role == null || l.Role == role)
+            .ToList();
 
     public void SaveReportNameParameter(ReportNameParameterLink l) => _reportNameParameter[(l.ReportNameCode, l.InspectionParameterCode)] = l;
     public bool DeleteReportNameParameter(string report, string param) => _reportNameParameter.TryRemove((report, param), out _);
+    public IReadOnlyList<ReportNameParameterLink> ListReportNameParameter(string? report, string? param) =>
+        _reportNameParameter.Values
+            .Where(l => report == null || l.ReportNameCode == report)
+            .Where(l => param == null || l.InspectionParameterCode == param)
+            .ToList();
 
     public void SaveParamInterface(ParamInterfaceLink l) => _paramInterface[(l.InspectionParameterCode, l.ParamInterfaceCode)] = l;
     public bool DeleteParamInterface(string param, string iface) => _paramInterface.TryRemove((param, iface), out _);
+    public IReadOnlyList<ParamInterfaceLink> ListParamInterface(string? param, string? iface) =>
+        _paramInterface.Values
+            .Where(l => param == null || l.InspectionParameterCode == param)
+            .Where(l => iface == null || l.ParamInterfaceCode == iface)
+            .ToList();
 }

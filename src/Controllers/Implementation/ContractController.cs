@@ -54,12 +54,12 @@ public sealed class ReceiptsController(SampleReceiptService service, ITenantCont
     private readonly SampleReceiptService _service = service;
     private readonly ITenantContext _tenantContext = tenantContext;
 
-    public override Task<Response15> ListReceipts(
+    public override Task<Response16> ListReceipts(
         [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string keyword,
         [FromQuery] string contractId, [FromQuery] FlowStatus? flowStatus)
     {
         var items = _service.List(_tenantContext.TenantId, contractId, flowStatus, keyword).ToList();
-        return Task.FromResult(new Response15
+        return Task.FromResult(new Response16
         {
             Items = items,
             Page = page ?? 1,
@@ -107,10 +107,10 @@ public sealed class ReportFlowController(ReportFlowService service, ITenantConte
         Task.FromResult<System.Collections.Generic.ICollection<FlowActionResult>>(
             _service.SubmitAction(_tenantContext.TenantId, body).ToList());
 
-    public override Task<Response16> ListFlowQueue([FromQuery] FlowStatus stage, [FromQuery] int? page, [FromQuery] int? pageSize)
+    public override Task<Response17> ListFlowQueue([FromQuery] FlowStatus stage, [FromQuery] int? page, [FromQuery] int? pageSize)
     {
         var items = _service.FlowQueue(_tenantContext.TenantId, stage, pageSize).ToList();
-        return Task.FromResult(new Response16
+        return Task.FromResult(new Response17
         {
             Items = items,
             Page = page ?? 1,
@@ -129,12 +129,12 @@ public sealed class SamplesController(SampleService service, ITenantContext tena
     private readonly SampleService _service = service;
     private readonly ITenantContext _tenantContext = tenantContext;
 
-    public override Task<Response18> ListSamples(
+    public override Task<Response22> ListSamples(
         [FromQuery] int? page, [FromQuery] int? pageSize,
         [FromQuery] string receiptId, [FromQuery] string keyword)
     {
         var items = _service.List(_tenantContext.TenantId, receiptId, keyword).ToList();
-        return Task.FromResult(new Response18
+        return Task.FromResult(new Response22
         {
             Items = items,
             Page = page ?? 1,
@@ -168,13 +168,13 @@ public sealed class TestRecordsController(TestRecordService service, ITenantCont
     private readonly TestRecordService _service = service;
     private readonly ITenantContext _tenantContext = tenantContext;
 
-    public override Task<Response19> ListTestRecords(
+    public override Task<Response23> ListTestRecords(
         [FromQuery] int? page, [FromQuery] int? pageSize,
         [FromQuery] string sampleId, [FromQuery] string parameterCode)
     {
         // parameterCode 接收未用（镜像 springboot：list 只按 tenant+sampleId 过滤）
         var items = _service.List(_tenantContext.TenantId, sampleId).ToList();
-        return Task.FromResult(new Response19
+        return Task.FromResult(new Response23
         {
             Items = items,
             Page = page ?? 1,

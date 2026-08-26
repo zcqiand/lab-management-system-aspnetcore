@@ -139,13 +139,17 @@ public interface IJunctionStore
 
     void SaveObjectReportName(ObjectReportNameLink l);
     bool DeleteObjectReportName(string obj, string report);
+    IReadOnlyList<ObjectReportNameLink> ListObjectReportName(string? obj, string? report);
 
     void SaveReportNameStandard(ReportNameStandardLink l);
     bool DeleteReportNameStandard(string report, string std, string role);
+    IReadOnlyList<ReportNameStandardLink> ListReportNameStandard(string? report, InspectionStandardRole? role);
 
     void SaveReportNameParameter(ReportNameParameterLink l);
     bool DeleteReportNameParameter(string report, string param);
+    IReadOnlyList<ReportNameParameterLink> ListReportNameParameter(string? report, string? param);
 
     void SaveParamInterface(ParamInterfaceLink l);
     bool DeleteParamInterface(string param, string iface);
+    IReadOnlyList<ParamInterfaceLink> ListParamInterface(string? param, string? iface);
 }

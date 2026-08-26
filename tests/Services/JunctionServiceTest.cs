@@ -230,4 +230,76 @@ public class JunctionServiceTest
         svc.UnlinkParamInterface("P-1", "PI-1");
         Assert.Throws<KeyNotFoundException>(() => svc.UnlinkParamInterface("P-1", "PI-1")); // 已删 404
     }
+
+    // === junction GET（Page<T> 契约补齐 — link 后按 query 过滤取回）===
+
+    [Fact]
+    [Trait("Fn", "M06.F07.I06")]
+    public void ListObjectReportNameLinks_filterByObject()
+    {
+        var svc = Svc();
+        svc.LinkObjectReportName(new ObjectReportNameLink { InspectionObjectCode = "OBJ-1", ReportNameCode = "RN-A" });
+        svc.LinkObjectReportName(new ObjectReportNameLink { InspectionObjectCode = "OBJ-2", ReportNameCode = "RN-B" });
+
+        var byObj = svc.ListObjectReportNameLinks("OBJ-1", null);
+        Assert.Single(byObj);
+        Assert.Equal("RN-A", byObj[0].ReportNameCode);
+
+        var all = svc.ListObjectReportNameLinks(null, null);
+        Assert.Equal(2, all.Count);
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F07.I07")]
+    public void ListReportNameStandardLinks_filterByRole()
+    {
+        var svc = Svc();
+        svc.LinkReportNameStandard(new ReportNameStandardLink
+        {
+            ReportNameCode = "RN-A",
+            InspectionStandardCode = "STD-1",
+            Role = InspectionStandardRole.TESTING,
+        });
+        svc.LinkReportNameStandard(new ReportNameStandardLink
+        {
+            ReportNameCode = "RN-A",
+            InspectionStandardCode = "STD-2",
+            Role = InspectionStandardRole.JUDGMENT,
+        });
+
+        var testingOnly = svc.ListReportNameStandardLinks("RN-A", InspectionStandardRole.TESTING);
+        Assert.Single(testingOnly);
+        Assert.Equal("STD-1", testingOnly[0].InspectionStandardCode);
+
+        Assert.Equal(2, svc.ListReportNameStandardLinks(null, null).Count);
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F07.I08")]
+    public void ListReportNameParameterLinks_filterByReport()
+    {
+        var svc = Svc();
+        svc.LinkReportNameParameter(new ReportNameParameterLink { ReportNameCode = "RN-A", InspectionParameterCode = "P-1" });
+        svc.LinkReportNameParameter(new ReportNameParameterLink { ReportNameCode = "RN-B", InspectionParameterCode = "P-2" });
+
+        var byReport = svc.ListReportNameParameterLinks("RN-A", null);
+        Assert.Single(byReport);
+        Assert.Equal("P-1", byReport[0].InspectionParameterCode);
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F08.I06")]
+    public void ListParamInterfaceLinks_filterByParam()
+    {
+        var svc = Svc();
+        svc.LinkParamInterface(new ParamInterfaceLink { InspectionParameterCode = "P-1", ParamInterfaceCode = "PI-1" });
+        svc.LinkParamInterface(new ParamInterfaceLink { InspectionParameterCode = "P-2", ParamInterfaceCode = "PI-2" });
+
+        var byParam = svc.ListParamInterfaceLinks("P-1", null);
+        Assert.Single(byParam);
+        Assert.Equal("PI-1", byParam[0].ParamInterfaceCode);
+
+        var empty = svc.ListParamInterfaceLinks("P-GHOST", null);
+        Assert.Empty(empty);
+    }
 }

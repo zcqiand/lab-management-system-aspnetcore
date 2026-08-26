@@ -301,14 +301,14 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     private readonly DictionaryService _service = service;
     private readonly JunctionService _junction = junction;
 
-    public override Task<Response17> ListReportNames(
+    public override Task<Response18> ListReportNames(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         [FromQuery] string keyword)
     {
         var items = _service.ListReportNames(keyword).ToList();
         int count = items.Count;
-        return Task.FromResult(new Response17
+        return Task.FromResult(new Response18
         {
             Items = items,
             Page = page ?? 1,
@@ -367,6 +367,53 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
         _junction.UnlinkReportNameStandard(body.ReportNameCode, body.InspectionStandardCode, body.Role);
         return Task.CompletedTask;
     }
+
+    // === junction GET（Page<T> 短 envelope，shared 契约补齐）===
+
+    public override Task<Response19> ListObjectReportNameLinks(
+        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string reportNameCode)
+    {
+        var items = _junction.ListObjectReportNameLinks(inspectionObjectCode, reportNameCode).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response19
+        {
+            Items = items,
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        });
+    }
+
+    public override Task<Response21> ListReportNameStandardLinks(
+        [FromQuery] string reportNameCode,
+        [FromQuery] InspectionStandardRole? role)
+    {
+        var items = _junction.ListReportNameStandardLinks(reportNameCode, role).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response21
+        {
+            Items = items,
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        });
+    }
+
+    public override Task<Response20> ListReportNameParameterLinks(
+        [FromQuery] string reportNameCode,
+        [FromQuery] string inspectionParameterCode)
+    {
+        var items = _junction.ListReportNameParameterLinks(reportNameCode, inspectionParameterCode).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response20
+        {
+            Items = items,
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        });
+    }
 }
 
 /// <summary>M06.F08 参数界面 CRUD + param-interface junction（B5/B6）。</summary>
@@ -419,5 +466,20 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
     {
         _junction.UnlinkParamInterface(body.InspectionParameterCode, body.ParamInterfaceCode);
         return Task.CompletedTask;
+    }
+
+    public override Task<Response15> ListParamInterfaceLinks(
+        [FromQuery] string inspectionParameterCode,
+        [FromQuery] string paramInterfaceCode)
+    {
+        var items = _junction.ListParamInterfaceLinks(inspectionParameterCode, paramInterfaceCode).ToList();
+        int count = items.Count;
+        return Task.FromResult(new Response15
+        {
+            Items = items,
+            Page = 1,
+            PageSize = count,
+            Total = count,
+        });
     }
 }
