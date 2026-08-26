@@ -8,7 +8,9 @@ using Microsoft.IdentityModel.Tokens;
 /// <summary>
 /// LabJwtSigner — 真 HMAC HS256 JWT 签发/验证（对齐 B1 真后端 OAuth 2.0 + JWT 方案）。
 ///
-/// <p>读取配置 Lab:Jwt:Secret（≥32 字节，缺/弱抛 {@link InvalidOperationException} 阻断 DI 容器）。提供：
+/// <p>读取配置 JWT_SIGNING_KEY env（≥32 字节，缺/弱抛 {@link InvalidOperationException} 阻断 DI 容器）。
+/// Phase 4 env 对称化: 顶层 flat key 直接读 env JWT_SIGNING_KEY（与 saas-springboot + saas-aspnetcore + saas-msw +
+/// lab-management-system-msw 5 仓镜像命名）。提供：
 /// <list type="bullet">
 ///   <item>{@link Issue(string, string?)} — access token（typ=access, 1h TTL, 支持 tenant_id claim）</item>
 ///   <item>{@link IssueRefresh(string, string)} — refresh token（typ=refresh, 7d TTL, 内嵌 saas refresh token）</item>
@@ -36,16 +38,16 @@ public sealed class LabJwtSigner
         if (string.IsNullOrEmpty(secret))
         {
             throw new InvalidOperationException(
-                "Lab:Jwt:Secret required (>=32 bytes). Set via env var or appsettings.");
+                "JWT_SIGNING_KEY required (>=32 bytes). Set via env var or appsettings JWT_SIGNING_KEY.");
         }
         if (Encoding.UTF8.GetByteCount(secret) < 32)
         {
             throw new InvalidOperationException(
-                $"Lab:Jwt:Secret must be >=32 bytes (got {Encoding.UTF8.GetByteCount(secret)}).");
+                $"JWT_SIGNING_KEY must be >=32 bytes (got {Encoding.UTF8.GetByteCount(secret)}).");
         }
         if (string.IsNullOrEmpty(issuer))
         {
-            throw new InvalidOperationException("Lab:Jwt:Issuer required");
+            throw new InvalidOperationException("JWT_ISSUER required");
         }
         _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
         _issuer = issuer;

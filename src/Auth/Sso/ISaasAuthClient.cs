@@ -38,10 +38,10 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
     {
         _http = http;
         _sso = opts.Value.Sso;
-        if (string.IsNullOrEmpty(_sso.SaasBase)) throw new InvalidOperationException("Lab:Sso:SaasBase required");
-        if (string.IsNullOrEmpty(_sso.ClientId)) throw new InvalidOperationException("Lab:Sso:ClientId required");
-        if (string.IsNullOrEmpty(_sso.ClientSecret)) throw new InvalidOperationException("Lab:Sso:ClientSecret required");
-        if (string.IsNullOrEmpty(_sso.DefaultTenantId)) throw new InvalidOperationException("Lab:Sso:DefaultTenantId required");
+        if (string.IsNullOrEmpty(_sso.SaasBase)) throw new InvalidOperationException("LAB_SAAS_BASE_URL required");
+        if (string.IsNullOrEmpty(_sso.ClientId)) throw new InvalidOperationException("LAB_SAAS_CLIENT_ID required");
+        if (string.IsNullOrEmpty(_sso.ClientSecret)) throw new InvalidOperationException("LAB_SAAS_CLIENT_SECRET required");
+        if (string.IsNullOrEmpty(_sso.DefaultTenantId)) throw new InvalidOperationException("LAB_SAAS_DEFAULT_TENANT_ID required");
         _http.BaseAddress ??= new Uri(_sso.SaasBase);
         _http.DefaultRequestHeaders.Accept.Clear();
         _http.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));

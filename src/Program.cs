@@ -34,10 +34,10 @@ builder.Services.AddSwaggerGen(c =>
 // 在 lambda 里 AddSingleton 会抛 "collection cannot be modified because it is read-only"
 // 且 AuthService 也从容器解析 LabJwtSigner（不能只做局部变量）。
 var jwtSigner = new LabJwtSigner(
-    builder.Configuration["Lab:Jwt:Secret"] ?? "dev-lab-jwt-secret-dev-lab-jwt-secret-dev-lab-jwt-secret",
-    builder.Configuration["Lab:Jwt:Issuer"] ?? "lab-management-system",
-    int.TryParse(builder.Configuration["Lab:Jwt:TtlSeconds"], out var t) ? t : 3600,
-    int.TryParse(builder.Configuration["Lab:Jwt:RefreshTtlSeconds"], out var rt) ? rt : 604800);
+    builder.Configuration["JWT_SIGNING_KEY"] ?? "dev-key-32-bytes-minimum-length!",
+    builder.Configuration["JWT_ISSUER"] ?? "lab-management-system",
+    int.TryParse(builder.Configuration["JWT_TTL_SECONDS"], out var t) ? t : 3600,
+    int.TryParse(builder.Configuration["JWT_REFRESH_TTL_SECONDS"], out var rt) ? rt : 604800);
 builder.Services.AddSingleton(jwtSigner);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -52,7 +52,8 @@ builder.Services.AddAuthorization(o =>
 });
 
 // CORS：lab 前端三仓（5173 react / 5174 vue / 3000 nextjs），env LAB_CORS_ALLOWED_ORIGINS 覆盖
-var allowedOrigins = (builder.Configuration["Lab:Cors:AllowedOrigins"]
+// Phase 4 env 对称化: Lab:Cors:AllowedOrigins → LAB_CORS_ALLOWED_ORIGINS flat key
+var allowedOrigins = (builder.Configuration["LAB_CORS_ALLOWED_ORIGINS"]
     ?? "http://localhost:5173,http://localhost:5174,http://localhost:3000")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
@@ -63,12 +64,12 @@ builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
     // CORS 响应必须带 Access-Control-Allow-Credentials 才生效
     .AllowCredentials()));
 
-// State cookie manager（HS256 签 state,签名密钥复用 Lab:Jwt:Secret）
+// State cookie manager（HS256 签 state,签名密钥复用 JWT_SIGNING_KEY）
 builder.Services.AddSingleton(sp => new StateCookieManager(
-    sp.GetRequiredService<IConfiguration>()["Lab:Jwt:Secret"] ?? "dev-lab-jwt-secret-dev-lab-jwt-secret-dev-lab-jwt-secret"));
+    sp.GetRequiredService<IConfiguration>()["JWT_SIGNING_KEY"] ?? "dev-key-32-bytes-minimum-length!"));
 
 // SSO 客户端（ADR-0008：profile 切换 noop vs real）
-var ssoProfile = builder.Configuration["Lab:Sso:Profile"] ?? "no-sso";
+var ssoProfile = builder.Configuration["LAB_SSO_PROFILE"] ?? "no-sso";
 if (ssoProfile == "no-sso")
 {
     builder.Services.AddSingleton<ISaasAuthClient, NoopSaasAuthClient>();

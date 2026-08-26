@@ -40,7 +40,7 @@ public sealed class HttpSaasMeClient : ISaasMeClient
         _http = http;
         if (string.IsNullOrEmpty(opts.Value.Sso.SaasBase))
         {
-            throw new InvalidOperationException("Lab:Sso:SaasBase required for SaasMeClient");
+            throw new InvalidOperationException("LAB_SAAS_BASE_URL required for SaasMeClient");
         }
         _http.BaseAddress ??= new Uri(opts.Value.Sso.SaasBase);
         _http.DefaultRequestHeaders.Accept.Clear();
