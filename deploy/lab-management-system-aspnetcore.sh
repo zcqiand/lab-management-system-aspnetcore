@@ -72,7 +72,7 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
       # 移除 @format 后可改回 'lab-mgmt')
       printf 'Lab__Sso__Profile=real\n'
       printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
-      printf 'Lab__Sso__LoginUrl=https://saas-nextjs.xiangru.uk\n'
+      printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n'
       printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
       printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
       printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
@@ -103,7 +103,7 @@ if ! grep -q '^Lab__Sso__Profile=' "$BASE/aspnetcore.env"; then
     {
       printf 'Lab__Sso__Profile=real\n'
       printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
-      printf 'Lab__Sso__LoginUrl=https://saas-nextjs.xiangru.uk\n'
+      printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n'
       printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
       printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
       printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
@@ -119,7 +119,7 @@ fi
 if ! grep -q '^Lab__Sso__LoginUrl=' "$BASE/aspnetcore.env"; then
   echo "→ append Lab__Sso__LoginUrl to existing $BASE/aspnetcore.env"
   umask 077
-  printf 'Lab__Sso__LoginUrl=https://saas-nextjs.xiangru.uk\n' >> "$BASE/aspnetcore.env"
+  printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n' >> "$BASE/aspnetcore.env"
 fi
 
 # nginx vhost 自举（缺时创建, 不 reload —— reload 要 root）:
