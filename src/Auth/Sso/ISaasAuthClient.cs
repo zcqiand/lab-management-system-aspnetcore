@@ -9,6 +9,8 @@ public interface ISaasAuthClient
 {
     Task<AuthorizeCodeResponse> AuthorizeAsync(string redirectUri, string scope, string state, CancellationToken ct = default);
     Task<TokenResponse> TokenAsync(string grantType, string? code, string? refreshToken, string? redirectUri, CancellationToken ct = default);
+    /// <summary>saas /api/v1/auth/login 密码登录（服务账号用，替密码登录用户拉菜单快照）。</summary>
+    Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default);
 }
 
 public sealed class AuthorizeCodeResponse
@@ -81,6 +83,20 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
         var result = await resp.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: ct);
         return result ?? throw new SaasAuthException.UpstreamUnavailable("saas returned empty token response");
     }
+
+    public async Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        var body = new Dictionary<string, string>
+        {
+            ["username"] = username,
+            ["password"] = password,
+            ["tenantCode"] = _sso.DefaultTenantId,
+        };
+        var resp = await _http.PostAsJsonAsync("/api/v1/auth/login", body, ct);
+        resp.EnsureSuccessStatusCode();
+        var result = await resp.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: ct);
+        return result ?? throw new SaasAuthException.UpstreamUnavailable("saas returned empty login response");
+    }
 }
 
 /// <summary>
@@ -99,6 +115,19 @@ public sealed class NoopSaasAuthClient : ISaasAuthClient
         {
             AccessToken = "dev-access-token",
             RefreshToken = "dev-refresh-token",
+            TokenType = "Bearer",
+            ExpiresIn = 3600,
+            Scope = "openid",
+        });
+    }
+
+    /// noop：与 TokenAsync 同款假 accessToken（服务账号快照路径走通，NoopSaasMeClient 返回空树）
+    public Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        return Task.FromResult(new TokenResponse
+        {
+            AccessToken = "dev-service-access-token",
+            RefreshToken = "dev-service-refresh-token",
             TokenType = "Bearer",
             ExpiresIn = 3600,
             Scope = "openid",

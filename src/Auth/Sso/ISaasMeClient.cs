@@ -10,6 +10,20 @@ public interface ISaasMeClient
 {
     Task<SaasCurrentUser> WhoamiAsync(string saasAccessToken, CancellationToken ct = default);
     Task<List<SaasTenantMembership>> ListMyTenantsAsync(string saasAccessToken, CancellationToken ct = default);
+    /// <summary>saas /me/menus?appCode=...：当前用户在指定 app 下的有效菜单树（EffectiveMenuNode）。</summary>
+    Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default);
+}
+
+/// <summary>saas EffectiveMenuNode（saas /me/menus 返回形状，字段与 saas DB MenuRow 一致）。</summary>
+public sealed class SaasMenuNode
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string? Path { get; set; }
+    public string? Icon { get; set; }
+    public string? Type { get; set; }
+    public int? SortOrder { get; set; }
+    public List<SaasMenuNode>? Children { get; set; }
 }
 
 public sealed class SaasCurrentUser
@@ -66,6 +80,16 @@ public sealed class HttpSaasMeClient : ISaasMeClient
         var arr = await resp.Content.ReadFromJsonAsync<SaasTenantMembership[]>(cancellationToken: ct);
         return arr?.ToList() ?? new List<SaasTenantMembership>();
     }
+
+    public async Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, $"/api/v1/me/menus?appCode={Uri.EscapeDataString(appCode)}");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", saasAccessToken);
+        var resp = await _http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        var arr = await resp.Content.ReadFromJsonAsync<SaasMenuNode[]>(cancellationToken: ct);
+        return arr?.ToList() ?? new List<SaasMenuNode>();
+    }
 }
 
 public sealed class NoopSaasMeClient : ISaasMeClient
@@ -94,5 +118,11 @@ public sealed class NoopSaasMeClient : ISaasMeClient
             new() { Id = "mem-2", UserId = "USER-A", TenantId = "TENANT-002", RoleIds = new() { "technician" }, Status = "active" },
             new() { Id = "mem-3", UserId = "USER-A", TenantId = "TENANT-003", RoleIds = new() { "viewer" }, Status = "active" },
         });
+    }
+
+    /// noop：空菜单树（快照写入空树，Menus() 命中不抛 -- 与 springboot noop 同语义）
+    public Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default)
+    {
+        return Task.FromResult(new List<SaasMenuNode>());
     }
 }

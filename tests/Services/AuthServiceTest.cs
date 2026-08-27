@@ -149,14 +149,25 @@ public class AuthServiceTest
 
     [Fact]
     [Trait("Fn", "M01.F04.I01")]
-    public void Menus_returns5RootNodes()
+    public void Menus_snapshotMiss_throwsMenusUnavailable()
     {
-        var menus = _service.Menus();
-        Assert.Equal(5, menus.Count);
-        Assert.Equal("menu-dashboard", menus[0].Id);
-        Assert.Equal("工作台", menus[0].Label);
-        var flow = menus.First(m => m.Id == "menu-m03");
-        Assert.Equal(7, flow.Children!.Count);
+        // 2026-08-27 起 demo 兜底删除：无 saas 快照（快照过期/拉取失败/重启）->
+        // MenusUnavailableException（Program.cs 映射 503），前端回退静态菜单
+        var claims = new Dictionary<string, object> { ["sub"] = "USER-A" };
+        Assert.Throws<MenusUnavailableException>(() => _service.Menus(claims));
+    }
+
+    [Fact]
+    [Trait("Fn", "M01.F04.I01")]
+    public void Login_passwordFlow_cachesServiceAccountSnapshot()
+    {
+        // 密码登录也拉快照：login() 成功后用 saas 服务账号换 token 拉 /me/menus。
+        // Noop saas 返回空菜单树 -> 空快照也写入（Menus() 不再抛）
+        var res = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
+        Assert.Equal("USER-A", res.User.Id);
+        // login 副作用：快照已写入 -> Menus() 命中（空树也算命中，不 503）
+        var claims = new Dictionary<string, object> { ["sub"] = res.User.Id };
+        Assert.Empty(_service.Menus(claims));
     }
 
     [Fact]

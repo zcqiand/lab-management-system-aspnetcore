@@ -33,6 +33,13 @@ public sealed class LabOptions
         public string ClientSecret { get; set; } = "";
         public string DefaultTenantId { get; set; } = "";
         public string CallbackRedirectBase { get; set; } = "http://localhost:5080/api/auth/sso/callback";
+        /// <summary>
+        /// 菜单快照服务账号（2026-08-27 demo 兜底删除配套）：密码登录用户无 saas 身份，
+        /// Login 后用它登 saas /api/v1/auth/login 换 token 拉 /me/menus 快照。
+        /// dev 默认 alice（saas seeds，role-admin 全量菜单授权）。
+        /// </summary>
+        public string ServiceUser { get; set; } = "alice";
+        public string ServicePassword { get; set; } = "dev123456";
 
         /// <summary>有效登录页 base：显式 LoginUrl 优先，缺省回落 SaasBase。</summary>
         public string EffectiveLoginUrl => string.IsNullOrEmpty(LoginUrl) ? SaasBase : LoginUrl;

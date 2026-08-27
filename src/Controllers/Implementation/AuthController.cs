@@ -26,7 +26,7 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
 
     [Authorize]
     public override Task<System.Collections.Generic.ICollection<MenuNode>> GetMenus() =>
-        Task.FromResult<System.Collections.Generic.ICollection<MenuNode>>(_service.Menus());
+        Task.FromResult<System.Collections.Generic.ICollection<MenuNode>>(_service.Menus(ReadClaims()));
 
     [Authorize]
     public override Task<PermissionSet> GetPermissions() =>

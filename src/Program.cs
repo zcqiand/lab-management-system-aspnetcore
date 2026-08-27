@@ -184,6 +184,7 @@ app.UseExceptionHandler(errorApp =>
         context.Response.StatusCode = ex switch
         {
             KeyNotFoundException => StatusCodes.Status404NotFound,
+            Lab.AspNetCore.Services.MenusUnavailableException => StatusCodes.Status503ServiceUnavailable,
             AuthenticationException or UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             ArgumentException => StatusCodes.Status400BadRequest,
             SaasAuthException s => s.Status,

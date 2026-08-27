@@ -29,6 +29,7 @@ public sealed class AuthService
     private readonly ISaasMeClient _saasMe;
     private readonly StateCookieManager _stateMgr;
     private readonly IOptions<LabOptions> _opts;
+    private readonly MenuSnapshotCache _menuCache;
 
     public AuthService(
         IUserDirectory directory,
@@ -36,7 +37,8 @@ public sealed class AuthService
         ISaasAuthClient saasAuth,
         ISaasMeClient saasMe,
         StateCookieManager stateMgr,
-        IOptions<LabOptions> opts)
+        IOptions<LabOptions> opts,
+        MenuSnapshotCache? menuCache = null)
     {
         _directory = directory;
         _jwt = jwt;
@@ -44,6 +46,7 @@ public sealed class AuthService
         _saasMe = saasMe;
         _stateMgr = stateMgr;
         _opts = opts;
+        _menuCache = menuCache ?? new MenuSnapshotCache();
     }
 
     // === M01.F05.I01 密码登录 ===
@@ -61,6 +64,17 @@ public sealed class AuthService
             throw new AuthenticationException("Invalid username or password");
         }
         var user = _directory.FindByUsername(username) ?? throw new AuthenticationException("Invalid username or password");
+        // 密码登录的 dev 用户无 saas 身份 -> 用服务账号拉菜单快照（demo 兜底已删，
+        // miss 时 Menus() 抛 503）。失败不阻塞登录（warn），重登/SSO 可补。
+        try
+        {
+            var t = _saasAuth.ServiceLoginAsync(_opts.Value.Sso.ServiceUser, _opts.Value.Sso.ServicePassword).GetAwaiter().GetResult();
+            CacheMenus(user.Id, t.AccessToken);
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"[login] service-account menu snapshot failed for {user.Id}: {e.Message}");
+        }
         return Session(user, null, null);
     }
 
@@ -135,31 +149,17 @@ public sealed class AuthService
 
     // === M01.F04.I01 动态菜单 / I02 权限集 ===
 
-    public List<MenuNode> Menus() => new() { /* mirror springboot */
-        new() { Id = "menu-dashboard", Label = "工作台", Path = "/dashboard", Icon = "dashboard" },
-        new() { Id = "menu-m02", Label = "资源管理", Icon = "resource",
-            Children = new List<MenuNode> { Menu("menu-contracts", "合同管理", "/contracts") } },
-        new() { Id = "menu-m03", Label = "试验过程", Icon = "flow",
-            Children = new List<MenuNode> {
-                Menu("menu-receipts", "接样管理", "/receipts"),
-                Menu("menu-task", "任务分配", "/receipts?stage=task_assignment"),
-                Menu("menu-entry", "数据录入", "/receipts?stage=data_entry"),
-                Menu("menu-review", "报告审核", "/receipts?stage=review"),
-                Menu("menu-approve", "报告批准", "/receipts?stage=approval"),
-                Menu("menu-issue", "报告发放", "/receipts?stage=issuance"),
-                Menu("menu-archive", "报告归档", "/receipts?stage=archived"),
-            } },
-        new() { Id = "menu-m04", Label = "基础数据", Icon = "data",
-            Children = new List<MenuNode> {
-                Menu("menu-techreq", "技术要求", "/technical-requirements"),
-                Menu("menu-models", "型号维护", "/catalog/models"),
-                Menu("menu-specs", "规格维护", "/catalog/specs"),
-                Menu("menu-grades", "等级维护", "/catalog/grades"),
-                Menu("menu-brands", "牌号维护", "/catalog/brands"),
-            } },
-        new() { Id = "menu-m05", Label = "数据统计", Icon = "stats",
-            Children = new List<MenuNode> { Menu("menu-summary", "报告汇总", "/summary") } },
-    };
+    /// <summary>
+    /// 动态菜单：SSO/refresh/密码登录时缓存的 saas 快照。miss（快照过期/拉取失败/重启）抛
+    /// MenusUnavailableException（Program.cs 映射 503）-- 2026-08-27 起 demo 兜底删除，
+    /// 假树不再下发；前端 useBackendMenus 失败回退静态菜单。
+    /// </summary>
+    public List<MenuNode> Menus(IReadOnlyDictionary<string, object>? claims)
+    {
+        var sub = claims?.GetValueOrDefault("sub")?.ToString();
+        return _menuCache.Get(sub)
+            ?? throw new MenusUnavailableException($"menu snapshot unavailable for user {sub ?? "(anonymous)"}; re-login to refresh");
+    }
 
     public PermissionSet Permissions() => new() { Permissions = DemoPermissions.ToList() };
 
@@ -198,6 +198,8 @@ public sealed class AuthService
         var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
         var labUser = _directory.FindByEmail(saasUser.Email)
             ?? _directory.Upsert(saasUser.Id, saasUser.Email, saasUser.DisplayName ?? "", "viewer");
+        // 菜单快照：瞬时持有 saas accessToken 的唯一时点，顺手拉菜单进缓存（失败不阻塞登录）
+        CacheMenus(labUser.Id, t.AccessToken);
         return Session(labUser, null, TenantsFrom(memberships), t.RefreshToken);
     }
 
@@ -244,6 +246,44 @@ public sealed class AuthService
             Name = m.TenantId,
             RoleIds = m.RoleIds?.ToList() ?? new List<string>(),
         }).ToList();
+    }
+
+    /// <summary>lab 家族在 saas 注册的 appCode（seeds apps.json）。</summary>
+    internal const string LabAppCode = "lab-management";
+
+    /// <summary>
+    /// 拉菜单进快照缓存。失败只 warn 不抛 -- 菜单不可用不应阻塞登录主流程
+    /// （miss 时 Menus() 503 由前端兜底），下次 refresh 重试。
+    /// </summary>
+    private void CacheMenus(string? userId, string? saasAccessToken)
+    {
+        if (userId is null || saasAccessToken is null) return;
+        try
+        {
+            var snapshot = _saasMe.ListMyMenusAsync(saasAccessToken, LabAppCode).GetAwaiter().GetResult();
+            _menuCache.Put(userId, snapshot.Select(MapSaasMenu).ToList());
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"[menu] snapshot fetch failed for {userId}: {e.Message}");
+        }
+    }
+
+    /// <summary>saas EffectiveMenuNode -> 契约 MenuNode（name->label；icon 空时按 type 兜底，镜像 springboot SaasMenuMapper）。</summary>
+    private static MenuNode MapSaasMenu(SaasMenuNode src)
+    {
+        var children = src.Children ?? new List<SaasMenuNode>();
+        var icon = string.IsNullOrEmpty(src.Icon)
+            ? (src.Type == "group" ? "resource" : "file")
+            : src.Icon;
+        return new MenuNode
+        {
+            Id = src.Id,
+            Label = src.Name,
+            Path = src.Path,
+            Icon = icon,
+            Children = children.Select(MapSaasMenu).ToList(),
+        };
     }
 
     private static MenuNode Menu(string id, string label, string path) => new()
