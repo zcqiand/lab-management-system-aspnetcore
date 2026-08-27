@@ -87,8 +87,17 @@ public sealed class HttpSaasMeClient : ISaasMeClient
         req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", saasAccessToken);
         var resp = await _http.SendAsync(req, ct);
         resp.EnsureSuccessStatusCode();
-        var arr = await resp.Content.ReadFromJsonAsync<SaasMenuNode[]>(cancellationToken: ct);
-        return arr?.ToList() ?? new List<SaasMenuNode>();
+        // saas /me/menus 按 shared 契约（saas-shared tsp `Record<EffectiveMenuNode[]>`）
+        // 返 `{appCode: [EffectiveMenuNode...]}` map。2026-08-27 复现 prod bug：
+        // 原实现反序列化为 `SaasMenuNode[]` 抛 JsonException → CacheMenus catch
+        // 不写快照 → Menus() miss 503。本修法：反序列化为 Dictionary，按 appCode
+        // 查表返 list；map 缺 appCode 返空（不要写零长度假数组进缓存 — 与 msw noop 一致）。
+        var map = await resp.Content.ReadFromJsonAsync<Dictionary<string, List<SaasMenuNode>>>(cancellationToken: ct);
+        if (map is null || !map.TryGetValue(appCode, out var list) || list is null)
+        {
+            return new List<SaasMenuNode>();
+        }
+        return list;
     }
 }
 
