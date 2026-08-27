@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "suite_version": "0.5.0",
+  "suite_version": "0.6.0",
   "project": "lab-management-system-aspnetcore",
   "stack": "aspnetcore",
   "gates": {
