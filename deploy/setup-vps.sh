@@ -10,7 +10,7 @@
 #
 # ASP.NET Core 8 是后端, 与 springboot 一样需要 PostgreSQL 远程连接, 但本脚本**不**
 # 生成 aspnetcore.env（避免把数据库密码写进 setup）：aspnetcore.env 由 deploy 脚本首启自举
-# 时从环境 DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET 读入。本脚本只保证:
+# 时从环境 DATABASE_URL + JWT_SIGNING_KEY 读入。本脚本只保证:
 #   1. apt 装 nginx、docker (如未装, 幂等)
 #   2. 创建 deploy 用户 (key-only SSH) + 加进 docker 组 + 写 sudoers 白名单
 #   3. 建 /home/deploy/lab-management-system-aspnetcore/
@@ -23,9 +23,9 @@
 #   b) 本地跑: ssh-copy-id -i ~/.ssh/id_ed25519_gh-deploy.pub deploy@VPS（lab 系已做则跳过）
 #   c) lab-aspnetcore repo 的 GitHub Repository Secrets 加:
 #        DOCKER_USERNAME / DOCKER_PASSWORD / VPS_HOST / VPS_USER / VPS_SSH_KEY
-#        DATABASE_URL / DATABASE_USER / DATABASE_PASSWORD / LAB_JWT_SECRET
+#        DATABASE_URL / JWT_SIGNING_KEY
 #      以及 Variables: NGINX_DOMAIN / NGINX_CERT_BASENAME
-#   d) 首次 deploy 前, 在 deploy 上下文提供 DATABASE_URL/USER/PASSWORD + LAB_JWT_SECRET env，
+#   d) 首次 deploy 前, 在 deploy 上下文提供 DATABASE_URL + JWT_SIGNING_KEY env，
 #      deploy 脚本会自举 aspnetcore.env, 或 deploy 后手工编辑 \$BASE/aspnetcore.env。
 
 set -eu
@@ -122,6 +122,6 @@ log "剩下手工:"
 log "  1) cert: /etc/nginx/ssl/${CERT_BASENAME}.{crt,key}（复用 lab 系的 cert 可跳过）"
 log "  2) ssh-copy-id -i ~/.ssh/id_ed25519_gh-deploy.pub deploy@\$(hostname -I | awk '{print \$1}')（lab 系已做可跳过）"
 log "  3) lab-aspnetcore repo GitHub Secrets: DOCKER_USERNAME / DOCKER_PASSWORD / VPS_HOST / VPS_USER / VPS_SSH_KEY"
-log "  4) GitHub Secrets（首次 deploy 自举 aspnetcore.env 用）: DATABASE_URL / DATABASE_USER / DATABASE_PASSWORD / LAB_JWT_SECRET"
-log "     （LAB_JWT_SECRET: 32B+ 随机串, HS256 签 lab 自家 JWT; 不设则 deploy fail-fast）"
+log "  4) GitHub Secrets（首次 deploy 自举 aspnetcore.env 用）: DATABASE_URL / JWT_SIGNING_KEY"
+log "     （JWT_SIGNING_KEY: 32B+ 随机串, HS256 签 lab 自家 JWT; 不设则 deploy fail-fast）"
 log "  5) GitHub Variables: NGINX_DOMAIN=lab-aspnetcore.<你的域> / NGINX_CERT_BASENAME=<cert basename>"

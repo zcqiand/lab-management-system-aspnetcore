@@ -12,6 +12,14 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// conventions §6: 家族统一监听 key SERVER_PORT（aspnetcore=5000）。ASPNETCORE_URLS
+// 优先级更高（容器内 Dockerfile ENV 已设）, 本 shim 只服务裸机 dotnet run。
+var shimUrls = Lab.AspNetCore.Hosting.ServerPortShim.ResolveUrls(builder.Configuration);
+if (shimUrls is not null)
+{
+    builder.WebHost.UseUrls(shimUrls);
+}
+
 // B1 认证域底座（镜像 lab-springboot SecurityConfig）：
 //   permitAll = login / refresh / sso/**，其余 authenticated。
 builder.Services.AddControllers();
@@ -103,8 +111,9 @@ builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 var dataProvider = builder.Configuration["Lab:Data:Provider"] ?? "memory";
 if (dataProvider == "ef")
 {
-    var connectionString = builder.Configuration["Lab:Data:ConnectionString"]
-        ?? throw new InvalidOperationException("Lab:Data:Provider=ef 需要 Lab:Data:ConnectionString");
+    var connectionString = builder.Configuration["DATABASE_URL"]
+        ?? builder.Configuration["Lab:Data:ConnectionString"]
+        ?? throw new InvalidOperationException("Lab:Data:Provider=ef 需要 DATABASE_URL 或 Lab:Data:ConnectionString");
     var dataSource = new Npgsql.NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
     builder.Services.AddDbContext<LabDbContext>(options => options.UseNpgsql(dataSource));
     builder.Services.AddScoped<EfCatalogStore>();
