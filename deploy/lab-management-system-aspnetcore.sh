@@ -61,7 +61,10 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
       printf 'Lab__Jwt__TtlSeconds=3600\n'
       printf 'Lab__Jwt__RefreshTtlSeconds=604800\n'
       # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
+      # Phase 4 env 对称化（2026-08-26 起）：Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS，
+      # 老 key Lab__Cors__AllowedOrigins 已废弃。两行都写兼容旧容器/旧镜像。
       printf 'Lab__Cors__AllowedOrigins=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
+      printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
       # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
       # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
       # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
@@ -171,11 +174,18 @@ else
   echo "→ nginx vhost created. To enable: sudo nginx -t && sudo systemctl reload nginx"
 fi
 
-# 必要时补 Lab__Cors__AllowedOrigins（已有则不覆盖, 运维手工补的 prod origin 不会丢）。
+# 必要时补 CORS 白名单（已有则不覆盖, 运维手工补的 prod origin 不会丢）。
+# Phase 4 env 对称化后：Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS。
+# 两行都检查 + append（兼容 .NET env 双 key provider）。
 if ! grep -q '^Lab__Cors__AllowedOrigins=' "$BASE/aspnetcore.env"; then
   echo "→ append Lab__Cors__AllowedOrigins to existing $BASE/aspnetcore.env"
   umask 077
   printf 'Lab__Cors__AllowedOrigins=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk\n' "$NGINX_DOMAIN" >> "$BASE/aspnetcore.env"
+fi
+if ! grep -q '^LAB_CORS_ALLOWED_ORIGINS=' "$BASE/aspnetcore.env"; then
+  echo "→ append LAB_CORS_ALLOWED_ORIGINS to existing $BASE/aspnetcore.env"
+  umask 077
+  printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk\n' "$NGINX_DOMAIN" >> "$BASE/aspnetcore.env"
 fi
 
 echo "→ image: $IMAGE"
