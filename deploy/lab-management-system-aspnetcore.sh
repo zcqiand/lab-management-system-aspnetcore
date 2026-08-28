@@ -47,42 +47,55 @@ fi
 # setup-vps.sh 仍是首推（VPS 一次性, 生成 nginx vhost + 目录 + sudoers）, 本分支仅给
 # "先有 DATABASE_URL 临时上线"的场景。
 if [ ! -f "$BASE/aspnetcore.env" ]; then
-  if [ -n "${DATABASE_URL:-}" ] && [ -n "${JWT_SIGNING_KEY:-}" ] && [ -n "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
-    echo "→ bootstrapping $BASE/aspnetcore.env from env DATABASE_URL + JWT_SIGNING_KEY + LAB_SAAS_*"
-    umask 077
-    {
-      printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
-      # lab 仓 PostgreSQL 路径（与 lab-springboot 同库）：Provider=ef；
-      # 连接串 Program.cs 优先读 DATABASE_URL（2026-08-28 起不再双写 Lab__Data__ConnectionString）
-      printf 'Lab__Data__Provider=ef\n'
-      # JWT 签名密钥（HS256 ≥32B）。prod 必填 —— 不落 dev 默认值。
-      # StateCookieManager 也复用同一密钥（HS256 签 SSO state），所以只填这一个。
-      # key 名与 Program.cs 读者一致（JWT_SIGNING_KEY；曾写 Lab__Jwt__Secret 无 flat 读者，
-      # 2026-08-28 断链修复。Issuer/Ttl/RefreshTtl 死 key 同批删除——值与代码默认相同）。
-      printf 'JWT_SIGNING_KEY=%s\n' "$JWT_SIGNING_KEY"
-      # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
-      # Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS（Phase 4 起老 key Lab__Cors__* 废弃）。
-      printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
-      # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
-      # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
-      # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
-      # saas-nextjs 走 string. 固定 UUID 是跨 3 saas 后端的最小公约数. (后续 PR 改 TypeSpec
-      # 移除 @format 后可改回 'lab-mgmt')
-      # profile 切换 Program.cs 读 flat LAB_SSO_PROFILE（曾写 Lab__Sso__Profile 只进
-      # IOptions 不被读 → prod SSO 静默降级 no-sso，2026-08-28 断链修复）。
-      printf 'LAB_SSO_PROFILE=real\n'
-      printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
-      printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n'
-      printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
-      printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
-      printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
-    } > "$BASE/aspnetcore.env"
-    chown deploy:deploy "$BASE/aspnetcore.env" 2>/dev/null || true
-    chmod 600 "$BASE/aspnetcore.env"
-  else
-    echo "ERROR: $BASE/aspnetcore.env missing. Set DATABASE_URL + JWT_SIGNING_KEY + LAB_SAAS_CLIENT_SECRET env (e.g. DATABASE_URL='Host=100.79.128.25;Port=5432;Database=lab_prod;Username=postgres;Password=...' JWT_SIGNING_KEY=<32B+ random> LAB_SAAS_CLIENT_SECRET=<saas-aspnetcore V014 seeded client secret> sudo -E sh deploy/setup-vps.sh lab-aspnetcore.example.com) or run setup-vps.sh first." >&2
-    exit 1
-  fi
+  # 禁默认值兜底:secret 类(DATABASE_URL/JWT_SIGNING_KEY/LAB_SAAS_CLIENT_SECRET/
+  # 服务账号)必须显式传入,缺哪个报哪个 —— LabOptions.SsoSection 的 dev 默认值
+  # (alice/dev123456)只属于 dev,prod 静默吃它 = 菜单快照打错账号还无声。
+  for _req in DATABASE_URL JWT_SIGNING_KEY LAB_SAAS_CLIENT_SECRET LAB_SAAS_SERVICE_USER LAB_SAAS_SERVICE_PASSWORD; do
+    eval "_val=\"\${${_req}:-}\""
+    if [ -z "$_val" ]; then
+      echo "ERROR: $BASE/aspnetcore.env missing and env ${_req} not set (add GitHub Secret ${_req} → ci.yml envs → ssh-action envs)" >&2
+      exit 1
+    fi
+  done
+  echo "→ bootstrapping $BASE/aspnetcore.env (key 集合 = .env.production, suite L0.5 锁死)"
+  umask 077
+  {
+    printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
+    printf 'DATABASE_NAME=lab_prod\n'
+    printf 'SERVER_PORT=8080\n'
+    # lab 仓 PostgreSQL 路径（与 lab-springboot 同库）：Provider=ef；
+    # 2026-08-28 key 统一:flat LAB_DATA_PROVIDER(Lab__Data__Provider 段映射废弃)
+    printf 'LAB_DATA_PROVIDER=ef\n'
+    # JWT 签名密钥（HS256 ≥32B）。prod 必填 —— 不落 dev 默认值。
+    # StateCookieManager 也复用同一密钥（HS256 签 SSO state），所以只填这一个。
+    # key 名与 Program.cs 读者一致（JWT_SIGNING_KEY；曾写 Lab__Jwt__Secret 无 flat 读者，
+    # 2026-08-28 断链修复）。Issuer/Ttl/RefreshTtl 显式写(值=契约值,不吃代码默认)。
+    printf 'JWT_SIGNING_KEY=%s\n' "$JWT_SIGNING_KEY"
+    printf 'JWT_ISSUER=lab-management-system\n'
+    printf 'JWT_AUDIENCE=lab-management-system-clients\n'
+    printf 'JWT_TTL_SECONDS=3600\n'
+    printf 'JWT_REFRESH_TTL_SECONDS=604800\n'
+    # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
+    # Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS（Phase 4 起老 key Lab__Cors__* 废弃）。
+    printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
+    # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
+    # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
+    # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
+    # saas-nextjs 走 string. 固定 UUID 是跨 3 saas 后端的最小公约数. (后续 PR 改 TypeSpec
+    # 移除 @format 后可改回 'lab-mgmt')
+    # 2026-08-28 key 统一:Lab__Sso__* 段映射全部废弃,flat key 与 lab-springboot 同名
+    printf 'LAB_SSO_PROFILE=real\n'
+    printf 'LAB_SAAS_BASE_URL=https://saas-aspnetcore.xiangru.uk\n'
+    printf 'LAB_SSO_LOGIN_URL=https://saas-react.xiangru.uk\n'
+    printf 'LAB_SAAS_CLIENT_ID=11111111-1111-1111-1111-111111111111\n'
+    printf 'LAB_SAAS_CLIENT_SECRET=%s\n' "$LAB_SAAS_CLIENT_SECRET"
+    printf 'LAB_SAAS_DEFAULT_TENANT_ID=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
+    printf 'LAB_SSO_CALLBACK_REDIRECT=https://lab-react.xiangru.uk/login\n'
+    printf 'LAB_SAAS_SERVICE_USER=%s\n' "$LAB_SAAS_SERVICE_USER"
+    printf 'LAB_SAAS_SERVICE_PASSWORD=%s\n' "$LAB_SAAS_SERVICE_PASSWORD"
+  } > "$BASE/aspnetcore.env"
+  chown deploy:deploy "$BASE/aspnetcore.env" 2>/dev/null || true
+  chmod 600 "$BASE/aspnetcore.env"
 fi
 # 校验 aspnetcore.env 里有 DATABASE_URL + JWT_SIGNING_KEY
 # （即使 env-file 已存在, 内容可能是上一次失败留下的）
@@ -97,34 +110,55 @@ if ! grep -q '^JWT_SIGNING_KEY=' "$BASE/aspnetcore.env"; then
   echo "ERROR: $BASE/aspnetcore.env has no JWT_SIGNING_KEY line (old key Lab__Jwt__Secret? see migration note above)" >&2
   exit 1
 fi
-# v0.1.9: SSO 配置校验（缺失则降级到 no-sso profile，不阻断 deploy）
-# 已有部署可能没装 SSO env, deploy.sh append-only 写缺失的 4 行, 不覆盖运维手工的。
-if ! grep -q '^LAB_SSO_PROFILE=' "$BASE/aspnetcore.env"; then
-  if [ -n "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
-    echo "→ append Lab SS_SO_* to existing $BASE/aspnetcore.env"
-    umask 077
-    {
-      # profile 切换 Program.cs 读 flat LAB_SSO_PROFILE（曾写 Lab__Sso__Profile 只进
-      # IOptions 不被读 → prod SSO 静默降级 no-sso，2026-08-28 断链修复）。
-      printf 'LAB_SSO_PROFILE=real\n'
-      printf 'Lab__Sso__SaasBase=https://saas-aspnetcore.xiangru.uk\n'
-      printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n'
-      printf 'Lab__Sso__ClientId=11111111-1111-1111-1111-111111111111\n'
-      printf 'Lab__Sso__ClientSecret=%s\n' "$LAB_SAAS_CLIENT_SECRET"
-      printf 'Lab__Sso__DefaultTenantId=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
-    } >> "$BASE/aspnetcore.env"
-    chmod 600 "$BASE/aspnetcore.env"
-  else
-    echo "→ WARNING: LAB_SAAS_CLIENT_SECRET missing, SSO env not appended (lab-aspnetcore will run with LAB_SSO_PROFILE=no-sso, /api/auth/sso/authorize returns 500)" >&2
+# v0.1.9: SSO 配置校验 + 2026-08-28 key 对齐迁移(append-if-missing 到
+# .env.production 全集;key 集合契约由 suite L0.5 check_deploy_parity 锁死)。
+# secret 类缺了 fail-fast 不再 WARNING 降级 —— 静默 no-sso 在 prod 是事故不是兜底。
+if [ -f "$BASE/aspnetcore.env" ]; then
+  append_if_missing() {
+    key="$1"; val="$2"
+    if ! grep -q "^${key}=" "$BASE/aspnetcore.env"; then
+      echo "→ append ${key} to existing $BASE/aspnetcore.env"
+      umask 077
+      printf '%s=%s\n' "$key" "$val" >> "$BASE/aspnetcore.env"
+    fi
+  }
+  append_if_missing LAB_SSO_PROFILE 'real'
+  append_if_missing LAB_DATA_PROVIDER 'ef'
+  append_if_missing LAB_SAAS_BASE_URL 'https://saas-aspnetcore.xiangru.uk'
+  append_if_missing LAB_SSO_LOGIN_URL 'https://saas-react.xiangru.uk'
+  append_if_missing LAB_SAAS_CLIENT_ID '11111111-1111-1111-1111-111111111111'
+  if ! grep -q '^LAB_SAAS_CLIENT_SECRET=' "$BASE/aspnetcore.env"; then
+    if [ -z "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
+      echo "ERROR: LAB_SAAS_CLIENT_SECRET missing in $BASE/aspnetcore.env and not forwarded via ci.yml envs (静默降级 no-sso 在 prod 是事故)" >&2
+      exit 1
+    fi
+    append_if_missing LAB_SAAS_CLIENT_SECRET "$LAB_SAAS_CLIENT_SECRET"
   fi
-fi
-
-# v0.1.13 起: LoginUrl（IdP 登录页 = saas 前端域名）。早期 env 只有 SaasBase（API 域名），
-# authorizeUrl 曾拼出 {API}/login 404。已有 env append-only 补这一行。
-if ! grep -q '^Lab__Sso__LoginUrl=' "$BASE/aspnetcore.env"; then
-  echo "→ append Lab__Sso__LoginUrl to existing $BASE/aspnetcore.env"
-  umask 077
-  printf 'Lab__Sso__LoginUrl=https://saas-react.xiangru.uk\n' >> "$BASE/aspnetcore.env"
+  append_if_missing LAB_SAAS_DEFAULT_TENANT_ID '00000000-0000-0000-0000-000000000001'
+  append_if_missing LAB_SSO_CALLBACK_REDIRECT 'https://lab-react.xiangru.uk/login'
+  if ! grep -q '^LAB_SAAS_SERVICE_USER=' "$BASE/aspnetcore.env"; then
+    if [ -z "${LAB_SAAS_SERVICE_USER:-}" ] || [ -z "${LAB_SAAS_SERVICE_PASSWORD:-}" ]; then
+      echo "ERROR: LAB_SAAS_SERVICE_USER/PASSWORD missing in $BASE/aspnetcore.env and not forwarded via ci.yml envs (LabOptions dev 默认 alice 只属于 dev)" >&2
+      exit 1
+    fi
+    append_if_missing LAB_SAAS_SERVICE_USER "$LAB_SAAS_SERVICE_USER"
+    append_if_missing LAB_SAAS_SERVICE_PASSWORD "$LAB_SAAS_SERVICE_PASSWORD"
+  fi
+  append_if_missing DATABASE_NAME 'lab_prod'
+  append_if_missing SERVER_PORT '8080'
+  append_if_missing JWT_ISSUER 'lab-management-system'
+  append_if_missing JWT_AUDIENCE 'lab-management-system-clients'
+  append_if_missing JWT_TTL_SECONDS '3600'
+  append_if_missing JWT_REFRESH_TTL_SECONDS '604800'
+  # 死键清理:Lab__Sso__*/Lab__Data__* 段映射已废弃(key 统一改 flat,老 env-file
+  # 迁移时删除);Lab__Cors__AllowedOrigins 无读者同理
+  for dead in Lab__Sso__SaasBase Lab__Sso__LoginUrl Lab__Sso__ClientId Lab__Sso__ClientSecret Lab__Sso__DefaultTenantId Lab__Sso__ServiceUser Lab__Sso__ServicePassword Lab__Sso__CallbackRedirectBase Lab__Data__Provider Lab__Cors__AllowedOrigins; do
+    if grep -q "^${dead}=" "$BASE/aspnetcore.env"; then
+      echo "→ drop legacy key ${dead} from $BASE/aspnetcore.env (key 统一为 flat)"
+      umask 077
+      sed -i "/^${dead}=/d" "$BASE/aspnetcore.env"
+    fi
+  done
 fi
 
 # nginx vhost 自举（缺时创建, 不 reload —— reload 要 root）:
@@ -180,13 +214,8 @@ else
 fi
 
 # 必要时补 CORS 白名单（已有则不覆盖, 运维手工补的 prod origin 不会丢）。
-# Phase 4 env 对称化后：Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS。
-# 两行都检查 + append（兼容 .NET env 双 key provider）。
-if ! grep -q '^Lab__Cors__AllowedOrigins=' "$BASE/aspnetcore.env"; then
-  echo "→ append Lab__Cors__AllowedOrigins to existing $BASE/aspnetcore.env"
-  umask 077
-  printf 'Lab__Cors__AllowedOrigins=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk\n' "$NGINX_DOMAIN" >> "$BASE/aspnetcore.env"
-fi
+# Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS(Phase 4 对称化;老分段
+# Lab__Cors__AllowedOrigins 无读者,上面迁移段已删,不再双写)。
 if ! grep -q '^LAB_CORS_ALLOWED_ORIGINS=' "$BASE/aspnetcore.env"; then
   echo "→ append LAB_CORS_ALLOWED_ORIGINS to existing $BASE/aspnetcore.env"
   umask 077

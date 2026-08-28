@@ -23,7 +23,15 @@ if (shimUrls is not null)
 // B1 认证域底座（镜像 lab-springboot SecurityConfig）：
 //   permitAll = login / refresh / sso/**，其余 authenticated。
 builder.Services.AddControllers();
+// LabOptions:Lab json 段绑定(appsettings dev 值)+ flat env 直读入口
+// (2026-08-28 key 统一:SSO 属性 getter 优先读 flat LAB_SAAS_*/LAB_SSO_*,
+// 与 lab-springboot yml 占位符同名;json 段作 dev fallback)
 builder.Services.Configure<LabOptions>(builder.Configuration.GetSection("Lab"));
+builder.Services.PostConfigure<LabOptions>(o =>
+{
+    o.Config = builder.Configuration;
+    o.Sso.Config = builder.Configuration;
+});
 
 // Swagger / OpenAPI UI：与 saas-identity-platform-aspnetcore v0.1.5 同位,
 // 服务于前端 orval 复核契约 + QA curl 试验端点（v0.1.8 接入）。
@@ -108,7 +116,9 @@ builder.Services.AddSingleton<AuthService>(sp =>
 // B2：码表/计算方法/技术要求。
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
-var dataProvider = builder.Configuration["Lab:Data:Provider"] ?? "memory";
+// 2026-08-28 key 统一:flat LAB_DATA_PROVIDER 优先(与家族 env 契约同名),
+// Lab:Data:Provider json 段作 dev fallback(appsettings.Development.json)
+var dataProvider = builder.Configuration["LAB_DATA_PROVIDER"] ?? builder.Configuration["Lab:Data:Provider"] ?? "memory";
 if (dataProvider == "ef")
 {
     var connectionString = builder.Configuration["DATABASE_URL"]

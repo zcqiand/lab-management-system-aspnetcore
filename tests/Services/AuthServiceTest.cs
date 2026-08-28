@@ -7,6 +7,7 @@ using Lab.AspNetCore.Auth.State;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Directory;
 using Lab.AspNetCore.Services;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -17,17 +18,30 @@ public class AuthServiceTest
 {
     private const string Secret = "test-lab-jwt-secret-test-lab-jwt-secret-test-lab-jwt-secret"; // ≥32B
 
-    private static readonly LabOptions Opts = new()
+    private static readonly LabOptions Opts = CreateOpts();
+
+    /// <summary>
+    /// 2026-08-28 key 统一后 SSO 属性 getter 直读 flat env(LAB_SAAS_*/LAB_SSO_*),
+    /// 测试经 InMemory Configuration 注入(与 Program.cs PostConfigure 组合根同路径),
+    /// 不再直接赋值只读属性。
+    /// </summary>
+    private static LabOptions CreateOpts()
     {
-        Sso = new LabOptions.SsoSection
-        {
-            SaasBase = "http://localhost:3000",
-            ClientId = "test-client-id",
-            ClientSecret = "test-client-secret",
-            DefaultTenantId = "00000000-0000-0000-0000-000000000001",
-            CallbackRedirectBase = "http://localhost:5080/api/auth/sso/callback",
-        },
-    };
+        var config = new Microsoft.Extensions.Configuration.ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["LAB_SAAS_BASE_URL"] = "http://localhost:3000",
+                ["LAB_SAAS_CLIENT_ID"] = "test-client-id",
+                ["LAB_SAAS_CLIENT_SECRET"] = "test-client-secret",
+                ["LAB_SAAS_DEFAULT_TENANT_ID"] = "00000000-0000-0000-0000-000000000001",
+                ["LAB_SSO_CALLBACK_REDIRECT"] = "http://localhost:5080/api/auth/sso/callback",
+            })
+            .Build();
+        var opts = new LabOptions();
+        opts.Config = config;
+        opts.Sso.Config = config;
+        return opts;
+    }
 
     private readonly AuthService _service = new(
         new ConfigUserDirectory("dev123456"),

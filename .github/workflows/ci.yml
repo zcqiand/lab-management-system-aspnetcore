@@ -65,13 +65,17 @@ jobs:
           JWT_SIGNING_KEY: ${{ secrets.JWT_SIGNING_KEY }}
           LAB_SAAS_CLIENT_SECRET: ${{ secrets.LAB_SAAS_CLIENT_SECRET }}
           LAB_SAAS_DEFAULT_TENANT_ID: ${{ secrets.LAB_SAAS_DEFAULT_TENANT_ID }}
+          # 服务账号(菜单快照)必传(2026-08-28): deploy 脚本 fail-fast,
+          # LabOptions dev 默认 alice/dev123456 只属于 dev,prod 不得静默兜底
+          LAB_SAAS_SERVICE_USER: ${{ secrets.LAB_SAAS_SERVICE_USER }}
+          LAB_SAAS_SERVICE_PASSWORD: ${{ secrets.LAB_SAAS_SERVICE_PASSWORD }}
           NGINX_DOMAIN: ${{ vars.NGINX_DOMAIN }}
           NGINX_CERT_BASENAME: ${{ vars.NGINX_CERT_BASENAME }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: DATABASE_URL,JWT_SIGNING_KEY,LAB_SAAS_CLIENT_SECRET,LAB_SAAS_DEFAULT_TENANT_ID,NGINX_DOMAIN,NGINX_CERT_BASENAME
+          envs: DATABASE_URL,JWT_SIGNING_KEY,LAB_SAAS_CLIENT_SECRET,LAB_SAAS_DEFAULT_TENANT_ID,LAB_SAAS_SERVICE_USER,LAB_SAAS_SERVICE_PASSWORD,NGINX_DOMAIN,NGINX_CERT_BASENAME
           script: |
             # 自举: 首次部署无 /home/deploy/<repo>/ 时自动建 + 总是重拉 deploy 脚本
             # （避免 v0.x.y 修了 deploy 脚本但 VPS 还跑着旧版的坑）
