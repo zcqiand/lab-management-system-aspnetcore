@@ -108,8 +108,12 @@ public sealed class AuthService
         var t = _saasAuth.TokenAsync("refresh_token", null, saasRefresh, null).GetAwaiter().GetResult();
         var saasUser = _saasMe.WhoamiAsync(t.AccessToken).GetAwaiter().GetResult();
         var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
+        // 2026-08-29 修 prod: Refresh 端点漏 Upsert(对比 SsoCallback line 207-211)。
+        // 新部署容器 InMemoryStore 是空的,FindByEmail 必返 null → 抛 401 →
+        // hydrateAuth catch → doRefresh 失败 → 退 ANON → LoginPage 阶段 2 不会触发
+        // (用户卡在 "检查登录态...")。修: 跟 SsoCallback 同款 Upsert。
         var labUser = _directory.FindByEmail(saasUser.Email)
-            ?? throw new AuthenticationException("unknown user");
+            ?? _directory.Upsert(saasUser.Id, saasUser.Email, saasUser.DisplayName ?? "", "viewer");
         // 2026-08-29: Refresh 端点也要更新 saas refresh_token (rotate-once 语义,
         // saas /token 返回新 refresh_token) + CacheMenus 重填 cache。
         _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
