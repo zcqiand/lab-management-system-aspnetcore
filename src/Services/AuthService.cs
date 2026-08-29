@@ -112,7 +112,7 @@ public sealed class AuthService
             ?? throw new AuthenticationException("unknown user");
         // 2026-08-29: Refresh 端点也要更新 saas refresh_token (rotate-once 语义,
         // saas /token 返回新 refresh_token) + CacheMenus 重填 cache。
-        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken);
+        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
         return Session(labUser, tenantId, TenantsFrom(memberships), t.RefreshToken);
     }
@@ -242,7 +242,7 @@ public sealed class AuthService
             ?? _directory.Upsert(saasUser.Id, saasUser.Email, saasUser.DisplayName ?? "", "viewer");
         // 2026-08-29: 持久化 saas refresh_token 按 userId → MenuSnapshotCache miss reload 用。
         // 菜单快照：瞬时持有 saas accessToken 的唯一时点，顺手拉菜单进缓存（失败不阻塞登录）
-        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken);
+        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
         return Session(labUser, null, TenantsFrom(memberships), t.RefreshToken);
     }
