@@ -181,7 +181,14 @@ public sealed class AuthService
         if (string.IsNullOrEmpty(redirectUri)) throw new ArgumentException("missing redirect_uri");
         if (string.IsNullOrEmpty(state)) throw new ArgumentException("missing state");
         var ss = _stateMgr.Issue(redirectUri, state);
-        var authorizeUrl = $"{_opts.Value.Sso.EffectiveLoginUrl}/login?redirect_uri={Uri.EscapeDataString(redirectUri)}&state={Uri.EscapeDataString(state)}";
+        // RFC 6749 §4.1.1: OAuth 2.0 授权请求必带 client_id。
+        // saas-vue/saas-react LoginPage 的 OAuth 跳板分支需要 client_id 调
+        // /api/v1/oauth/authorize 拿 code 跳回 RP。缺 client_id 时跳板分支
+        // early return → 用户登录后落到 /tenants → 阻断 OAuth 流程。
+        var authorizeUrl = $"{_opts.Value.Sso.EffectiveLoginUrl}/login" +
+            $"?redirect_uri={Uri.EscapeDataString(redirectUri)}" +
+            $"&state={Uri.EscapeDataString(state)}" +
+            $"&client_id={Uri.EscapeDataString(_opts.Value.Sso.ClientId)}";
         return new SsoAuthResult(
             new SsoRedirect { AuthorizeUrl = authorizeUrl, State = state },
             ss.CookieValue);
