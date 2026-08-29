@@ -32,4 +32,9 @@ public interface IUserDirectory
      * 真实 DB 实现（V014+）走 SQL upsert。
      */
     CurrentUser Upsert(string id, string email, string displayName, string roleCode);
+
+    // 2026-08-29: MenuSnapshotCache miss reload — 持久化 saas refresh_token 按 userId。
+    // 单实例部署 OK;多实例需 DB/Redis (Phase 6+ follow-up)。
+    void SetSaasRefreshToken(string userId, string saasRefreshToken);
+    string? GetSaasRefreshToken(string userId);
 }

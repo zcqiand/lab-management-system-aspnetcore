@@ -110,6 +110,10 @@ public sealed class AuthService
         var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
         var labUser = _directory.FindByEmail(saasUser.Email)
             ?? throw new AuthenticationException("unknown user");
+        // 2026-08-29: Refresh 端点也要更新 saas refresh_token (rotate-once 语义,
+        // saas /token 返回新 refresh_token) + CacheMenus 重填 cache。
+        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken);
+        CacheMenus(labUser.Id, t.AccessToken);
         return Session(labUser, tenantId, TenantsFrom(memberships), t.RefreshToken);
     }
 
@@ -157,8 +161,36 @@ public sealed class AuthService
     public List<MenuNode> Menus(IReadOnlyDictionary<string, object>? claims)
     {
         var sub = claims?.GetValueOrDefault("sub")?.ToString();
-        return _menuCache.Get(sub)
-            ?? throw new MenusUnavailableException($"menu snapshot unavailable for user {sub ?? "(anonymous)"}; re-login to refresh");
+        if (sub is null)
+        {
+            throw new MenusUnavailableException("missing sub claim; re-login required");
+        }
+        // 2026-08-29 修 prod 503: MenuSnapshotCache 是进程内 ConcurrentDictionary,
+        // VPS 重 deploy / 容器重启即清空 → 旧 token 调 /api/auth/menus 503。
+        // miss 时主动用 IUserDirectory 持久化的 saas refresh_token 走 saas /token refresh,
+        // 拿新 saas access_token 调 saas /me/menus 填 cache。单实例 OK,多实例部署
+        // 需要把 saas refresh_token 持久化到 DB / Redis (Phase 6+ follow-up)。
+        var cached = _menuCache.Get(sub);
+        if (cached is not null) return cached;
+        var saasRefresh = _directory.GetSaasRefreshToken(sub);
+        if (string.IsNullOrEmpty(saasRefresh))
+        {
+            throw new MenusUnavailableException(
+                $"menu snapshot unavailable for user {sub} (cache miss + no saas refresh_token); re-login required");
+        }
+        try
+        {
+            var t = _saasAuth.TokenAsync("refresh_token", null, saasRefresh, null).GetAwaiter().GetResult();
+            CacheMenus(sub, t.AccessToken);
+            return _menuCache.Get(sub)
+                ?? throw new MenusUnavailableException(
+                    $"menu snapshot unavailable for user {sub} (post-refresh still empty)");
+        }
+        catch (Exception e)
+        {
+            throw new MenusUnavailableException(
+                $"menu snapshot reload failed for user {sub}: {e.Message}; re-login required");
+        }
     }
 
     public PermissionSet Permissions() => new() { Permissions = DemoPermissions.ToList() };
@@ -208,7 +240,9 @@ public sealed class AuthService
         var memberships = _saasMe.ListMyTenantsAsync(t.AccessToken).GetAwaiter().GetResult();
         var labUser = _directory.FindByEmail(saasUser.Email)
             ?? _directory.Upsert(saasUser.Id, saasUser.Email, saasUser.DisplayName ?? "", "viewer");
+        // 2026-08-29: 持久化 saas refresh_token 按 userId → MenuSnapshotCache miss reload 用。
         // 菜单快照：瞬时持有 saas accessToken 的唯一时点，顺手拉菜单进缓存（失败不阻塞登录）
+        _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken);
         CacheMenus(labUser.Id, t.AccessToken);
         return Session(labUser, null, TenantsFrom(memberships), t.RefreshToken);
     }

@@ -1,5 +1,6 @@
 namespace Lab.AspNetCore.Directory;
 
+using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
 
 /// <summary>
@@ -8,6 +9,12 @@ using Lab.AspNetCore.Controllers.Generated;
 ///   用户：admin@lab.local / dev123456（USER-A，roleCode=admin）— ADR-0008 后主键从 username 改为 email
 ///   租户：TENANT-001 city-lab / TENANT-002 district-lab / TENANT-003 third-party
 ///   运行时 upsert：不在 seed 里的 SSO 用户落到 _upserted 内存 Dictionary
+///
+///   2026-08-29: 新增 saas_refresh_token 进程内缓存 (_saasRefreshTokens, by userId)。
+///   MenuSnapshotCache 是进程内 ConcurrentDictionary,VPS 重 deploy / 容器重启即清空
+///   → /api/auth/menus 503。修复: cache miss 时 GetSaasRefreshToken(userId) →
+///   saas /token refresh → 重新调 saas /me/menus → 填 cache。单实例 OK,多实例部署
+///   需要替换为 DB / Redis 持久层 (Phase 6+ follow-up)。
 ///
 /// 口令可用 Lab:Auth:DevPassword 覆盖（避免硬编码扩散到测试）。
 /// </summary>
@@ -30,6 +37,7 @@ public sealed class ConfigUserDirectory : IUserDirectory
 
     private readonly string _devPassword;
     private readonly Dictionary<string, CurrentUser> _upserted = new();
+    private readonly ConcurrentDictionary<string, string> _saasRefreshTokens = new();
 
     public ConfigUserDirectory(string devPassword)
     {
@@ -98,5 +106,18 @@ public sealed class ConfigUserDirectory : IUserDirectory
         };
         _upserted[email] = user;
         return user;
+    }
+
+    // 2026-08-29: saas refresh_token 进程内缓存 (MenuSnapshotCache miss reload 用)。
+    public void SetSaasRefreshToken(string userId, string saasRefreshToken)
+    {
+        if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(saasRefreshToken)) return;
+        _saasRefreshTokens[userId] = saasRefreshToken;
+    }
+
+    public string? GetSaasRefreshToken(string userId)
+    {
+        if (string.IsNullOrEmpty(userId)) return null;
+        return _saasRefreshTokens.TryGetValue(userId, out var t) ? t : null;
     }
 }
