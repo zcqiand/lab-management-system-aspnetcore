@@ -86,7 +86,9 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     # 2026-08-28 key 统一:Lab__Sso__* 段映射全部废弃,flat key 与 lab-springboot 同名
     printf 'LAB_SSO_PROFILE=real\n'
     printf 'LAB_SAAS_BASE_URL=https://saas-aspnetcore.xiangru.uk\n'
-    printf 'LAB_SSO_LOGIN_URL=https://saas-react.xiangru.uk\n'
+    # 登录 UI 同栈匹配：lab-vue 后端是 lab-aspnetcore → 登录页指 saas-vue
+    #（2026-08-29 前指 saas-react；saas-vue LoginPage 已补 OAuth code 回跳）
+    printf 'LAB_SSO_LOGIN_URL=https://saas-vue.xiangru.uk\n'
     printf 'LAB_SAAS_CLIENT_ID=11111111-1111-1111-1111-111111111111\n'
     printf 'LAB_SAAS_CLIENT_SECRET=%s\n' "$LAB_SAAS_CLIENT_SECRET"
     printf 'LAB_SAAS_DEFAULT_TENANT_ID=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
@@ -125,7 +127,15 @@ if [ -f "$BASE/aspnetcore.env" ]; then
   append_if_missing LAB_SSO_PROFILE 'real'
   append_if_missing LAB_DATA_PROVIDER 'ef'
   append_if_missing LAB_SAAS_BASE_URL 'https://saas-aspnetcore.xiangru.uk'
-  append_if_missing LAB_SSO_LOGIN_URL 'https://saas-react.xiangru.uk'
+  # v0.2.7: 登录 UI 同栈匹配 saas-vue（lab-vue 后端 = 本仓；ADR-0014 T-10 曾指
+  # saas-react，现改 saas-vue 对齐 vue 栈）。存量 env 里脚本旧默认 saas-react
+  # 原地迁移；自定义值不动。
+  if ! grep -q '^LAB_SSO_LOGIN_URL=' "$BASE/aspnetcore.env"; then
+    append_if_missing LAB_SSO_LOGIN_URL 'https://saas-vue.xiangru.uk'
+  elif grep -q '^LAB_SSO_LOGIN_URL=https://saas-react\.xiangru\.uk$' "$BASE/aspnetcore.env"; then
+    echo "→ migrate stale LAB_SSO_LOGIN_URL saas-react -> saas-vue (同栈匹配) in $BASE/aspnetcore.env"
+    sed -i 's#^LAB_SSO_LOGIN_URL=https://saas-react\.xiangru\.uk$#LAB_SSO_LOGIN_URL=https://saas-vue.xiangru.uk#' "$BASE/aspnetcore.env"
+  fi
   append_if_missing LAB_SAAS_CLIENT_ID '11111111-1111-1111-1111-111111111111'
   if ! grep -q '^LAB_SAAS_CLIENT_SECRET=' "$BASE/aspnetcore.env"; then
     if [ -z "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
