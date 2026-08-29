@@ -1,34 +1,19 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "junction GET 4 端点实现 + Response 编号错位修复 + service 测试（12a9867, v0.1.14）",
+  "current_task": "Lab__Sso__* 段映射废弃统一 flat key(v0.2.9 GREEN)",
   "done": [
-    "scripts/gen-shared.sh 跑通:NSwag 重生 Controllers.cs (19 个 Page<T> wrapper inline Response1-19) + 4 junction GET 接口 + IStores/JunctionService 全接口签名重整",
-    "src/Data/IStores.cs:IJunctionStore 加 4 List 方法 (ListSpecialtyObject / ListObjectParameter / ListObjectStandard / ListStandardParameter) 接 ?string / ?role 过滤",
-    "src/Data/InMemoryDictionaryStore.cs:InMemoryJunctionStore 4 个 List 用 ConcurrentDictionary.Values + Where LINQ 过滤",
-    "src/Persistence/EfDictionaryStore.cs:EfJunctionStore 4 个 List 用 db.JunctionLinks.AsNoTracking() + Where 过滤",
-    "src/Services/JunctionService.cs:加 4 List*Links 转发方法",
-    "src/Controllers/Implementation/DictionaryController.cs:4 主表 (ListSpecialties/Wrap12, ListParameters/Wrap11, ListStandards/Wrap13, ListObjects/Wrap10) + 4 junction list (Response8/6/7/9 WrapShort) + ReportNamesController ListReportNames (Response17) + ParamInterfacesController ListParamInterfaces (Response14) — 全部 Page<T> 4 字段包裹",
-    "src/Controllers/Implementation/CatalogController.cs:4 码表 list (ListBrands/Response, ListModels/Response3, ListSpecs/Response4, ListGrades/Response2) Page<T>",
-    "src/Controllers/Implementation/ContractController.cs:Response N 重映射(Contracts/Receipts/FlowQueue/Samples/TestRecords 5 个 list 编号错位修复)",
-    "dotnet format 应用,L1 format 全绿",
-    "aspnetcore 仓 gate L0-L5 全绿 149 条目 0 软告警"
+    "LabOptions.SsoSection getter 直读 flat LAB_SAAS_*(Config 经 PostConfigure 注入,json 段 dev fallback)",
+    "三份 env+deploy 脚本 flat key+老 env-file 死键清理",
+    "v0.2.9-20260829 部署 GREEN(rerun,第一次 docker pull 瞬时 lease 错)"
   ],
   "next": [
-    "无"
+    "验收 SSO + 菜单快照(flat key 链路)"
   ],
-  "open_questions": [
-    "LabJwtSigner.cs HMAC HS256 — 此前 batch (B12) 已落地;与本 batch (B7 Page<T>) 无冲突"
-  ],
+  "open_questions": [],
   "dont": [
-    "不要在 Controller / Program.cs 写业务逻辑(CLAUDE.md §2 硬约束)",
-    "不要 catch 后吞掉异常(CLAUDE.md §2 硬约束)",
-    "不要硬编码连接串/密钥(CLAUDE.md §2 硬约束 — appsettings.Development.json)",
-    "不要直接修改 docs/functions/function-tree.md → 走 /tree-change 提案",
-    "不要在 aspnetcore 仓加新的 NuGet 包(CLAUDE.md §1 'xUnit + dotnet format + TRX trace' 锁定)",
-    "不要手改 src/Controllers/Generated/Controllers.cs(NSwag 产物 — 下次 gen-shared.sh 会覆盖)",
-    "不要修改 src/Models/Generated/Models.cs (inline in Controllers.cs,不独立生成)",
-    "Response5 / Response15 / Response16 / Response18 / Response19 是 NSwag 自动编号 — 顺序依赖 regen 时序,不要硬编码预期编号"
+    "测试不能直接赋值 SsoSection 只读属性——经 InMemory ConfigurationRoot 注入"
   ],
-  "active_branch": "master"
+  "active_branch": "master",
+  "last_session_at": "2026-08-29"
 }
