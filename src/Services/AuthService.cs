@@ -168,17 +168,20 @@ public sealed class AuthService
     public SsoAuthResult SsoAuthorize(string redirectUri, string state)
     {
         // RFC 6749 §4.1.1：redirect_uri + state 由客户端（前端）发起，原样透传给授权服务器。
-        // lab 后端是 confidential client：替浏览器向 saas /oauth/authorize 领 code，
-        // 同时把前端 state 存入签名 cookie（§10.12 CSRF），callback 时校验回传的 state。
+        // lab 后端是 confidential client,但 OAuth 2.0 标准 authorize 端点必须 saas session
+        // 验证资源所有者(用户必须在 saas 端登录,写 saasSession cookie),lab 后端 server-to-server
+        // 调不通(HttpOnly + SameSite cookie 无法跨后端获取)。所以 lab 后端不再代理 authorize。
+        //
+        // 2026-08-29 修 prod 401: 不再调 _saasAuth.AuthorizeAsync(预拿 code),改成直接
+        // 302 跳 saas 登录页(带 redirect_uri + state)。saas-vue/saas-react LoginPage 已支持
+        // ?redirect_uri=&state= 参数处理:用户登录后自动调 saas-aspnetcore /api/v1/oauth/authorize
+        // 拿 code(此时已有 saas session),302 跳回 redirect_uri?code=&state= 给 lab 前端。
+        // lab 前端 POST /api/auth/sso/callback {code, state} → SsoCallback 用 clientSecret
+        // 调 saas /token (v0.3.20 已放宽不需 session) 拿 access_token + refresh_token。
         if (string.IsNullOrEmpty(redirectUri)) throw new ArgumentException("missing redirect_uri");
         if (string.IsNullOrEmpty(state)) throw new ArgumentException("missing state");
         var ss = _stateMgr.Issue(redirectUri, state);
-        // scope 必须精确 ∈ apps.scopes 种子的单个值（shared V014: "lab.read" | "lab.write"；
-        // saas 侧 Contains 是单值精确匹配，不接受 space-separated）。
-        // 曾发 "openid profile email" → saas Authorize 抛 INVALID_SCOPE 500，浏览器只见 502。
-        var resp = _saasAuth.AuthorizeAsync(redirectUri, "lab.read", state).GetAwaiter().GetResult();
-        // 登录跳板在 saas 前端域名（LoginUrl），不是 API 域名（SaasBase 的 /login 是 404）
-        var authorizeUrl = $"{_opts.Value.Sso.EffectiveLoginUrl}/login?code={resp.Code}&state={resp.State}&redirect_uri={Uri.EscapeDataString(redirectUri)}";
+        var authorizeUrl = $"{_opts.Value.Sso.EffectiveLoginUrl}/login?redirect_uri={Uri.EscapeDataString(redirectUri)}&state={Uri.EscapeDataString(state)}";
         return new SsoAuthResult(
             new SsoRedirect { AuthorizeUrl = authorizeUrl, State = state },
             ss.CookieValue);
