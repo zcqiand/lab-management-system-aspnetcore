@@ -200,9 +200,12 @@ public class AuthServiceTest
     public void SsoAuthorize_returnsAuthorizeUrlAndState()
     {
         // RFC 6749 §4.1.1：前端 state 原样透传，SsoRedirect.state 返回同一值
+        // 2026-08-29: lab 后端不再代理 saas authorize 预拿 code,
+        // 改成 302 跳 saas 登录页(带 redirect_uri + state)。
         var res = _service.SsoAuthorize("http://localhost:5173/login", "client-state-abc");
         Assert.NotNull(res.Redirect.AuthorizeUrl);
-        Assert.Contains("code=dev-code", res.Redirect.AuthorizeUrl);
+        Assert.Contains("/login?redirect_uri=", res.Redirect.AuthorizeUrl);
+        Assert.Contains("state=client-state-abc", res.Redirect.AuthorizeUrl);
         Assert.Equal("client-state-abc", res.Redirect.State);
         Assert.NotEmpty(res.CookieValue);
     }
