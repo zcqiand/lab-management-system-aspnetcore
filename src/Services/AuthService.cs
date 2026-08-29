@@ -320,7 +320,9 @@ public sealed class AuthService
     /// <summary>saas EffectiveMenuNode -> 契约 MenuNode（name->label；icon 空时按 type 兜底，镜像 springboot SaasMenuMapper）。</summary>
     private static MenuNode MapSaasMenu(SaasMenuNode src)
     {
-        var children = src.Children ?? new List<SaasMenuNode>();
+        var children = (src.Children ?? new List<SaasMenuNode>())
+            .OrderBy(c => c.SortOrder)
+            .ToList();
         var icon = string.IsNullOrEmpty(src.Icon)
             ? (src.Type == "group" ? "resource" : "file")
             : src.Icon;
