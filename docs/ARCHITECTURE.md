@@ -7,7 +7,7 @@
 > 3. 改一次契约 → 三端同步的核心流程在本仓怎么走。
 
 > **范围**：本文档只描述 *架构*（结构 / 边界 / 数据流 / 决策）。
-> 编码细则见 [docs/conventions/](conventions/)，单个决策的 ADR 见 [docs/adr/](adr/)，需求/功能见 [docs/requirements/](../requirements/) 与 [docs/functions/function-tree.md](functions/function-tree.md)。
+> 编码细则见 [docs/conventions/](conventions/)，单个决策的 ADR 见 [docs/adr/](adr/)，需求/功能见 [docs/requirements/](requirements/) 与 [docs/functions/function-tree.md](functions/function-tree.md)。
 
 ---
 
@@ -16,7 +16,7 @@
 | 你是… | 直接看 |
 |---|---|
 | 新人，要 30 分钟搞懂本仓 | §1 → §2 → §3.1（NSwag 链）→ §4（启动流程） |
-| 改 API 契约怎么同步 | §3.1 → §5 → [父仓 docs/ARCHITECTURE.md §5.1](../docs/ARCHITECTURE.md#51-改一次契约--三端同步codegen-链) |
+| 改 API 契约怎么同步 | §3.1 → §5 → [父仓 docs/ARCHITECTURE.md §5.1](../../../docs/ARCHITECTURE.md#51-改一次契约--三端同步codegen-链) |
 | 想加新 endpoint | §3.2（手写 partial Controller）→ §3.4（TenantGuard）→ [function-tree.md](functions/function-tree.md) |
 | 切换 InMemory ↔ EF | §3.3 → §3.6（Program.cs DI 分支）→ ADR-0010（§6） |
 | 想问「为什么这样设计」 | §7（决策索引）→ 对应 ADR |
@@ -258,7 +258,7 @@ InMemoryXxxStore    EfXxxStore
 **EF Core（prod，`Lab:Data:Provider=ef`）**：
 
 - `LabDbContext` 镜像 shared SQL 表结构（`contracts`, `receipts`, `samples`, `test_records`, `inspection_models`, `inspection_specialties`, ...）；
-- 与 shared SQL 同步靠 `sync-db.mjs`（[lab-nextjs 借链](../lab-management-system-nextjs/scripts/sync-db.mjs)）灌库，不靠 EF Migrations；
+- 与 shared SQL 同步靠 `sync-db.mjs`（[lab-shared 仓](../../lab-management-system-shared/scripts/sync-db.mjs)，pg driver 走 [lab-nextjs 借链](../../lab-management-system-nextjs/scripts/borrow-from-nextjs-pg.mjs)）灌库，不靠 EF Migrations；
 - EF Migrations 本仓**不维护**（[ADR-0010 §6](#6-adr-0010-待办) open question）；
 - DI 在 `Program.cs` 用 `if (dataProvider == "ef")` 二选一。
 
@@ -327,7 +327,7 @@ M02.F01（合同）、M03.F01-F09（接样/样品/检测/flow）、M04.F06-F09�
 | `Lab:Jwt:TtlSeconds` | `3600` | access token TTL |
 | `Lab:Jwt:RefreshTtlSeconds` | `604800` | refresh token TTL（7d） |
 | `Lab:Sso:Profile` | dev=`no-sso` / prod=`dev` 或 `prod` | `no-sso` 走 NoopSaasAuthClient；其他走 HttpSaasAuthClient |
-| `Lab:Cors:AllowedOrigins` | `http://localhost:5173,http://localhost:5174,http://localhost:3000` | lab 三前端 dev port |
+| `Lab:Cors:AllowedOrigins` | `http://localhost:5201,http://localhost:5202,http://localhost:5203,http://localhost:5101` | lab 三前端 dev port + saas-nextjs（lab→saas SSO）；flat key `LAB_CORS_ALLOWED_ORIGINS` |
 | `Lab:Data:Provider` | `memory` | `memory` / `ef` 二选一 |
 | `Lab:Data:ConnectionString` | ef 时必填 | Npgsql 连接串（env 注入，不硬编码） |
 | `Lab:Auth:DevPassword` | `dev123456` | dev demo 密码 |
@@ -475,7 +475,7 @@ app.Run()
 
 **关键检查点**：
 
-- 改契约时必须**先**改 shared BASE tree 的 F 级（[ADR-0003](../docs/adr/0003-function-tree-requires-human-approval.md)），再改本仓 I 级子项；否则 L5 红；
+- 改契约时必须**先**改 shared BASE tree 的 F 级（[ADR-0003](../../../docs/adr/0003-function-tree-requires-human-approval.md)），再改本仓 I 级子项；否则 L5 红；
 - `gen-shared.sh` 不会 `cp` SQL 文件——本仓 EF 不 Migrate，schema 真源永远是 shared SQL；
 - `patch-generated.py` 是确定性 AST 修补，幂等可重放；
 - `dotnet test` 测试**禁止并行**：`[assembly: CollectionBehavior(DisableTestParallelization)]`——InMemoryStore 是 Singleton fixture，并发修改抛 `Collection was modified`；
@@ -559,7 +559,7 @@ python "$ROOT/scripts/patch-generated.py"
 
 ## 6. ADR-0010 待办
 
-**ADR-0010**（父仓 [00010-aspnetcore-ef-mirrors-sql.md](../docs/adr/0010-aspnetcore-ef-mirrors-sql.md)）：EF Core Migrations 应镜像 shared SQL DDL。
+**ADR-0010**（父仓 [00010-aspnetcore-ef-mirrors-sql.md](../../../docs/adr/0010-aspnetcore-ef-mirrors-sql.md)）：EF Core Migrations 应镜像 shared SQL DDL。
 
 **当前状态**：
 
@@ -591,10 +591,10 @@ python "$ROOT/scripts/patch-generated.py"
 
 | ADR | 主题 | 在本仓的落地点 |
 |---|---|---|
-| [0007](../docs/adr/0007-shared-sql-ssot.md) | shared 双 SSOT | schema 真源 = shared SQL；本仓不维护 SQL |
-| [0010](../docs/adr/0010-aspnetcore-ef-mirrors-sql.md) | aspnetcore EF 应镜像 SQL | 待办：本仓暂不补 EF Migrations（§6） |
-| [0014](../docs/conventions/multi-repo-family.md#4-后端配置env-driven-单-urladr-0014) | env-driven 单 URL | 本仓配置全部走 env（Lab:Jwt:Secret 等） |
-| [0003](../docs/adr/0003-function-tree-requires-human-approval.md) | 功能清单变更需人批 | 改 F/I 走 `/tree-change` |
+| [0007](../../../docs/adr/0007-shared-sql-ssot.md) | shared 双 SSOT | schema 真源 = shared SQL；本仓不维护 SQL |
+| [0010](../../../docs/adr/0010-aspnetcore-ef-mirrors-sql.md) | aspnetcore EF 应镜像 SQL | 待办：本仓暂不补 EF Migrations（§6） |
+| [0014](../../../docs/conventions/multi-repo-family.md#4-后端配置env-driven-单-urladr-0014) | env-driven 单 URL | 本仓配置全部走 env（Lab:Jwt:Secret 等） |
+| [0003](../../../docs/adr/0003-function-tree-requires-human-approval.md) | 功能清单变更需人批 | 改 F/I 走 `/tree-change` |
 
 ### 7.3 隐含约束（来自 CLAUDE.md）
 
@@ -627,7 +627,7 @@ python "$ROOT/scripts/patch-generated.py"
 | **real backend OAuth** | 真对接 saas /oauth/{authorize,token} | ADR-0008 取代 B1 alg=none + mock SSO |
 | **SSOT** | Single Source of Truth | lab-shared 担 API + DB 双 SSOT |
 | **BASE tree** | 契约仓的功能清单 | 只到 F 级；本仓镜像后加 I |
-| **gitlink** | 父仓对子仓 commit hash 引用 | mode 160000；详见 [docs/conventions/submodule.md](../docs/conventions/submodule.md) |
+| **gitlink** | 父仓对子仓 commit hash 引用 | mode 160000；详见 [docs/conventions/submodule.md](../../../docs/conventions/submodule.md) |
 | **trace.json** | 测试命中 fn-ID 清单 | `trace_cmd` 产，禁止手写 |
 | **fnTest** | 测试 ID 嵌入 it 名 | `fnTest(["M01.F05.I01"], "...", () => {...})` |
 | **stack.json** | 项目自描述 | suite 门禁读它；项目只能声明 L1-L4 |
@@ -641,13 +641,13 @@ python "$ROOT/scripts/patch-generated.py"
 
 | 你想知道… | 看哪里 |
 |---|---|
-| lab 家族 + 14 仓拓扑 | [父仓 docs/ARCHITECTURE.md §1-§2](../docs/ARCHITECTURE.md) |
-| 双 SSOT + 一份契约三套 codegen | [父仓 docs/ARCHITECTURE.md §3](../docs/ARCHITECTURE.md) |
-| 改契约三端同步全流程 | [父仓 docs/ARCHITECTURE.md §5.1](../docs/ARCHITECTURE.md#51-改一次契约--三端同步codegen-链) |
-| 端口 + CORS + env 全景 | [父仓 docs/ARCHITECTURE.md §6](../docs/ARCHITECTURE.md) |
-| 12 份 ADR 总索引 | [父仓 docs/ARCHITECTURE.md §7](../docs/ARCHITECTURE.md) |
-| 14 仓 CLAUDE.md 一览 | [父仓 docs/ARCHITECTURE.md §9](../docs/ARCHITECTURE.md) |
-| 典型陷阱 | [父仓 docs/ARCHITECTURE.md 附录 B](../docs/ARCHITECTURE.md) + `~/.claude/.../memory/MEMORY.md` |
+| lab 家族 + 14 仓拓扑 | [父仓 docs/ARCHITECTURE.md §1-§2](../../../docs/ARCHITECTURE.md) |
+| 双 SSOT + 一份契约三套 codegen | [父仓 docs/ARCHITECTURE.md §3](../../../docs/ARCHITECTURE.md) |
+| 改契约三端同步全流程 | [父仓 docs/ARCHITECTURE.md §5.1](../../../docs/ARCHITECTURE.md#51-改一次契约--三端同步codegen-链) |
+| 端口 + CORS + env 全景 | [父仓 docs/ARCHITECTURE.md §6](../../../docs/ARCHITECTURE.md) |
+| 12 份 ADR 总索引 | [父仓 docs/ARCHITECTURE.md §7](../../../docs/ARCHITECTURE.md) |
+| 14 仓 CLAUDE.md 一览 | [父仓 docs/ARCHITECTURE.md §9](../../../docs/ARCHITECTURE.md) |
+| 典型陷阱 | [父仓 docs/ARCHITECTURE.md 附录 B](../../../docs/ARCHITECTURE.md) + `~/.claude/.../memory/MEMORY.md` |
 
 **本仓独有**，父仓文档只提及：
 
@@ -682,7 +682,7 @@ python "$ROOT/scripts/patch-generated.py"
 
 ---
 
-## 附录 C：典型陷阱（详见 [父仓 memory](../docs/conventions/) + `~/.claude/.../memory/MEMORY.md`）
+## 附录 C：典型陷阱（详见 [父仓 memory](../../../docs/conventions/) + `~/.claude/.../memory/MEMORY.md`）
 
 | 陷阱 | 后果 | 解法 |
 |---|---|---|
