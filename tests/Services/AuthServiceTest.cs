@@ -57,9 +57,9 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I01")]
     public void Login_success_returnsSessionWithTenants()
     {
-        var res = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
+        var res = _service.Login(new LoginRequest { Username = "alice", Password = "dev123456" });
         Assert.Equal("USER-A", res.User.Id);
-        Assert.Equal("admin@lab.local", res.User.Username);
+        Assert.Equal("alice", res.User.Username);
         Assert.Equal(3, res.Tenants.Count);
         Assert.Equal("TENANT-001", res.Tenants[0].TenantId);
         Assert.NotNull(res.Token);
@@ -71,7 +71,7 @@ public class AuthServiceTest
     public void Login_wrongPassword_throws()
     {
         Assert.Throws<AuthenticationException>(
-            () => _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "wrong" }));
+            () => _service.Login(new LoginRequest { Username = "alice", Password = "wrong" }));
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I04")]
     public void Refresh_validToken_returnsNewSession()
     {
-        var login = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
+        var login = _service.Login(new LoginRequest { Username = "alice", Password = "dev123456" });
         var res = _service.Refresh(new RefreshTokenRequest { RefreshToken = login.RefreshToken });
 
         Assert.Equal("USER-A", res.User.Id);
@@ -177,7 +177,7 @@ public class AuthServiceTest
     {
         // 密码登录也拉快照：login() 成功后用 saas 服务账号换 token 拉 /me/menus。
         // Noop saas 返回空菜单树 -> 空快照也写入（Menus() 不再抛）
-        var res = _service.Login(new LoginRequest { Username = "admin@lab.local", Password = "dev123456" });
+        var res = _service.Login(new LoginRequest { Username = "alice", Password = "dev123456" });
         Assert.Equal("USER-A", res.User.Id);
         // login 副作用：快照已写入 -> Menus() 命中（空树也算命中，不 503）
         var claims = new Dictionary<string, object> { ["sub"] = res.User.Id };

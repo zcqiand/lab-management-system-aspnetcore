@@ -13,8 +13,8 @@
 # 这份配置的目的:
 #   - lab.YOUR_DOMAIN 的 HTTP 301 到 HTTPS
 #   - HTTPS 终结在 VPS（持 cert）
-#   - proxy_pass 到本机容器端口 8014（由 docker run -p 127.0.0.1:8014:8080 决定）
-#   - 容器内 ASP.NET Core 8 监听 :8080（Dockerfile: ENTRYPOINT ["dotnet", "lab-management-system-aspnetcore.dll"]）
+#   - proxy_pass 到本机容器端口 8014（由 docker run -p 127.0.0.1:8014:5204 决定）
+#   - 容器内 ASP.NET Core 8 监听 :5204（conventions §6；Dockerfile: ENTRYPOINT ["dotnet", "lab-management-system-aspnetcore.dll"]）
 #
 # 注意:不持有 default_server。同一台 VPS 上若 lab-react/vue/nextjs/springboot 也跑 :80
 # default_server，aspnetcore 这边重复声明 nginx -t 直接报错——务必先装其中一个并
@@ -44,7 +44,7 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
 
     location / {
-        # VPS 暴露端口（容器内 ASP.NET Core 监听 :8080）
+        # VPS 暴露端口（容器内 ASP.NET Core 监听 :5204）
         # 改端口必须同步 deploy/lab-management-system-aspnetcore.sh 的 -p
         proxy_pass http://127.0.0.1:8014;
 

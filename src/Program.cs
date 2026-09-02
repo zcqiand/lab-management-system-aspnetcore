@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// conventions §6: 家族统一监听 key SERVER_PORT（aspnetcore=5000）。ASPNETCORE_URLS
+// conventions §6: 家族统一监听 key SERVER_PORT（aspnetcore=5204，2026-09-02 端口分段）。ASPNETCORE_URLS
 // 优先级更高（容器内 Dockerfile ENV 已设）, 本 shim 只服务裸机 dotnet run。
 var shimUrls = Lab.AspNetCore.Hosting.ServerPortShim.ResolveUrls(builder.Configuration);
 if (shimUrls is not null)
@@ -67,10 +67,10 @@ builder.Services.AddAuthorization(o =>
     o.AddPolicy("permitAll", p => p.RequireAssertion(_ => true));
 });
 
-// CORS：lab 前端三仓（5173 react / 5174 vue / 3000 nextjs），env LAB_CORS_ALLOWED_ORIGINS 覆盖
+// CORS：lab 前端三仓（5202 react / 5203 vue / 5201 nextjs），env LAB_CORS_ALLOWED_ORIGINS 覆盖
 // Phase 4 env 对称化: Lab:Cors:AllowedOrigins → LAB_CORS_ALLOWED_ORIGINS flat key
 var allowedOrigins = (builder.Configuration["LAB_CORS_ALLOWED_ORIGINS"]
-    ?? "http://localhost:5173,http://localhost:5174,http://localhost:3000")
+    ?? "http://localhost:5201,http://localhost:5202,http://localhost:5203")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
     .WithOrigins(allowedOrigins)

@@ -2,7 +2,7 @@
 # Multi-stage:
 #   build    : dotnet:8.0-sdk → restore + publish self-contained=false
 #   runtime  : aspnet:8.0 (debian-slim) → copy published app + ContentRoot
-# 容器内监听 :8080 (ASPNETCORE_URLS=http://+:8080);VPS nginx 反代到 host 8014
+# 容器内监听 :5204 (ASPNETCORE_URLS=http://+:5204; conventions §6 端口分段);VPS nginx 反代到 host 8014
 # (lab-aspnetcore.xiangru.uk — lab 家族 801x: vue=8010 react=8011 nextjs=8012 springboot=8013 aspnetcore=8014,
 #  与 springboot 同 PostgreSQL 远程库, swap 时只换前端 env 里的 base URL)。
 
@@ -49,14 +49,14 @@ RUN groupadd --system --gid 1001 labasp \
 # 从 builder 拷 publish 产物
 COPY --from=builder --chown=labasp:labasp /app/publish /app
 
-# 容器内监听 :8080（与 saas-springboot / saas-aspnetcore 家族对齐 :8080）。
+# 容器内监听 :5204（conventions §6 端口分段：本地 dev 与容器内统一）。
 # ContentRootPath=AppContext.BaseDirectory → /app, 自动找到 appsettings*.json。
-ENV ASPNETCORE_URLS=http://+:8080 \
+ENV ASPNETCORE_URLS=http://+:5204 \
     ASPNETCORE_ENVIRONMENT=Production \
     DOTNET_RUNNING_IN_CONTAINER=true \
     DOTNET_NOLOGO=true
 
-EXPOSE 8080
+EXPOSE 5204
 
 USER labasp
 
@@ -66,6 +66,6 @@ USER labasp
 # start-period=30s 给启动留余量;deploy.sh wget 探针仍是 ground truth
 # (Docker HEALTHCHECK 跨 daemon 行为不一致 —— saas-springboot v0.1.8/09/10 教训)。
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD wget --tries=1 --timeout=3 -qO- http://127.0.0.1:8080/health >/dev/null || exit 1
+  CMD wget --tries=1 --timeout=3 -qO- http://127.0.0.1:5204/health >/dev/null || exit 1
 
 ENTRYPOINT ["dotnet", "lab-management-system-aspnetcore.dll"]

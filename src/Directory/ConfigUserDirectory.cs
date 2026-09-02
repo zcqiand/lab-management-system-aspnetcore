@@ -6,7 +6,8 @@ using Lab.AspNetCore.Controllers.Generated;
 /// <summary>
 /// 配置式 demo 目录（B1）。数据 1:1 镜像 lab-msw / lab-springboot：
 ///
-///   用户：admin@lab.local / dev123456（USER-A，roleCode=admin）— ADR-0008 后主键从 username 改为 email
+///   用户：alice / dev123456（USER-A，roleCode=admin）— 2026-09-02 契约收敛：dev 凭证
+///   与 saas seed（V016 alice）同源，四方（msw/nextjs/springboot/本仓）统一，contract-test 依赖
 ///   租户：TENANT-001 city-lab / TENANT-002 district-lab / TENANT-003 third-party
 ///   运行时 upsert：不在 seed 里的 SSO 用户落到 _upserted 内存 Dictionary
 ///
@@ -23,7 +24,7 @@ public sealed class ConfigUserDirectory : IUserDirectory
     private static readonly CurrentUser DemoUser = new()
     {
         Id = "USER-A",
-        Username = "admin@lab.local",
+        Username = "alice",
         DisplayName = "管理员",
         RoleCode = "admin",
     };

@@ -11,7 +11,7 @@
 # 与姊妹仓 saas-identity-platform-aspnetcore.sh 的差异:
 #   - 数据库：PostgreSQL 远程, DATABASE_URL 从 env 注入
 #     （EF Core / Npgsql 无 ./data 卷, 程序重启数据不丢；与 lab-springboot 共用 lab_dev/lib 库）
-#   - 容器内是 ASP.NET Core 8 监听 :8080 → -p 127.0.0.1:8014:8080
+#   - 容器内是 ASP.NET Core 8 监听 :5204（conventions §6）→ -p 127.0.0.1:8014:5204
 #     （lab 家族 801x: vue=8010 react=8011 nextjs=8012 springboot=8013 aspnetcore=8014）
 #   - 密钥走 ./aspnetcore.env (DATABASE_URL + JWT_SIGNING_KEY + LAB_CORS_ALLOWED_ORIGINS),
 #     setup-vps.sh 不预生成（fail-fast 不便）,本脚本首启自举。
@@ -62,7 +62,7 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
   {
     printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
     printf 'DATABASE_NAME=lab_prod\n'
-    printf 'SERVER_PORT=8080\n'
+    printf 'SERVER_PORT=5204\n'
     # lab 仓 PostgreSQL 路径（与 lab-springboot 同库）：Provider=ef；
     # 2026-08-28 key 统一:flat LAB_DATA_PROVIDER(Lab__Data__Provider 段映射废弃)
     printf 'LAB_DATA_PROVIDER=ef\n'
@@ -77,7 +77,7 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     printf 'JWT_REFRESH_TTL_SECONDS=604800\n'
     # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
     # Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS（Phase 4 起老 key Lab__Cors__* 废弃）。
-    printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5173,http://localhost:5174\n' "$NGINX_DOMAIN"
+    printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5201,http://localhost:5202,http://localhost:5203\n' "$NGINX_DOMAIN"
     # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
     # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
     # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
@@ -155,7 +155,7 @@ if [ -f "$BASE/aspnetcore.env" ]; then
     append_if_missing LAB_SAAS_SERVICE_PASSWORD "$LAB_SAAS_SERVICE_PASSWORD"
   fi
   append_if_missing DATABASE_NAME 'lab_prod'
-  append_if_missing SERVER_PORT '8080'
+  append_if_missing SERVER_PORT '5204'
   append_if_missing JWT_ISSUER 'lab-management-system'
   append_if_missing JWT_AUDIENCE 'lab-management-system-clients'
   append_if_missing JWT_TTL_SECONDS '3600'
@@ -247,7 +247,7 @@ echo "→ docker run"
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
-  -p "127.0.0.1:${HOST_PORT}:8080" \
+  -p "127.0.0.1:${HOST_PORT}:5204" \
   --env-file "$BASE/aspnetcore.env" \
   "$IMAGE"
 

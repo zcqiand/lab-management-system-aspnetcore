@@ -68,7 +68,7 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
         var opts = new CookieOptions
         {
             HttpOnly = true,
-            // 跨源 cookie（5173 前端 ↔ 5000 后端）必须 SameSite=None + Secure：
+            // 跨源 cookie（5202 前端 ↔ 5204 后端）必须 SameSite=None + Secure：
             // Lax 不随跨站 XHR POST 携带，None 要求 Secure（localhost 是浏览器
             // 可信上下文，http://localhost 可写 Secure cookie）。dev/prod 统一。
             Secure = true,

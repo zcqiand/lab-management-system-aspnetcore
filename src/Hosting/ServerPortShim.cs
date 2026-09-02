@@ -3,7 +3,7 @@ namespace Lab.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
 /// <summary>
-/// SERVER_PORT → UseUrls 决策（conventions §6 全家族统一监听 key，aspnetcore=5000）。
+/// SERVER_PORT → UseUrls 决策（conventions §6 全家族统一监听 key，aspnetcore=5204，2026-09-02 端口分段：saas=5100 段、lab=5200 段）。
 ///
 /// ASP.NET Core 原生只认 ASPNETCORE_URLS；本 shim 让裸机/dotnet run 也能用
 /// 与 springboot 仓同名的 SERVER_PORT。ASPNETCORE_URLS 优先（容器内 Dockerfile

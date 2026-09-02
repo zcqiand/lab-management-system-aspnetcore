@@ -37,7 +37,7 @@ public sealed class LabOptions
         /// <summary>
         /// saas IdP 登录页（资源所有者认证跳板）。authorizeUrl 拼的是 {LoginUrl}/login?code=...，
         /// 该页面由 saas 前端（saas-nextjs /login）提供，不在后端 API 域名上（API /login 404）。
-        /// 缺省取 SaasBase 同域（dev 时 saas-nextjs :3000 既是前端也带 API routes）。
+        /// 缺省取 SaasBase 同域（dev 时 saas-nextjs :5101 既是前端也带 API routes）。
         /// </summary>
         public string LoginUrl => Config?["LAB_SSO_LOGIN_URL"] ?? _loginUrl;
         public string ClientId => Config?["LAB_SAAS_CLIENT_ID"] ?? _clientId;
@@ -48,7 +48,7 @@ public sealed class LabOptions
         public string CallbackRedirectBase => Config?["LAB_SSO_CALLBACK_REDIRECT"] ?? _callbackRedirectBase;
 
         // Lab:Sso json 段绑定字段(appsettings*.json dev 值;flat env 优先)
-        public string _saasBase { get; set; } = "http://localhost:5000";
+        public string _saasBase { get; set; } = "http://localhost:5101";
         public string _loginUrl { get; set; } = "";
         public string _clientId { get; set; } = "";
         public string _clientSecret { get; set; } = "";
