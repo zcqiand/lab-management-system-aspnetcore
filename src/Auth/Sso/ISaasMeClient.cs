@@ -103,18 +103,22 @@ public sealed class HttpSaasMeClient : ISaasMeClient
 
 public sealed class NoopSaasMeClient : ISaasMeClient
 {
+    /// <summary>
+    /// 2026-09-03 租户体系对齐：saas 侧租户用 UUID 体系（与 prod 一致），
+    /// 与 lab demo 目录（TENANT-00x）可区分 —— 否则 Me() 对齐测试区分不出两套体系。
+    /// whoami id 也改为 UUID（SSO upsert 用户 sub=UUID ≠ DemoUser USER-A）。
+    /// </summary>
     public Task<SaasCurrentUser> WhoamiAsync(string saasAccessToken, CancellationToken ct = default)
     {
         return Task.FromResult(new SaasCurrentUser
         {
-            Id = "USER-A",
+            Id = "00000000-0000-0000-0000-b00000000001",
             Email = "admin@lab.local",
             DisplayName = "管理员",
+            CurrentTenantId = "00000000-0000-0000-0000-000000000001",
             Memberships = new List<SaasTenantMembership>
             {
-                new() { Id = "mem-1", UserId = "USER-A", TenantId = "TENANT-001", RoleIds = new() { "admin" }, Status = "active" },
-                new() { Id = "mem-2", UserId = "USER-A", TenantId = "TENANT-002", RoleIds = new() { "technician" }, Status = "active" },
-                new() { Id = "mem-3", UserId = "USER-A", TenantId = "TENANT-003", RoleIds = new() { "viewer" }, Status = "active" },
+                new() { Id = "mem-1", UserId = "00000000-0000-0000-0000-b00000000001", TenantId = "00000000-0000-0000-0000-000000000001", RoleIds = new() { "admin" }, Status = "active" },
             },
         });
     }
@@ -123,9 +127,7 @@ public sealed class NoopSaasMeClient : ISaasMeClient
     {
         return Task.FromResult(new List<SaasTenantMembership>
         {
-            new() { Id = "mem-1", UserId = "USER-A", TenantId = "TENANT-001", RoleIds = new() { "admin" }, Status = "active" },
-            new() { Id = "mem-2", UserId = "USER-A", TenantId = "TENANT-002", RoleIds = new() { "technician" }, Status = "active" },
-            new() { Id = "mem-3", UserId = "USER-A", TenantId = "TENANT-003", RoleIds = new() { "viewer" }, Status = "active" },
+            new() { Id = "mem-1", UserId = "00000000-0000-0000-0000-b00000000001", TenantId = "00000000-0000-0000-0000-000000000001", RoleIds = new() { "admin" }, Status = "active" },
         });
     }
 

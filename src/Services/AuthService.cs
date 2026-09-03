@@ -30,6 +30,7 @@ public sealed class AuthService
     private readonly StateCookieManager _stateMgr;
     private readonly IOptions<LabOptions> _opts;
     private readonly MenuSnapshotCache _menuCache;
+    private readonly MembershipSnapshotCache _membershipCache;
 
     public AuthService(
         IUserDirectory directory,
@@ -38,7 +39,8 @@ public sealed class AuthService
         ISaasMeClient saasMe,
         StateCookieManager stateMgr,
         IOptions<LabOptions> opts,
-        MenuSnapshotCache? menuCache = null)
+        MenuSnapshotCache? menuCache = null,
+        MembershipSnapshotCache? membershipCache = null)
     {
         _directory = directory;
         _jwt = jwt;
@@ -47,6 +49,7 @@ public sealed class AuthService
         _stateMgr = stateMgr;
         _opts = opts;
         _menuCache = menuCache ?? new MenuSnapshotCache();
+        _membershipCache = membershipCache ?? new MembershipSnapshotCache();
     }
 
     // === M01.F05.I01 密码登录 ===
@@ -118,29 +121,55 @@ public sealed class AuthService
         // saas /token 返回新 refresh_token) + CacheMenus 重填 cache。
         _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
+        _membershipCache.Put(labUser.Id, TenantsFrom(memberships));
         return Session(labUser, tenantId, TenantsFrom(memberships), t.RefreshToken);
     }
-
-    // === M01.F05.I05 登出（无状态 JWT,服务端无 session store） ===
 
     public void Logout()
     {
         // 前端清存储;服务端无操作
     }
 
+    // === M01.F05.I05 登出（无状态 JWT,服务端无 session store） ===
+
     // === M00.F01.I01 当前会话 ===
 
     public CurrentUserSession Me(IReadOnlyDictionary<string, object> claims)
     {
         var user = ResolveUser(claims);
-        var currentTenantId = claims.TryGetValue("tenant_id", out var tenantClaim) && tenantClaim != null
-            ? tenantClaim.ToString() ?? ""
+        // 2026-09-03 租户体系对齐（docs/superpowers/specs/2026-09-03-me-tenant-alignment-design.md §3）：
+        // SSO 用户（有 per-user saas refresh token）必须返回 saas memberships 租户，
+        // 与 SsoCallback 同体系 —— 否则前端 hydrateAuth 的 tenants.find(saas UUID)
+        // 跨体系失配 → awaiting_tenant → 卡「检查登录态…」死锁。
+        // miss（容器重启/TTL 过期）抛 401，前端 catch 走 /api/auth/refresh 自愈
+        // （该端点会重填本快照）。密码登录用户（无 per-user token）保持 demo 租户。
+        var saasRefresh = _directory.GetSaasRefreshToken(user.Id);
+        if (!string.IsNullOrEmpty(saasRefresh))
+        {
+            var cachedTenants = _membershipCache.Get(user.Id);
+            if (cachedTenants is null)
+            {
+                throw new AuthenticationException(
+                    $"membership snapshot unavailable for user {user.Id} (cache miss); refresh required");
+            }
+            var currentTenantId = claims.TryGetValue("tenant_id", out var tenantClaim) && tenantClaim != null
+                ? tenantClaim.ToString() ?? ""
+                : cachedTenants[0].TenantId;
+            return new CurrentUserSession
+            {
+                User = user,
+                Tenants = cachedTenants,
+                CurrentTenantId = currentTenantId,
+            };
+        }
+        var demoTenantId = claims.TryGetValue("tenant_id", out var demoTenantClaim) && demoTenantClaim != null
+            ? demoTenantClaim.ToString() ?? ""
             : _directory.DefaultTenant().TenantId;
         return new CurrentUserSession
         {
             User = user,
             Tenants = _directory.TenantsOf(user.Username).ToList(),
-            CurrentTenantId = currentTenantId,
+            CurrentTenantId = demoTenantId,
         };
     }
 
@@ -185,6 +214,10 @@ public sealed class AuthService
         try
         {
             var t = _saasAuth.TokenAsync("refresh_token", null, saasRefresh, null).GetAwaiter().GetResult();
+            // 2026-09-03 rotate-once 修复（设计 §1 存量雷）：saas /token refresh
+            // 消费旧 refresh token 即刻作废并发新的 —— 必须存回，否则本次 reload
+            // 把 stored token 烧掉，后续所有 reload/refresh 永久 INVALID_GRANT。
+            _directory.SetSaasRefreshToken(sub, t.RefreshToken ?? saasRefresh);
             CacheMenus(sub, t.AccessToken);
             return _menuCache.Get(sub)
                 ?? throw new MenusUnavailableException(
@@ -248,7 +281,10 @@ public sealed class AuthService
         // 菜单快照：瞬时持有 saas accessToken 的唯一时点，顺手拉菜单进缓存（失败不阻塞登录）
         _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
-        return Session(labUser, null, TenantsFrom(memberships), t.RefreshToken);
+        _membershipCache.Put(labUser.Id, TenantsFrom(memberships));
+        // 2026-09-03 设计 §4.1.4：token 带 tenant_id claim（whoami currentTenantId），
+        // Me() 的 currentTenantId 不再落 demo 默认租户
+        return Session(labUser, saasUser.CurrentTenantId, TenantsFrom(memberships), t.RefreshToken);
     }
 
     // === helpers ===
