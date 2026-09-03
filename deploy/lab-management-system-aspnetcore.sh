@@ -11,8 +11,8 @@
 # 与姊妹仓 saas-identity-platform-aspnetcore.sh 的差异:
 #   - 数据库：PostgreSQL 远程, DATABASE_URL 从 env 注入
 #     （EF Core / Npgsql 无 ./data 卷, 程序重启数据不丢；与 lab-springboot 共用 lab_dev/lib 库）
-#   - 容器内是 ASP.NET Core 8 监听 :5204（conventions §6）→ -p 127.0.0.1:8014:5204
-#     （lab 家族 801x: vue=8010 react=8011 nextjs=8012 springboot=8013 aspnetcore=8014）
+#   - 容器内 ASP.NET Core 8 监听 :5204（conventions §6）；host=container=5204
+#     （ADR-0018 单层 port 方案，docker run -p 127.0.0.1:5204:5204；lab 家族 X04 段）
 #   - 密钥走 ./aspnetcore.env (DATABASE_URL + JWT_SIGNING_KEY + LAB_CORS_ALLOWED_ORIGINS),
 #     setup-vps.sh 不预生成（fail-fast 不便）,本脚本首启自举。
 #   - JWT_SIGNING_KEY（HS256 ≥32B, 签 lab 自家 JWT）**不**写入默认 dev 值: 生产路径 = 必填;
@@ -30,7 +30,6 @@ VERSION="${3:-latest}"
 IMAGE="${USERNAME}/lab-management-system-aspnetcore:${VERSION}"
 BASE="/home/deploy/lab-management-system-aspnetcore"
 CONTAINER_NAME="lab-management-system-aspnetcore"
-HOST_PORT=8014
 
 # nginx domain（deploy 脚本渲染 nginx vhost 时用）
 NGINX_DOMAIN="${NGINX_DOMAIN:-lab-aspnetcore.xiangru.uk}"
@@ -247,7 +246,7 @@ echo "→ docker run"
 docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
-  -p "127.0.0.1:${HOST_PORT}:5204" \
+  -p "127.0.0.1:5204:5204" \
   --env-file "$BASE/aspnetcore.env" \
   "$IMAGE"
 
@@ -264,8 +263,8 @@ docker ps --filter name="$CONTAINER_NAME"
 # (Docker HEALTHCHECK 跨 daemon 行为不一致 —— saas-springboot v0.1.8/09/10 教训)。
 i=0
 while [ $i -lt 60 ]; do
-  if wget --tries=1 --timeout=3 -q "http://127.0.0.1:${HOST_PORT}/health" -O /dev/null 2>/dev/null; then
-    echo "→ /health 200 (host 127.0.0.1:${HOST_PORT}) after ${i}s"
+  if wget --tries=1 --timeout=3 -q "http://127.0.0.1:5204/health" -O /dev/null 2>/dev/null; then
+    echo "→ /health 200 (host 127.0.0.1:5204) after ${i}s"
     break
   fi
   # 容器实际死亡 (OOM / start-cmd failure / 立刻 crash) 提前终止循环, 立刻报失败。
