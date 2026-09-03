@@ -366,7 +366,7 @@ public sealed class AuthService
         {
             Id = src.Id,
             Label = src.Name,
-            Path = src.Path,
+            Path = src.Path ?? "",
             Icon = icon,
             Children = children.Select(MapSaasMenu).ToList(),
         };

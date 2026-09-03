@@ -17,7 +17,7 @@ public sealed class ContractsController(ContractService service, ITenantContext 
 
     public override Task<Response5> ListContracts(
         [FromQuery] int? page, [FromQuery] int? pageSize,
-        [FromQuery] string keyword, [FromQuery] ContractStatus? status)
+        [FromQuery] string? keyword, [FromQuery] ContractStatus? status)
     {
         var items = _service.List(_tenantContext.TenantId, keyword, status).ToList();
         return Task.FromResult(new Response5
@@ -55,8 +55,8 @@ public sealed class ReceiptsController(SampleReceiptService service, ITenantCont
     private readonly ITenantContext _tenantContext = tenantContext;
 
     public override Task<Response16> ListReceipts(
-        [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string keyword,
-        [FromQuery] string contractId, [FromQuery] FlowStatus? flowStatus)
+        [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? keyword,
+        [FromQuery] string? contractId, [FromQuery] FlowStatus? flowStatus)
     {
         var items = _service.List(_tenantContext.TenantId, contractId, flowStatus, keyword).ToList();
         return Task.FromResult(new Response16
@@ -131,7 +131,7 @@ public sealed class SamplesController(SampleService service, ITenantContext tena
 
     public override Task<Response22> ListSamples(
         [FromQuery] int? page, [FromQuery] int? pageSize,
-        [FromQuery] string receiptId, [FromQuery] string keyword)
+        [FromQuery] string? receiptId, [FromQuery] string? keyword)
     {
         var items = _service.List(_tenantContext.TenantId, receiptId, keyword).ToList();
         return Task.FromResult(new Response22
@@ -170,7 +170,7 @@ public sealed class TestRecordsController(TestRecordService service, ITenantCont
 
     public override Task<Response23> ListTestRecords(
         [FromQuery] int? page, [FromQuery] int? pageSize,
-        [FromQuery] string sampleId, [FromQuery] string parameterCode)
+        [FromQuery] string? sampleId, [FromQuery] string? parameterCode)
     {
         // parameterCode 接收未用（镜像 springboot：list 只按 tenant+sampleId 过滤）
         var items = _service.List(_tenantContext.TenantId, sampleId).ToList();

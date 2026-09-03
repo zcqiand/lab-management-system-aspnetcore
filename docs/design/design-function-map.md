@@ -45,6 +45,8 @@
 | M06.F06.I05 | TechnicalRequirementsController#DeleteTechnicalRequirement / TechnicalRequirementService#Delete | DELETE /api/technical-requirements/{object}/{parameter}/{standard} | inspection_technical_requirements | M06.F06.I05 | - | 已上线 |
 | M05.F01.I01 | SummaryController#GetReportSummary / SummaryService#GetReportSummary | GET /api/summary?categoryCode=&dateFrom=&dateTo= | sample_receipts（内存 store 镜像 summary 查询） | M05.F01.I01 | - | 已上线 |
 | M05.F02.I01 | SummaryController#GetDashboardStats / SummaryService#GetDashboardStats | GET /api/summary/stats | sample_receipts / contracts / samples 计数 | M05.F02.I01 | - | 已上线 |
+| M05.F01.I03 | SummaryService#GetDashboardStats（todayTestCount/qualifiedRateByMaterial/reportOutputByStatus 段） | GET /api/summary/stats | sample_receipts + inspection_report_names（码表预载 summaryName 关键词映射） | M05.F01.I03 | - | 已上线 |
+| M05.F01.I04 | SummaryService#GetDashboardStats（funnelByStage 段） | GET /api/summary/stats | sample_receipts（flowStatus + reportCode 六段分桶） | M05.F01.I04 | - | 已上线 |
 | M02.F01.I01 | ContractsController#ListContracts / ContractService#List | GET /api/contracts | contracts（内存 store 镜像 V001+V012） | M02.F01.I01 | - | 已上线 |
 | M02.F01.I02 | ContractsController#GetContract / ContractService#Get | GET /api/contracts/{id} | contracts | M02.F01.I02 | - | 已上线 |
 | M02.F01.I03 | ContractsController#CreateContract / ContractService#Create | POST /api/contracts | contracts | M02.F01.I03 | - | 已上线 |

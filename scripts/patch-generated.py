@@ -59,6 +59,49 @@ def patch_enum_converter(text: str) -> str:
     raise SystemExit("patch-generated: 未找到 JsonStringEnumConverter 模式 -- NSwag 输出变了，请更新修补脚本")
 
 
+def patch_nullable_query_params(text: str) -> str:
+    """NSwag 把 optional query 参数（openapi required:false）生成为非 nullable 的
+    `string`，配合 [ApiController] + NRT 的隐式必填（ASPNETCORE_DEFAULT_​REQUIRED
+    行为）变成缺参即 400 —— 与 shared 契约「query 可省略」分叉（live contract-test
+    的 /api/summary 不带 dateFrom 探针 2026-09-04 抓到）。全部改 `string?`，
+    实现层自行处理 null（SummaryService 已按 null→"" 语义）。
+
+    只改 FromQuery string（路径段 id / body 不动 —— body 本就有 Required 特性）。
+    """
+    pattern = re.compile(
+        r"(\[Microsoft\.AspNetCore\.Mvc\.FromQuery\]) string (\w+)"
+    )
+    def _sub(m: re.Match) -> str:
+        return f"{m.group(1)} string? {m.group(2)}"
+    patched, n = pattern.subn(_sub, text)
+    if n == 0:
+        # 幂等：已经是 string? 就无 FromQuery string（非 ?）残留
+        if re.search(r"\[Microsoft\.AspNetCore\.Mvc\.FromQuery\]\s+string\?", text):
+            return text
+        raise SystemExit("patch-generated: 未找到 FromQuery string 模式 -- NSwag 输出变了，请更新修补脚本")
+    return patched
+
+
+def patch_nullable_enable(text: str) -> str:
+    """CS8669：生成文件默认无 nullable 上下文，patch_nullable_query_params 产出的
+    `string?` 注解需要 `#nullable enable` 头。加在 auto-generated 注释块后。"""
+    marker = "//----------------------\n"
+    directive = (
+        "#nullable enable\n"
+        "#pragma warning disable CS8618 // patch-generated: string? 注解需显式上下文（CS8669）；\n"
+        "#pragma warning disable CS8618 // 生成 DTO 的 _additionalProperties 惰性初始化与 NRT 全量检查不兼容，只压本文件\n"
+    )
+    if "#nullable enable" in text and "CS8618" in text:
+        return text  # 幂等
+    idx = text.find(marker)
+    if idx == -1:
+        raise SystemExit("patch-generated: 未找到文件头 marker -- NSwag 输出变了，请更新修补脚本")
+    # 插在第一处 marker 之后（auto-generated 块之后会再出现一次结尾 marker）
+    end = text.find(marker, idx + len(marker))
+    insert_at = end + len(marker) if end != -1 else idx + len(marker)
+    return text[:insert_at] + directive + text[insert_at:]
+
+
 def main() -> None:
     if not GENERATED.exists():
         raise SystemExit(f"patch-generated: missing {GENERATED}")
@@ -66,6 +109,8 @@ def main() -> None:
     text = patch_state_property(text)
     text = patch_requirement_comparison(text)
     text = patch_enum_converter(text)
+    text = patch_nullable_query_params(text)
+    text = patch_nullable_enable(text)
     GENERATED.write_text(text, encoding="utf-8")
     print("[patch-generated] OK")
 

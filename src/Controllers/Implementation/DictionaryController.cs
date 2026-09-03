@@ -22,7 +22,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     public override Task<Response12> ListSpecialties(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string keyword)
+        [FromQuery] string? keyword)
     {
         var items = _service.ListSpecialties(keyword).ToList();
         return Task.FromResult(Wrap12(items, page, pageSize));
@@ -45,7 +45,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     public override Task<Response11> ListParameters(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string keyword,
+        [FromQuery] string? keyword,
         [FromQuery] InspectionParameterSourceType? sourceType)
     {
         var items = _service.ListParameters(keyword, sourceType).ToList();
@@ -69,7 +69,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     public override Task<Response13> ListStandards(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string keyword,
+        [FromQuery] string? keyword,
         [FromQuery] InspectionStandardStatus? status)
     {
         var items = _service.ListStandards(keyword, status).ToList();
@@ -93,8 +93,8 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     public override Task<Response10> ListObjects(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string inspectionSpecialtyCode,
-        [FromQuery] string keyword)
+        [FromQuery] string? inspectionSpecialtyCode,
+        [FromQuery] string? keyword)
     {
         var items = _service.ListObjects(inspectionSpecialtyCode, keyword).ToList();
         return Task.FromResult(Wrap10(items, page, pageSize));
@@ -126,7 +126,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.CompletedTask;
     }
 
-    public override Task<Response8> ListSpecialtyObjectLinks([FromQuery] string inspectionSpecialtyCode)
+    public override Task<Response8> ListSpecialtyObjectLinks([FromQuery] string? inspectionSpecialtyCode)
     {
         var items = _junction.ListSpecialtyObjectLinks(inspectionSpecialtyCode).ToList();
         return Task.FromResult(WrapShort(items));
@@ -145,8 +145,8 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     }
 
     public override Task<Response6> ListObjectParameterLinks(
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string inspectionParameterCode)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? inspectionParameterCode)
     {
         var items = _junction.ListObjectParameterLinks(inspectionObjectCode, inspectionParameterCode).ToList();
         return Task.FromResult(WrapShort(items));
@@ -165,7 +165,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     }
 
     public override Task<Response7> ListObjectStandardLinks(
-        [FromQuery] string inspectionObjectCode,
+        [FromQuery] string? inspectionObjectCode,
         [FromQuery] InspectionStandardRole? role)
     {
         var items = _junction.ListObjectStandardLinks(inspectionObjectCode, role).ToList();
@@ -185,8 +185,8 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
     }
 
     public override Task<Response9> ListStandardParameterLinks(
-        [FromQuery] string inspectionStandardCode,
-        [FromQuery] string inspectionParameterCode)
+        [FromQuery] string? inspectionStandardCode,
+        [FromQuery] string? inspectionParameterCode)
     {
         var items = _junction.ListStandardParameterLinks(inspectionStandardCode, inspectionParameterCode).ToList();
         return Task.FromResult(WrapShort(items));
@@ -304,7 +304,7 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     public override Task<Response18> ListReportNames(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string keyword)
+        [FromQuery] string? keyword)
     {
         var items = _service.ListReportNames(keyword).ToList();
         int count = items.Count;
@@ -371,8 +371,8 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     // === junction GET（Page<T> 短 envelope，shared 契约补齐）===
 
     public override Task<Response19> ListObjectReportNameLinks(
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string reportNameCode)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? reportNameCode)
     {
         var items = _junction.ListObjectReportNameLinks(inspectionObjectCode, reportNameCode).ToList();
         int count = items.Count;
@@ -386,7 +386,7 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     }
 
     public override Task<Response21> ListReportNameStandardLinks(
-        [FromQuery] string reportNameCode,
+        [FromQuery] string? reportNameCode,
         [FromQuery] InspectionStandardRole? role)
     {
         var items = _junction.ListReportNameStandardLinks(reportNameCode, role).ToList();
@@ -401,8 +401,8 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     }
 
     public override Task<Response20> ListReportNameParameterLinks(
-        [FromQuery] string reportNameCode,
-        [FromQuery] string inspectionParameterCode)
+        [FromQuery] string? reportNameCode,
+        [FromQuery] string? inspectionParameterCode)
     {
         var items = _junction.ListReportNameParameterLinks(reportNameCode, inspectionParameterCode).ToList();
         int count = items.Count;
@@ -428,7 +428,7 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
     public override Task<Response14> ListParamInterfaces(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string keyword)
+        [FromQuery] string? keyword)
     {
         var items = _service.ListInterfaces(keyword).ToList();
         int count = items.Count;
@@ -469,8 +469,8 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
     }
 
     public override Task<Response15> ListParamInterfaceLinks(
-        [FromQuery] string inspectionParameterCode,
-        [FromQuery] string paramInterfaceCode)
+        [FromQuery] string? inspectionParameterCode,
+        [FromQuery] string? paramInterfaceCode)
     {
         var items = _junction.ListParamInterfaceLinks(inspectionParameterCode, paramInterfaceCode).ToList();
         int count = items.Count;

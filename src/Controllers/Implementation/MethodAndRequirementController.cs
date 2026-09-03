@@ -15,7 +15,7 @@ public sealed class CalculationMethodsController(CalculationMethodService servic
     private readonly CalculationMethodService _service = service;
 
     public override Task<System.Collections.Generic.ICollection<CalculationMethod>> ListCalculationMethods(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string inspectionParameterCode) =>
+        [FromQuery] string? inspectionObjectCode, [FromQuery] string? inspectionParameterCode) =>
         Task.FromResult<System.Collections.Generic.ICollection<CalculationMethod>>(
             _service.List(inspectionObjectCode, inspectionParameterCode).ToList());
 
@@ -46,8 +46,8 @@ public sealed class TechnicalRequirementsController(TechnicalRequirementService 
     private readonly ITenantContext _tenantContext = tenantContext;
 
     public override Task<System.Collections.Generic.ICollection<TechnicalRequirement>> ListTechnicalRequirements(
-        [FromQuery] string inspectionObjectCode, [FromQuery] string inspectionParameterCode,
-        [FromQuery] string judgmentStandardCode, [FromQuery] RequirementVerificationStatus? verificationStatus) =>
+        [FromQuery] string? inspectionObjectCode, [FromQuery] string? inspectionParameterCode,
+        [FromQuery] string? judgmentStandardCode, [FromQuery] RequirementVerificationStatus? verificationStatus) =>
         Task.FromResult<System.Collections.Generic.ICollection<TechnicalRequirement>>(
             _service.List(_tenantContext.TenantId, inspectionObjectCode, inspectionParameterCode, judgmentStandardCode, verificationStatus).ToList());
 

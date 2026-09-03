@@ -38,6 +38,17 @@ public class SummaryServiceTest
         return store;
     }
 
+    /// <summary>空码表字典存储（summary 材料映射测试单独灌数据，默认空表）。</summary>
+    private static InMemoryDictionaryStore DictStore(params InspectionReportName[] names)
+    {
+        var store = new InMemoryDictionaryStore();
+        foreach (var rn in names)
+        {
+            store.SaveReportName(rn);
+        }
+        return store;
+    }
+
     // === M05.F01.I01 报告汇总 ===
 
     [Fact]
@@ -46,7 +57,7 @@ public class SummaryServiceTest
     {
         var service = new SummaryService(Store(
             Receipt("R1", "CAT-A", "2026-01-10", FlowStatus.Data_entry, code: "C-2"),
-            Receipt("R2", "CAT-B", "2026-01-11", FlowStatus.Review, code: "C-1")));
+            Receipt("R2", "CAT-B", "2026-01-11", FlowStatus.Review, code: "C-1")), DictStore());
 
         var data = service.GetReportSummary(Tenant, "ALL", null, null);
 
@@ -66,7 +77,7 @@ public class SummaryServiceTest
     {
         var service = new SummaryService(Store(
             Receipt("R1", "CAT-A", "2026-01-10", FlowStatus.Review),
-            Receipt("R2", "CAT-B", "2026-01-11", FlowStatus.Review)));
+            Receipt("R2", "CAT-B", "2026-01-11", FlowStatus.Review)), DictStore());
 
         var data = service.GetReportSummary(Tenant, "CAT-A", "", "");
 
@@ -78,7 +89,7 @@ public class SummaryServiceTest
     [Trait("Fn", "M05.F01.I01")]
     public void GetReportSummary_blankCategoryCode_treatedAsAll()
     {
-        var service = new SummaryService(Store()); // 空库也行，只看哨兵归一
+        var service = new SummaryService(Store(), DictStore()); // 空库也行，只看哨兵归一
 
         var data = service.GetReportSummary(Tenant, "  ", null, null);
 
@@ -93,7 +104,7 @@ public class SummaryServiceTest
         var service = new SummaryService(Store(
             Receipt("R1", "CAT-A", "2026-01-01", FlowStatus.Review),
             Receipt("R2", "CAT-A", "2026-01-05", FlowStatus.Review),
-            Receipt("R3", "CAT-A", "2026-01-10", FlowStatus.Review)));
+            Receipt("R3", "CAT-A", "2026-01-10", FlowStatus.Review)), DictStore());
 
         var inclusive = service.GetReportSummary(Tenant, "ALL", "2026-01-05", "2026-01-05");
 
@@ -125,7 +136,7 @@ public class SummaryServiceTest
         {
             store.SaveReceipt(Receipt(id, "CAT-A", "2026-01-10", status));
         }
-        var service = new SummaryService(store);
+        var service = new SummaryService(store, DictStore());
 
         var stats = service.GetDashboardStats(Tenant);
 
@@ -142,7 +153,7 @@ public class SummaryServiceTest
     [Trait("Fn", "M05.F02.I01")]
     public void GetDashboardStats_empty_returnsZeros()
     {
-        var service = new SummaryService(new InMemoryFlowStore());
+        var service = new SummaryService(new InMemoryFlowStore(), DictStore());
 
         var stats = service.GetDashboardStats(Tenant);
 
@@ -153,5 +164,54 @@ public class SummaryServiceTest
         Assert.Equal(0, stats.ReportCountByStatus.Reviewing);
         Assert.Equal(0, stats.ReportCountByStatus.Issued);
         Assert.Equal(0, stats.PendingTaskCount);
+    }
+
+    // === M05.F01.I03 核心指标（材料映射走码表 summaryName，不是 categoryCode）===
+
+    [Fact]
+    [Trait("Fn", "M05.F01.I03")]
+    public void GetDashboardStats_materialRate_usesReportNameSummaryName()
+    {
+        // 码表：CAT-A summaryName 含「混凝土」→ concrete；CAT-B 含「钢筋」→ rebar
+        var dict = DictStore(
+            new InspectionReportName { Code = "CAT-A", SummaryName = "混凝土及砂浆汇总" },
+            new InspectionReportName { Code = "CAT-B", SummaryName = "钢筋原材料汇总" });
+        var store = new InMemoryFlowStore();
+        // 2 条 CAT-A（1 pass）+ 1 条 CAT-B（pass）
+        store.SaveReceipt(Receipt("R1", "CAT-A", "2026-01-10", FlowStatus.Review, result: ReceiptResult.Pass));
+        store.SaveReceipt(Receipt("R2", "CAT-A", "2026-01-10", FlowStatus.Review, result: ReceiptResult.Fail));
+        store.SaveReceipt(Receipt("R3", "CAT-B", "2026-01-10", FlowStatus.Review, result: ReceiptResult.Pass));
+        var service = new SummaryService(store, dict);
+
+        var stats = service.GetDashboardStats(Tenant);
+
+        Assert.Equal(2, stats.QualifiedRateByMaterial.Concrete.Total);
+        Assert.Equal(1, stats.QualifiedRateByMaterial.Concrete.Pass);
+        Assert.Equal(0.5, stats.QualifiedRateByMaterial.Concrete.Rate, 3);
+        Assert.Equal(1, stats.QualifiedRateByMaterial.Rebar.Total);
+        Assert.Equal(0, stats.QualifiedRateByMaterial.Sand.Total);
+    }
+
+    [Fact]
+    [Trait("Fn", "M05.F01.I04")]
+    public void GetDashboardStats_funnel_sixStages()
+    {
+        var store = new InMemoryFlowStore();
+        // 各状态 1 条：receiving/task_assignment/data_entry(无report)/review/issuance + data_entry(有report)
+        store.SaveReceipt(Receipt("R1", "CAT-A", "2026-01-10", FlowStatus.Receiving, reportCode: "RP-1"));
+        store.SaveReceipt(Receipt("R2", "CAT-A", "2026-01-10", FlowStatus.Task_assignment, reportCode: "RP-2"));
+        store.SaveReceipt(Receipt("R3", "CAT-A", "2026-01-10", FlowStatus.Data_entry, reportCode: null));
+        store.SaveReceipt(Receipt("R4", "CAT-A", "2026-01-10", FlowStatus.Review, reportCode: "RP-4"));
+        store.SaveReceipt(Receipt("R5", "CAT-A", "2026-01-10", FlowStatus.Issuance, reportCode: "RP-5"));
+        var service = new SummaryService(store, DictStore());
+
+        var f = service.GetDashboardStats(Tenant).FunnelByStage;
+
+        Assert.Equal(1, f.Pending_collect);
+        Assert.Equal(1, f.Received);
+        Assert.Equal(1, f.Testing);    // data_entry 无 reportCode
+        Assert.Equal(0, f.Reporting);  // data_entry 有 reportCode 才进编制段
+        Assert.Equal(1, f.Reviewing);
+        Assert.Equal(1, f.Issued);
     }
 }

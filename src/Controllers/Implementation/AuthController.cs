@@ -40,11 +40,11 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
     // 的参数名取 query，改成 responseType 会让前端发的 ?response_type= 绑不上 → 400。
     public override Task<SsoRedirect> SsoAuthorize(
         [FromQuery] OAuthResponseType response_type,
-        [FromQuery] string client_id,
-        [FromQuery] string redirect_uri,
-        [FromQuery] string state)
+        [FromQuery] string? client_id,
+        [FromQuery] string? redirect_uri,
+        [FromQuery] string? state)
     {
-        var result = _service.SsoAuthorize(redirect_uri, state);
+        var result = _service.SsoAuthorize(redirect_uri ?? "", state ?? "");
         AppendStateCookie(result.CookieValue);
         return Task.FromResult(result.Redirect);
     }

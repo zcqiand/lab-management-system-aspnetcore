@@ -23,8 +23,8 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
     public override Task<Response3> ListModels(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string keyword)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? keyword)
     {
         var items = _service.ListModels(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
         int count = items.Count;
@@ -54,8 +54,8 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
     public override Task<Response4> ListSpecs(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string keyword)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? keyword)
     {
         var items = _service.ListSpecs(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
         int count = items.Count;
@@ -85,8 +85,8 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
     public override Task<Response2> ListGrades(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string keyword)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? keyword)
     {
         var items = _service.ListGrades(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
         int count = items.Count;
@@ -116,8 +116,8 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
     public override Task<Response> ListBrands(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
-        [FromQuery] string inspectionObjectCode,
-        [FromQuery] string keyword)
+        [FromQuery] string? inspectionObjectCode,
+        [FromQuery] string? keyword)
     {
         var items = _service.ListBrands(_tenantContext.TenantId, inspectionObjectCode, keyword).ToList();
         int count = items.Count;

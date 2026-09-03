@@ -16,7 +16,7 @@ public sealed class SummaryController(SummaryService service, ITenantContext ten
     private readonly ITenantContext _tenantContext = tenantContext;
 
     public override Task<SummaryData> GetReportSummary(
-        [FromQuery] string categoryCode, [FromQuery] string dateFrom, [FromQuery] string dateTo) =>
+        [FromQuery] string? categoryCode, [FromQuery] string? dateFrom, [FromQuery] string? dateTo) =>
         Task.FromResult(_service.GetReportSummary(_tenantContext.TenantId, categoryCode, dateFrom, dateTo));
 
     public override Task<DashboardStats> GetDashboardStats() =>

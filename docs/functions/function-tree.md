@@ -241,12 +241,14 @@
 | 子项 ID | 名称 | 类型 | 说明 | 状态 |
 |---|---|---|---|---|
 | M05.F01.I01 | 报告汇总 | 接口 | GET /api/summary?categoryCode=&dateFrom=&dateTo=：ALL 不过滤按报告类别过滤当前租户接样单；SummaryData{summaryName, 6 列, rows}；commissionDate DESC, commissionCode 排序 | 已上线 |
+| M05.F01.I03 | 核心指标卡 | 接口 | GET /api/summary/stats 扩展：todayTestCount（今日试验总数）+ qualifiedRateByMaterial{concrete,rebar,sand}（按材料合格率，码表 summaryName 关键词映射，全量预载防 N+1）+ reportOutputByStatus{generated,pending,issued}（报告产出量） | 已上线 |
+| M05.F01.I04 | 任务状态漏斗 | 接口 | GET /api/summary/stats 扩展：funnelByStage{pending_collect,received,testing,reporting,reviewing,issued} 六段实时计数 | 已上线 |
 
 ### M05.F02 仪表盘统计
 
 | 子项 ID | 名称 | 类型 | 说明 | 状态 |
 |---|---|---|---|---|
-| M05.F02.I01 | 仪表盘统计 | 接口 | GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount | 已上线 |
+| M05.F02.I01 | 仪表盘统计 | 接口 | GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount + I03/I04 扩展字段 | 已上线 |
 
 ## M06 检测能力
 
