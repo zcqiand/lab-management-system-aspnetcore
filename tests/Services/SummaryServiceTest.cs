@@ -24,7 +24,9 @@ public class SummaryServiceTest
             CommissionCode = code,
             ProjectName = project,
             FlowStatus = status,
-            ReportCode = reportCode,
+            // 生成 DTO 的 ReportCode 声明为非 nullable，但运行时语义允许 null
+            //（SummaryService 漏斗分桶以 ReportCode != null 判断）；测试需要造 null 态
+            ReportCode = reportCode!,
             Result = result,
         };
 
