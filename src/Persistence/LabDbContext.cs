@@ -223,6 +223,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
     {
         e.ToTable(table);
         e.HasKey("Code"); // V004 PK=code（V012 tenant_id 同租户唯一索引在 DB 侧）
+        e.Ignore("AdditionalProperties"); // JsonExtensionData 字典不可映射（与其余实体逐个 Ignore 同规矩）
     }
 
     // === 枚举 wire 转换器：值 = [EnumMember]（契约小写串），与 EnumMemberEnumConverter 同源 ===

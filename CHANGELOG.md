@@ -2,6 +2,15 @@
 
 格式参照 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [0.2.25] — 2026-09-04
+
+- fix(ef): B7 EF 镜像 prod 首请求 500 — `CatalogEntity` helper 漏
+  `Ignore("AdditionalProperties")`，4 个码表实体（brands/models/specs/grades）
+  的 JsonExtensionData 字典被照映射，模型验证在首个 `Set<T>()` 才炸
+  （组合根盲区变体：测试走 memory 分支全绿）。
+- 新增 `tests/Harness/LabDbContextModelTest.cs`：强制初始化全 EF 模型，
+  把「首请求才爆」提前到「测试就爆」；逐实体断言 AdditionalProperties 已 Ignore。
+
 ## [0.2.6] — 2026-08-27
 
 - fix(menus): saas /me/menus 响应形状适配 — `Record<EffectiveMenuNode[]>`
