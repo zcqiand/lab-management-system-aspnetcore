@@ -1,9 +1,9 @@
 namespace Lab.AspNetCore.Security;
 
 /// <summary>
-/// 租户上下文（B2）。从当前 HTTP 请求的 JWT claim 解 tenant_id，缺失时 dev fallback
-/// TENANT-001 —— 镜像 springboot InspectionCatalogController.currentTenantIdOrDefault。
-/// scoped：每请求一次。
+/// 租户上下文（B2）。从当前 HTTP 请求的 JWT claim 解 tenant_id。
+/// ADR-0019：删 "claim 缺失 fallback TENANT-001" 反模式。缺失 throw，
+/// 镜像 saas-aspnetcore TenantContext 模板（claim 缺失由 TenantGuard 抛 business exception）。
 /// </summary>
 public interface ITenantContext
 {
@@ -12,14 +12,19 @@ public interface ITenantContext
 
 public sealed class HttpTenantContext(IHttpContextAccessor accessor) : ITenantContext
 {
-    private const string DefaultTenant = "TENANT-001";
-
     public string TenantId
     {
         get
         {
             var claim = accessor.HttpContext?.User.FindFirst("tenant_id")?.Value;
-            return string.IsNullOrEmpty(claim) ? DefaultTenant : claim;
+            if (string.IsNullOrEmpty(claim))
+            {
+                // ADR-0019：删 dev fallback TENANT-001,缺失必须拒,让 TenantGuard 抛 401。
+                // 不抛 UnauthorizedAccessException 是因为这是 DTO 属性,
+                // 异常由调用方(controller)catch 后映射 HTTP code。
+                throw new UnauthorizedAccessException("tenant_id claim missing (ADR-0019 禁 demo 兜底)");
+            }
+            return claim;
         }
     }
 }

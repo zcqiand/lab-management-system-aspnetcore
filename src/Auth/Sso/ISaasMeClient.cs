@@ -52,9 +52,12 @@ public sealed class HttpSaasMeClient : ISaasMeClient
     public HttpSaasMeClient(HttpClient http, Microsoft.Extensions.Options.IOptions<Lab.AspNetCore.Auth.Jwt.LabOptions> opts)
     {
         _http = http;
-        if (string.IsNullOrEmpty(opts.Value.Sso.SaasBase))
+        // ADR-0019：SaasBase 缺失且 BaseAddress 未设时 throw,允许测试用 BaseAddress mock。
+        if (_http.BaseAddress is null && string.IsNullOrEmpty(opts.Value.Sso.SaasBase))
         {
-            throw new InvalidOperationException("LAB_SAAS_BASE_URL required for SaasMeClient");
+            throw new InvalidOperationException(
+                "LAB_SAAS_BASE_URL required for SaasMeClient (ADR-0019 禁字面默认值). " +
+                "Set in appsettings.Development.json (dev) or env (prod), or pass HttpClient with BaseAddress.");
         }
         _http.BaseAddress ??= new Uri(opts.Value.Sso.SaasBase);
         _http.DefaultRequestHeaders.Accept.Clear();

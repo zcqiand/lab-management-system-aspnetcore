@@ -20,10 +20,13 @@ public sealed class LabOptions
 
     public sealed class JwtSection
     {
-        public string Issuer { get; set; } = "lab-management-system";
-        public int TtlSeconds { get; set; } = 3600;
-        public int RefreshTtlSeconds { get; set; } = 604800;
-        public string Secret { get; set; } = "";
+        // ADR-0019：删 "lab-management-system" / 3600 / 604800 字面默认值。
+        // Program.cs 启动期 ConfigBuilder.RequireJwtSigningKey 已校验,这里字段为 null/0
+        // 表示「未从 env 注入」,读取时由调用方 throw (与 saas-aspnetcore 同模板)。
+        public string? Issuer { get; set; }
+        public int TtlSeconds { get; set; }
+        public int RefreshTtlSeconds { get; set; }
+        public string? Secret { get; set; }
     }
 
     public sealed class SsoSection
@@ -31,31 +34,29 @@ public sealed class LabOptions
         /// <summary>flat env 读取入口(经 LabOptions.Config 注入;测试可不设)。</summary>
         public IConfiguration? Config { internal get; set; }
 
-        public string Profile { get; set; } = "no-sso";
-        /// <summary>saas 后端 API base（HttpClient 调 /api/v1/oauth/* 与 /api/v1/me/* 用）。</summary>
-        public string SaasBase => Config?["LAB_SAAS_BASE_URL"] ?? _saasBase;
-        /// <summary>
-        /// saas IdP 登录页（资源所有者认证跳板）。authorizeUrl 拼的是 {LoginUrl}/login?code=...，
-        /// 该页面由 saas 前端（saas-nextjs /login）提供，不在后端 API 域名上（API /login 404）。
-        /// 缺省取 SaasBase 同域（dev 时 saas-nextjs :5101 既是前端也带 API routes）。
-        /// </summary>
-        public string LoginUrl => Config?["LAB_SSO_LOGIN_URL"] ?? _loginUrl;
-        public string ClientId => Config?["LAB_SAAS_CLIENT_ID"] ?? _clientId;
-        public string ClientSecret => Config?["LAB_SAAS_CLIENT_SECRET"] ?? _clientSecret;
-        public string DefaultTenantId => Config?["LAB_SAAS_DEFAULT_TENANT_ID"] ?? _defaultTenantId;
-        public string ServiceUser => Config?["LAB_SAAS_SERVICE_USER"] ?? _serviceUser;
-        public string ServicePassword => Config?["LAB_SAAS_SERVICE_PASSWORD"] ?? _servicePassword;
-        public string CallbackRedirectBase => Config?["LAB_SSO_CALLBACK_REDIRECT"] ?? _callbackRedirectBase;
+        // ADR-0019：删 "no-sso" 兜底。Profile 必须显式 env 注入 ("no-sso" / "real")。
+        public string? Profile { get; set; }
+
+        // 各 getter：flat env 优先,缺省回落 json 段。json 段已删字面默认值,缺即空串由调用方校验。
+        public string SaasBase => Config?["LAB_SAAS_BASE_URL"] ?? _saasBase ?? "";
+        public string LoginUrl => Config?["LAB_SSO_LOGIN_URL"] ?? _loginUrl ?? "";
+        public string ClientId => Config?["LAB_SAAS_CLIENT_ID"] ?? _clientId ?? "";
+        public string ClientSecret => Config?["LAB_SAAS_CLIENT_SECRET"] ?? _clientSecret ?? "";
+        public string DefaultTenantId => Config?["LAB_SAAS_DEFAULT_TENANT_ID"] ?? _defaultTenantId ?? "";
+        public string ServiceUser => Config?["LAB_SAAS_SERVICE_USER"] ?? _serviceUser ?? "";
+        public string ServicePassword => Config?["LAB_SAAS_SERVICE_PASSWORD"] ?? _servicePassword ?? "";
+        public string CallbackRedirectBase => Config?["LAB_SSO_CALLBACK_REDIRECT"] ?? _callbackRedirectBase ?? "";
 
         // Lab:Sso json 段绑定字段(appsettings*.json dev 值;flat env 优先)
-        public string _saasBase { get; set; } = "http://localhost:5101";
-        public string _loginUrl { get; set; } = "";
-        public string _clientId { get; set; } = "";
-        public string _clientSecret { get; set; } = "";
-        public string _defaultTenantId { get; set; } = "";
-        public string _serviceUser { get; set; } = "alice";
-        public string _servicePassword { get; set; } = "dev123456";
-        public string _callbackRedirectBase { get; set; } = "http://localhost:5080/api/auth/sso/callback";
+        // ADR-0019：删 "alice" / "dev123456" / "http://localhost:5080" 字面默认值。
+        public string? _saasBase { get; set; }
+        public string? _loginUrl { get; set; }
+        public string? _clientId { get; set; }
+        public string? _clientSecret { get; set; }
+        public string? _defaultTenantId { get; set; }
+        public string? _serviceUser { get; set; }
+        public string? _servicePassword { get; set; }
+        public string? _callbackRedirectBase { get; set; }
 
         /// <summary>有效登录页 base：显式 LoginUrl 优先，缺省回落 SaasBase。</summary>
         public string EffectiveLoginUrl => string.IsNullOrEmpty(LoginUrl) ? SaasBase : LoginUrl;

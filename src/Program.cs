@@ -1,4 +1,5 @@
 using System.Security.Authentication;
+using Lab.AspNetCore.Auth.Config;
 using Lab.AspNetCore.Auth.Jwt;
 using Lab.AspNetCore.Auth.Sso;
 using Lab.AspNetCore.Auth.State;
@@ -49,11 +50,16 @@ builder.Services.AddSwaggerGen(c =>
 //（首个认证请求才跑 OptionsFactory），那时容器已 build、ServiceCollection 只读，
 // 在 lambda 里 AddSingleton 会抛 "collection cannot be modified because it is read-only"
 // 且 AuthService 也从容器解析 LabJwtSigner（不能只做局部变量）。
-var jwtSigner = new LabJwtSigner(
-    builder.Configuration["JWT_SIGNING_KEY"] ?? "dev-key-32-bytes-minimum-length!",
-    builder.Configuration["JWT_ISSUER"] ?? "lab-management-system",
-    int.TryParse(builder.Configuration["JWT_TTL_SECONDS"], out var t) ? t : 3600,
-    int.TryParse(builder.Configuration["JWT_REFRESH_TTL_SECONDS"], out var rt) ? rt : 604800);
+//
+// ADR-0019：所有 JWT 配置从 env 必填注入（ConfigBuilder.RequireXxx 集中校验）。
+// TTL/RefreshTTL 是数值(无 demo 字面陷阱),保留 int.TryParse 但缺省值改为 0 → 必填。
+var jwtSigningKey = ConfigBuilder.RequireJwtSigningKey(builder.Configuration);
+var jwtIssuer = ConfigBuilder.RequireJwtIssuer(builder.Configuration);
+var jwtTtlSeconds = int.TryParse(builder.Configuration["JWT_TTL_SECONDS"], out var t) ? t
+    : throw new InvalidOperationException("JWT_TTL_SECONDS env is required (ADR-0019 禁字面默认值)");
+var jwtRefreshTtlSeconds = int.TryParse(builder.Configuration["JWT_REFRESH_TTL_SECONDS"], out var rt) ? rt
+    : throw new InvalidOperationException("JWT_REFRESH_TTL_SECONDS env is required (ADR-0019 禁字面默认值)");
+var jwtSigner = new LabJwtSigner(jwtSigningKey, jwtIssuer, jwtTtlSeconds, jwtRefreshTtlSeconds);
 builder.Services.AddSingleton(jwtSigner);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -68,10 +74,8 @@ builder.Services.AddAuthorization(o =>
 });
 
 // CORS：lab 前端三仓（5202 react / 5203 vue / 5201 nextjs），env LAB_CORS_ALLOWED_ORIGINS 覆盖
-// Phase 4 env 对称化: Lab:Cors:AllowedOrigins → LAB_CORS_ALLOWED_ORIGINS flat key
-var allowedOrigins = (builder.Configuration["LAB_CORS_ALLOWED_ORIGINS"]
-    ?? "http://localhost:5201,http://localhost:5202,http://localhost:5203")
-    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+// ADR-0019：缺失 throw,不允许 fallback 到 localhost dev 列表。
+var allowedOrigins = ConfigBuilder.RequireCorsOrigins(builder.Configuration);
 builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
     .WithOrigins(allowedOrigins)
     .AllowAnyMethod()
@@ -81,11 +85,11 @@ builder.Services.AddCors(o => o.AddPolicy("labFrontend", p => p
     .AllowCredentials()));
 
 // State cookie manager（HS256 签 state,签名密钥复用 JWT_SIGNING_KEY）
-builder.Services.AddSingleton(sp => new StateCookieManager(
-    sp.GetRequiredService<IConfiguration>()["JWT_SIGNING_KEY"] ?? "dev-key-32-bytes-minimum-length!"));
+builder.Services.AddSingleton(sp => new StateCookieManager(jwtSigningKey));
 
 // SSO 客户端（ADR-0008：profile 切换 noop vs real）
-var ssoProfile = builder.Configuration["LAB_SSO_PROFILE"] ?? "no-sso";
+// ADR-0019：profile 缺失 throw,不允许 "no-sso" 兜底。dev 期显式设 no-sso,prod 必须 "real"。
+var ssoProfile = ConfigBuilder.RequireSsoProfile(builder.Configuration);
 if (ssoProfile == "no-sso")
 {
     builder.Services.AddSingleton<ISaasAuthClient, NoopSaasAuthClient>();
@@ -101,9 +105,11 @@ else
 }
 
 // 用户目录（B1 配置式 demo，1:1 镜像 lab-msw / lab-springboot ConfigUserDirectory）
+// ADR-0019：DevPassword 缺失 throw,不允许 "dev123456" 兜底。dev 期 appsettings.Development.json
+// 必须显式声明 (即便 dev 也要求显式 dev password,与 prod 同 key 路径对齐)。
 builder.Services.AddSingleton<IUserDirectory>(sp =>
     new ConfigUserDirectory(
-        sp.GetRequiredService<IConfiguration>()["Lab:Auth:DevPassword"] ?? "dev123456"));
+        ConfigBuilder.RequireDevPassword(sp.GetRequiredService<IConfiguration>())));
 builder.Services.AddSingleton<AuthService>(sp =>
     new AuthService(
         sp.GetRequiredService<IUserDirectory>(),
@@ -118,7 +124,14 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantContext, HttpTenantContext>();
 // 2026-08-28 key 统一:flat LAB_DATA_PROVIDER 优先(与家族 env 契约同名),
 // Lab:Data:Provider json 段作 dev fallback(appsettings.Development.json)
-var dataProvider = builder.Configuration["LAB_DATA_PROVIDER"] ?? builder.Configuration["Lab:Data:Provider"] ?? "memory";
+//
+// ADR-0019：data provider 缺失 throw,不允许 "memory" 兜底。dev 用 "memory" (显式声明),
+// prod 必须 "ef" + DATABASE_URL (走 deploy 注入)。
+var dataProvider = builder.Configuration["LAB_DATA_PROVIDER"]
+    ?? builder.Configuration["Lab:Data:Provider"]
+    ?? throw new InvalidOperationException(
+        "LAB_DATA_PROVIDER (or Lab:Data:Provider) env is required (ADR-0019 禁 \"memory\" 兜底). " +
+        "Set to \"memory\" (dev) or \"ef\" (prod).");
 if (dataProvider == "ef")
 {
     var connectionString = builder.Configuration["DATABASE_URL"]
