@@ -16,12 +16,7 @@ public sealed class EfCatalogStore(LabDbContext db) : ICatalogStore
     // === 型号 M04.F06 ===
 
     public IReadOnlyList<InspectionModel> FilterModels(string tenantId, string? objectCode, string? keyword) =>
-        db.InspectionModels
-            .Where(m => m.TenantId == tenantId)
-            .Where(m => objectCode == null || objectCode == "" || m.InspectionObjectCode == objectCode)
-            .Where(m => Kw(m.Code, m.Name, keyword))
-            .OrderBy(m => m.SortOrder).ThenBy(m => m.Code)
-            .ToList();
+        BuildFilterModelsQuery(db, tenantId, objectCode, keyword).ToList();
 
     public InspectionModel? FindModel(string tenantId, string code) =>
         db.InspectionModels.FirstOrDefault(m => m.TenantId == tenantId && m.Code == code);
@@ -35,12 +30,7 @@ public sealed class EfCatalogStore(LabDbContext db) : ICatalogStore
     // === 规格 M04.F07 ===
 
     public IReadOnlyList<InspectionSpec> FilterSpecs(string tenantId, string? objectCode, string? keyword) =>
-        db.InspectionSpecs
-            .Where(s => s.TenantId == tenantId)
-            .Where(s => objectCode == null || objectCode == "" || s.InspectionObjectCode == objectCode)
-            .Where(s => Kw(s.Code, s.Name, keyword))
-            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code)
-            .ToList();
+        BuildFilterSpecsQuery(db, tenantId, objectCode, keyword).ToList();
 
     public InspectionSpec? FindSpec(string tenantId, string code) =>
         db.InspectionSpecs.FirstOrDefault(s => s.TenantId == tenantId && s.Code == code);
@@ -54,12 +44,7 @@ public sealed class EfCatalogStore(LabDbContext db) : ICatalogStore
     // === 等级 M04.F08 ===
 
     public IReadOnlyList<InspectionGrade> FilterGrades(string tenantId, string? objectCode, string? keyword) =>
-        db.InspectionGrades
-            .Where(g => g.TenantId == tenantId)
-            .Where(g => objectCode == null || objectCode == "" || g.InspectionObjectCode == objectCode)
-            .Where(g => Kw(g.Code, g.Name, keyword))
-            .OrderBy(g => g.SortOrder).ThenBy(g => g.Code)
-            .ToList();
+        BuildFilterGradesQuery(db, tenantId, objectCode, keyword).ToList();
 
     public InspectionGrade? FindGrade(string tenantId, string code) =>
         db.InspectionGrades.FirstOrDefault(g => g.TenantId == tenantId && g.Code == code);
@@ -73,12 +58,7 @@ public sealed class EfCatalogStore(LabDbContext db) : ICatalogStore
     // === 牌号 M04.F09（SET NULL 语义由 DB ON DELETE SET NULL 承担） ===
 
     public IReadOnlyList<InspectionBrand> FilterBrands(string tenantId, string? objectCode, string? keyword) =>
-        db.InspectionBrands
-            .Where(b => b.TenantId == tenantId)
-            .Where(b => objectCode == null || objectCode == "" || b.InspectionObjectCode == objectCode)
-            .Where(b => Kw(b.Code, b.Name, keyword))
-            .OrderBy(b => b.SortOrder).ThenBy(b => b.Code)
-            .ToList();
+        BuildFilterBrandsQuery(db, tenantId, objectCode, keyword).ToList();
 
     public InspectionBrand? FindBrand(string tenantId, string code) =>
         db.InspectionBrands.FirstOrDefault(b => b.TenantId == tenantId && b.Code == code);
@@ -89,11 +69,39 @@ public sealed class EfCatalogStore(LabDbContext db) : ICatalogStore
     public bool DeleteBrand(string tenantId, string code) =>
         db.InspectionBrands.Where(b => b.TenantId == tenantId && b.Code == code).ExecuteDelete() > 0;
 
-    // keyword 大小写不敏包含 code/name（空串不过滤）-- 翻译成 SQL LOWER(...) LIKE
-    private static bool Kw(string? code, string? name, string? keyword) =>
-        keyword == null || keyword == ""
-        || (code != null && code.ToLower().Contains(keyword.ToLower()))
-        || (name != null && name.ToLower().Contains(keyword.ToLower()));
+    // === 查询构建器：internal 供翻译性测试（EfQueryTranslatabilityTest）逐个 ToQueryString ===
+
+    internal static IQueryable<InspectionModel> BuildFilterModelsQuery(
+        LabDbContext db, string tenantId, string? objectCode, string? keyword) =>
+        db.InspectionModels
+            .Where(m => m.TenantId == tenantId)
+            .Where(m => objectCode == null || objectCode == "" || m.InspectionObjectCode == objectCode)
+            .WhereKw(m => m.Code, m => m.Name, keyword)
+            .OrderBy(m => m.SortOrder).ThenBy(m => m.Code);
+
+    internal static IQueryable<InspectionSpec> BuildFilterSpecsQuery(
+        LabDbContext db, string tenantId, string? objectCode, string? keyword) =>
+        db.InspectionSpecs
+            .Where(s => s.TenantId == tenantId)
+            .Where(s => objectCode == null || objectCode == "" || s.InspectionObjectCode == objectCode)
+            .WhereKw(s => s.Code, s => s.Name, keyword)
+            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code);
+
+    internal static IQueryable<InspectionGrade> BuildFilterGradesQuery(
+        LabDbContext db, string tenantId, string? objectCode, string? keyword) =>
+        db.InspectionGrades
+            .Where(g => g.TenantId == tenantId)
+            .Where(g => objectCode == null || objectCode == "" || g.InspectionObjectCode == objectCode)
+            .WhereKw(g => g.Code, g => g.Name, keyword)
+            .OrderBy(g => g.SortOrder).ThenBy(g => g.Code);
+
+    internal static IQueryable<InspectionBrand> BuildFilterBrandsQuery(
+        LabDbContext db, string tenantId, string? objectCode, string? keyword) =>
+        db.InspectionBrands
+            .Where(b => b.TenantId == tenantId)
+            .Where(b => objectCode == null || objectCode == "" || b.InspectionObjectCode == objectCode)
+            .WhereKw(b => b.Code, b => b.Name, keyword)
+            .OrderBy(b => b.SortOrder).ThenBy(b => b.Code);
 }
 
 /// <summary>EF 仓储共用：upsert（先查后 Add/SetValues）+ keyword 谓词。</summary>

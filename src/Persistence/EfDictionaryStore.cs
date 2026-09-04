@@ -6,18 +6,10 @@ using Microsoft.EntityFrameworkCore;
 
 public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
 {
-    private static bool Kw(string? code, string? name, string? keyword) =>
-        keyword == null || keyword == ""
-        || (code != null && code.ToLower().Contains(keyword.ToLower()))
-        || (name != null && name.ToLower().Contains(keyword.ToLower()));
-
     // === 专项 M06.F01 ===
 
     public IReadOnlyList<InspectionSpecialty> FilterSpecialties(string? keyword) =>
-        db.InspectionSpecialties
-            .Where(s => Kw(s.Code, s.Name, keyword))
-            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code)
-            .ToList();
+        BuildFilterSpecialtiesQuery(db, keyword).ToList();
 
     public InspectionSpecialty? FindSpecialty(string code) => db.InspectionSpecialties.Find(code);
 
@@ -42,11 +34,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
     // === 参数 M06.F03 ===
 
     public IReadOnlyList<InspectionParameter> FilterParameters(string? keyword, InspectionParameterSourceType? sourceType) =>
-        db.InspectionParameters
-            .Where(p => sourceType == null || p.SourceType == sourceType)
-            .Where(p => Kw(p.Code, p.Name, keyword))
-            .OrderBy(p => p.SortOrder).ThenBy(p => p.Code)
-            .ToList();
+        BuildFilterParametersQuery(db, keyword, sourceType).ToList();
 
     public InspectionParameter? FindParameter(string code) => db.InspectionParameters.Find(code);
 
@@ -69,11 +57,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
     // === 标准 M06.F04 ===
 
     public IReadOnlyList<InspectionStandard> FilterStandards(string? keyword, InspectionStandardStatus? status) =>
-        db.InspectionStandards
-            .Where(s => status == null || s.Status == status)
-            .Where(s => Kw(s.Code, s.Name, keyword))
-            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code)
-            .ToList();
+        BuildFilterStandardsQuery(db, keyword, status).ToList();
 
     public InspectionStandard? FindStandard(string code) => db.InspectionStandards.Find(code);
 
@@ -96,10 +80,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
     // === 报告名称 M06.F07 ===
 
     public IReadOnlyList<InspectionReportName> FilterReportNames(string? keyword) =>
-        db.InspectionReportNames
-            .Where(r => Kw(r.Code, r.Name, keyword))
-            .OrderBy(r => r.SortOrder).ThenBy(r => r.Code)
-            .ToList();
+        BuildFilterReportNamesQuery(db, keyword).ToList();
 
     public InspectionReportName? FindReportName(string code) => db.InspectionReportNames.Find(code);
 
@@ -122,10 +103,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
     // === 参数界面 M06.F08 ===
 
     public IReadOnlyList<ParamInterface> FilterInterfaces(string? keyword) =>
-        db.ParamInterfaces
-            .Where(i => Kw(i.Code, i.Name, keyword))
-            .OrderBy(i => i.SortOrder).ThenBy(i => i.Code)
-            .ToList();
+        BuildFilterInterfacesQuery(db, keyword).ToList();
 
     public ParamInterface? FindInterface(string code) => db.ParamInterfaces.Find(code);
 
@@ -148,11 +126,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
     // === 项目 M06.F02 ===
 
     public IReadOnlyList<InspectionObject> FilterObjects(string? specialtyCode, string? keyword) =>
-        db.InspectionObjects
-            .Where(o => specialtyCode == null || specialtyCode == "" || o.InspectionSpecialtyCode == specialtyCode)
-            .Where(o => Kw(o.Code, o.Name, keyword))
-            .OrderBy(o => o.SortOrder).ThenBy(o => o.Code)
-            .ToList();
+        BuildFilterObjectsQuery(db, specialtyCode, keyword).ToList();
 
     public InspectionObject? FindObject(string code) => db.InspectionObjects.Find(code);
 
@@ -171,6 +145,44 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
         db.SaveChanges();
         return true;
     }
+
+    // === 查询构建器：internal 供翻译性测试（EfQueryTranslatabilityTest）逐个 ToQueryString ===
+
+    internal static IQueryable<InspectionSpecialty> BuildFilterSpecialtiesQuery(LabDbContext db, string? keyword) =>
+        db.InspectionSpecialties
+            .WhereKw(s => s.Code, s => s.Name, keyword)
+            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code);
+
+    internal static IQueryable<InspectionParameter> BuildFilterParametersQuery(
+        LabDbContext db, string? keyword, InspectionParameterSourceType? sourceType) =>
+        db.InspectionParameters
+            .Where(p => sourceType == null || p.SourceType == sourceType)
+            .WhereKw(p => p.Code, p => p.Name, keyword)
+            .OrderBy(p => p.SortOrder).ThenBy(p => p.Code);
+
+    internal static IQueryable<InspectionStandard> BuildFilterStandardsQuery(
+        LabDbContext db, string? keyword, InspectionStandardStatus? status) =>
+        db.InspectionStandards
+            .Where(s => status == null || s.Status == status)
+            .WhereKw(s => s.Code, s => s.Name, keyword)
+            .OrderBy(s => s.SortOrder).ThenBy(s => s.Code);
+
+    internal static IQueryable<InspectionReportName> BuildFilterReportNamesQuery(LabDbContext db, string? keyword) =>
+        db.InspectionReportNames
+            .WhereKw(r => r.Code, r => r.Name, keyword)
+            .OrderBy(r => r.SortOrder).ThenBy(r => r.Code);
+
+    internal static IQueryable<ParamInterface> BuildFilterInterfacesQuery(LabDbContext db, string? keyword) =>
+        db.ParamInterfaces
+            .WhereKw(i => i.Code, i => i.Name, keyword)
+            .OrderBy(i => i.SortOrder).ThenBy(i => i.Code);
+
+    internal static IQueryable<InspectionObject> BuildFilterObjectsQuery(
+        LabDbContext db, string? specialtyCode, string? keyword) =>
+        db.InspectionObjects
+            .Where(o => specialtyCode == null || specialtyCode == "" || o.InspectionSpecialtyCode == specialtyCode)
+            .WhereKw(o => o.Code, o => o.Name, keyword)
+            .OrderBy(o => o.SortOrder).ThenBy(o => o.Code);
 }
 
 /// <summary>

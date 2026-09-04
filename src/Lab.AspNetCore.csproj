@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- 翻译性测试（EfQueryTranslatabilityTest）直接消费 store 的 internal Build*Query -->
+    <InternalsVisibleTo Include="Lab.AspNetCore.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <!-- B1 认证域：JWT 校验 + CORS（镜像 lab-springboot SecurityConfig） -->
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <!-- Swagger / OpenAPI UI：与 saas-identity-platform-aspnetcore v0.1.5 同位, 服务于

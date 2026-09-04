@@ -11,6 +11,20 @@
 - 新增 `tests/Harness/LabDbContextModelTest.cs`：强制初始化全 EF 模型，
   把「首请求才爆」提前到「测试就爆」；逐实体断言 AdditionalProperties 已 Ignore。
 
+## [0.2.26] — 2026-09-04
+
+- fix(ef): `Kw` 普通 C# 方法在 Where lambda 里不可翻译 —— B7 EF 镜像下
+  全部 Filter 端点（contracts/receipts/samples/码表/字典，共 13 处 × 3 store）
+  prod 首请求 500。改 `WhereKw` 表达式组合扩展（`EF.Functions.ILike` → PG ILIKE，
+  语义 = ToLower().Contains）。
+- 测试体系改造（v0.2.25/26 两起事故的共同根因是「测试走 memory 分支」）：
+  - 新增 `EfQueryTranslatabilityTest`：store 拆 internal `Build*Query`（18 个查询）
+    逐个 `ToQueryString`，翻译失败测试即红。无需连库，CI 可跑。
+  - 新增 `EfStorePgTest`（lab_test 真库硬依赖，连不上即败不 skip）：
+    ILIKE 匹配 / tenant 隔离 / 排序 / upsert 语义走真 SQL 验证；
+    首跑即抓出 memory 分支测不出的 FK（models→objects）。
+  - 新增 `TestDb` 基建：连接串 `LAB_TEST_DATABASE_URL` 可覆盖。
+
 ## [0.2.6] — 2026-08-27
 
 - fix(menus): saas /me/menus 响应形状适配 — `Record<EffectiveMenuNode[]>`

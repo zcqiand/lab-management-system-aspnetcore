@@ -7,11 +7,14 @@ using Microsoft.EntityFrameworkCore;
 public sealed class EfMethodStore(LabDbContext db) : IMethodStore
 {
     public IReadOnlyList<CalculationMethod> Filter(string? objectCode, string? parameterCode) =>
+        BuildFilterQuery(db, objectCode, parameterCode).ToList();
+
+    internal static IQueryable<CalculationMethod> BuildFilterQuery(
+        LabDbContext db, string? objectCode, string? parameterCode) =>
         db.CalculationMethods
             .Where(r => objectCode == null || objectCode == "" || r.InspectionObjectCode == objectCode)
             .Where(r => parameterCode == null || parameterCode == "" || r.InspectionParameterCode == parameterCode)
-            .OrderBy(r => r.SortOrder)
-            .ToList();
+            .OrderBy(r => r.SortOrder);
 
     public CalculationMethod? Find(string objectCode, string parameterCode) =>
         db.CalculationMethods.Find(objectCode, parameterCode);
@@ -40,6 +43,11 @@ public sealed class EfRequirementStore(LabDbContext db) : IRequirementStore
     public IReadOnlyList<TechnicalRequirement> Filter(
         string tenantId, string? objectCode, string? parameterCode, string? standardCode,
         RequirementVerificationStatus? status) =>
+        BuildFilterQuery(db, tenantId, objectCode, parameterCode, standardCode, status).ToList();
+
+    internal static IQueryable<TechnicalRequirement> BuildFilterQuery(
+        LabDbContext db, string tenantId, string? objectCode, string? parameterCode, string? standardCode,
+        RequirementVerificationStatus? status) =>
         db.TechnicalRequirements
             .Where(t => t.TenantId == tenantId)
             .Where(t => objectCode == null || objectCode == "" || t.InspectionObjectCode == objectCode)
@@ -49,8 +57,7 @@ public sealed class EfRequirementStore(LabDbContext db) : IRequirementStore
             .OrderBy(t => t.SortOrder)
             .ThenBy(t => t.InspectionObjectCode)
             .ThenBy(t => t.InspectionParameterCode)
-            .ThenBy(t => t.JudgmentStandardCode)
-            .ToList();
+            .ThenBy(t => t.JudgmentStandardCode);
 
     // SQL PK = 业务三键（tenant_id 不在 PK，镜像 SSOT；同三键跨租户在 DB 侧冲突）
     public TechnicalRequirement? Find(string tenantId, string objectCode, string parameterCode, string standardCode) =>
