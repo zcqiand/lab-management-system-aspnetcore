@@ -18,8 +18,7 @@ public class LabDbContextModelTest
     public void Model_initializes_withoutUnmappedProperties()
     {
         var options = new DbContextOptionsBuilder<LabDbContext>()
-            .UseNpgsql("Host=localhost;Database=lab_dev;Username=probe;Password=probe")
-            .UseSnakeCaseNamingConvention()
+            .UseLabNpgsql("Host=localhost;Database=lab_dev;Username=probe;Password=probe")
             .Options;
 
         using var ctx = new LabDbContext(options);

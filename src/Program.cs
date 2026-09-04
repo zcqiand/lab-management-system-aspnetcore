@@ -138,7 +138,13 @@ if (dataProvider == "ef")
         ?? builder.Configuration["Lab:Data:ConnectionString"]
         ?? throw new InvalidOperationException("Lab:Data:Provider=ef 需要 DATABASE_URL 或 Lab:Data:ConnectionString");
     var dataSource = new Npgsql.NpgsqlDataSourceBuilder(connectionString).EnableDynamicJson().Build();
-    builder.Services.AddDbContext<LabDbContext>(options => options.UseNpgsql(dataSource));
+    // EF Core 8 AddDbContext<TContext> 给的是 non-generic DbContextOptionsBuilder。
+    // UseSnakeCaseNamingConvention() 必须挂上:PascalCase 列 vs snake_case DB = 42703
+    // (2026-09-04 prod incident)。TestDb 用 LabDbContextConfig.UseLabNpgsql(string),
+    // prod 走 NpgsqlDataSource(EnableDynamicJson for jsonb) 不能复用 string helper,
+    // 这里手挂 convention。L4 测试 LabDbContextConfigTest 锁住列名映射。
+    builder.Services.AddDbContext<LabDbContext>(
+        options => options.UseNpgsql(dataSource).UseSnakeCaseNamingConvention());
     builder.Services.AddScoped<EfCatalogStore>();
     builder.Services.AddScoped<EfMethodStore>();
     builder.Services.AddScoped<EfRequirementStore>();

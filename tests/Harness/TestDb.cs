@@ -24,8 +24,7 @@ public static class TestDb
     public static LabDbContext CreateContext()
     {
         var options = new DbContextOptionsBuilder<LabDbContext>()
-            .UseNpgsql(ConnectionString)
-            .UseSnakeCaseNamingConvention()
+            .UseLabNpgsql(ConnectionString)
             .Options;
 
         return new LabDbContext(options);
