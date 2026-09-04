@@ -27,7 +27,10 @@ jobs:
       - name: L2+L3 build (warnings as errors)
         run: dotnet build tests/Lab.AspNetCore.Tests.csproj /p:TreatWarningsAsErrors=true
       - name: L4 test
-        run: dotnet test tests/Lab.AspNetCore.Tests.csproj
+        # RealDb 测试集（*PgTest）硬依赖内网共享 PG，CI runner 不可达 ——
+        # 按「CI=翻译性（ToQueryString 无需连库）/ gate=真库（本机全量）」分层排除。
+        # suite gate L4 全量跑（scripts/gate.py），真库行为在那里验证。
+        run: dotnet test tests/Lab.AspNetCore.Tests.csproj --filter "Category!=RealDb"
 
   deploy:
     runs-on: ubuntu-latest

@@ -10,9 +10,12 @@ using Xunit;
 /// 硬依赖共享 PG —— 连不上即失败（TestDb.RequireReachable），不 skip：
 /// memory 分支测试掩盖 prod 问题是 v0.2.25/26 两起事故的根因。
 ///
+/// 分层（CI=翻译性 / gate=真库）：[Trait("Category", "RealDb")] 标记本测试集，
+/// ci.yml 用 --filter 排除（GitHub runner 够不到内网 PG）；suite gate L4 全量跑。
 /// 数据隔离：独立 tenant_id 前缀（PG-T-），全部用例走该前缀；fixture 末尾按前缀清理。
 /// 不挂 [Trait("Fn", ...)]：脚手架级（LabDbContextModelTest 同约定）。
 /// </summary>
+[Trait("Category", "RealDb")]
 public sealed class EfStorePgTest : IDisposable
 {
     private const string Tenant = "PG-T-EFSTORE";
