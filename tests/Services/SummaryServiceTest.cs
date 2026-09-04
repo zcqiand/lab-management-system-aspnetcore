@@ -15,7 +15,7 @@ public class SummaryServiceTest
 
     private static SampleReceipt Receipt(
         string id, string category, string date, FlowStatus status,
-        string code = "C-1", string project = "工程一", string reportCode = "R-1", ReceiptResult result = ReceiptResult.Pass) => new()
+        string code = "C-1", string project = "工程一", string? reportCode = "R-1", ReceiptResult result = ReceiptResult.Pass) => new()
         {
             Id = id,
             TenantId = Tenant,
