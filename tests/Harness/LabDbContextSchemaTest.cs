@@ -21,9 +21,12 @@ using Xunit;
 /// 2. 库 NOT NULL 且无 default 的列 ⊆ 模型列（缺了 insert 必炸）
 /// 3. PK 列集合全等（复合主键顺序敏感）
 ///
-/// 连不上库即失败（TestDb 同约定，不 skip）。scripts/sync-db.sh 跑本测试 + 写
-/// ADR-0026 marker。不挂 [Trait("Fn", ...)]：脚手架级（LabDbContextModelTest 同约定）。
+/// 连不上库即失败（TestDb 同约定，不 skip）。分层同 EfStorePgTest：CI=翻译性
+/// （Category!=RealDb 过滤掉，Actions runner 够不到共享 PG）、gate=真库（本机全量）。
+/// scripts/sync-db.sh 跑本测试 + 写 ADR-0026 marker。不挂 [Trait("Fn", ...)]：
+/// 脚手架级（LabDbContextModelTest 同约定）。
 /// </summary>
+[Trait("Category", "RealDb")]
 public class LabDbContextSchemaTest
 {
     [Fact]
