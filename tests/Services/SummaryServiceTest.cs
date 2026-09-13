@@ -6,7 +6,7 @@ using Lab.AspNetCore.Services;
 using Xunit;
 
 /// <summary>
-/// M05.F01 报告汇总 + M05.F02 仪表盘 fnTest（B4）。
+/// M05.F01 报告汇总 + 仪表盘统计 fnTest（B4；I06 仪表盘统计基础端点，ADR-0033 阶段二自 M05.F02.I01 下沉 BASE 对齐）。
 /// 语义基准：lab-springboot SummaryServiceTest（ALL 哨兵 / 闭区间 / 6 列 / null→"" / 3 桶聚合）。
 /// </summary>
 public class SummaryServiceTest
@@ -116,10 +116,10 @@ public class SummaryServiceTest
         Assert.Single(open.Rows); // 只有 01-10
     }
 
-    // === M05.F02.I01 仪表盘统计 ===
+    // === M05.F01.I06 仪表盘统计基础端点（原 M05.F02.I01，ADR-0033 阶段二下沉 BASE 对齐）===
 
     [Fact]
-    [Trait("Fn", "M05.F02.I01")]
+    [Trait("Fn", "M05.F01.I06")]
     public void GetDashboardStats_aggregatesByStatus()
     {
         var store = new InMemoryFlowStore();
@@ -152,7 +152,7 @@ public class SummaryServiceTest
     }
 
     [Fact]
-    [Trait("Fn", "M05.F02.I01")]
+    [Trait("Fn", "M05.F01.I06")]
     public void GetDashboardStats_empty_returnsZeros()
     {
         var service = new SummaryService(new InMemoryFlowStore(), DictStore());

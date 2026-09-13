@@ -6,7 +6,7 @@ using Lab.AspNetCore.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-/// <summary>M05.F01 报告汇总 + M05.F02 仪表盘统计（B4，2 端点）。</summary>
+/// <summary>M05.F01 报告汇总 + 仪表盘统计 M05.F01.I06（B4，2 端点；ADR-0033 阶段二自 M05.F02.I01 改挂）。</summary>
 [ApiController]
 [Authorize]
 public sealed class SummaryController(SummaryService service, ITenantContext tenantContext)

@@ -236,8 +236,8 @@
 
 | 功能 ID | 功能名称 | 说明 | 状态 |
 |---|---|---|---|---|
-| M05.F01 | 报告汇总 | 按报告类别输出试验报告汇总表 | 已上线 |
-| M05.F02 | 仪表盘统计 | 工作台仪表盘：合同/接样/样品计数 + 按 3 桶聚合的报告状态 + 任务计数 | 已上线 |
+| M05.F01 | 报告汇总 | 按报告类别输出试验报告汇总表 + 仪表盘统计 | 已上线 |
+| M05.F02 | 仪表盘统计 | 工作台仪表盘：合同/接样/样品计数 + 按 3 桶聚合的报告状态 + 任务计数 | 已废弃 |
 
 ### M05.F01 报告汇总
 
@@ -246,12 +246,7 @@
 | M05.F01.I01 | 报告汇总 | 接口 | 前端+后端 | GET /api/summary?categoryCode=&dateFrom=&dateTo=：ALL 不过滤按报告类别过滤当前租户接样单；SummaryData{summaryName, 6 列, rows}；commissionDate DESC, commissionCode 排序 | 已上线 |
 | M05.F01.I03 | 核心指标卡 | 接口 | 前端+后端 | GET /api/summary/stats 扩展：todayTestCount（今日试验总数）+ qualifiedRateByMaterial{concrete,rebar,sand}（按材料合格率，码表 summaryName 关键词映射，全量预载防 N+1）+ reportOutputByStatus{generated,pending,issued}（报告产出量） | 已上线 |
 | M05.F01.I04 | 任务状态漏斗 | 接口 | 前端+后端 | GET /api/summary/stats 扩展：funnelByStage{pending_collect,received,testing,reporting,reviewing,issued} 六段实时计数 | 已上线 |
-
-### M05.F02 仪表盘统计
-
-| 子项 ID | 名称 | 类型 | 交付 | 说明 | 状态 |
-|---|---|---|---|---|---|
-| M05.F02.I01 | 仪表盘统计 | 接口 | 前端+后端 | GET /api/summary/stats：合同/接样/样品计数 + 3 桶报告状态（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount + I03/I04 扩展字段 | 已上线 |
+| M05.F01.I06 | 仪表盘统计基础端点 | 接口 | 前端+后端 | GET /api/summary/stats 基础字段：contractCount/receiptCount/sampleCount + 报告状态 3 桶（draft=receiving+task+data_entry；reviewing=review+approval；issued=issuance+archived）+ pendingTaskCount。ADR-0033 阶段二自 M05.F02.I01 改挂 F01（BASE I06 下沉对齐） | 已上线 |
 
 ## M06 检测能力
 

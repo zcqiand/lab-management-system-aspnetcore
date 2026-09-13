@@ -4,7 +4,7 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 
 /// <summary>
-/// M05.F01 报告汇总 + M05.F02 仪表盘统计（B4）。
+/// M05.F01 报告汇总 + 仪表盘统计 M05.F01.I06（B4；ADR-0033 阶段二自 M05.F02.I01 改挂）。
 /// 语义镜像 springboot SummaryService：
 ///   - categoryCode null/空白 → 哨兵 ALL（不过滤）
 ///   - dateFrom/dateTo 闭区间（YYYY-MM-DD 字典序），空串无界

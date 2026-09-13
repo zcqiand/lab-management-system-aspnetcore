@@ -56,7 +56,7 @@ flowchart TD
 |---|---|---|---|---|---|---|
 | S01 | 数据积累（接样推进 + 合同/样品登记） | 所有角色 | - | - | - | -（B2/B3 上游） |
 | S02 | 报告汇总查询 | 管理层 | categoryCode/dateFrom/dateTo | SummaryData 6 列行集 | - | M05.F01.I01 |
-| S03 | 仪表盘聚合 | 所有用户 | - | 计数 + 3 桶 + pendingTask | - | M05.F02.I01 |
+| S03 | 仪表盘聚合 | 所有用户 | - | 计数 + 3 桶 + pendingTask | - | M05.F01.I06 |
 
 ## FLOW-04 试验流程主流程（B3）
 
