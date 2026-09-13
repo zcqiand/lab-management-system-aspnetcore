@@ -35,12 +35,12 @@
 | 契约源 | `../lab-management-system-shared/generated/openapi/openapi.yaml`（lab-shared `npm run emit:openapi` 产物） |
 | 同构对侧 | `saas-identity-platform-aspnetcore`（结构 1:1，业务表不同） |
 | 并行实现 | `lab-management-system-springboot`（同 lab-shared 契约；Spring Boot 实现） |
-| 持久化 | dev=`Lab:Data:Provider=memory`（InMemory fixture）；prod=`ef`（Npgsql + EF Core，shared SQL 是 SSOT） |
+| 持久化 | dev=`Lab:Data:Provider=memory`（InMemory fixture）；prod=`ef`（Npgsql + EF Core，DB-First：shared `src/db/schema.ts` 是 SSOT） |
 
 **关键哲学**：
 
 1. **路由不手写**：所有 `[Route]`/`[HttpGet]` 等由 NSwag 从 OpenAPI.yaml 生成；本仓只覆盖抽象方法提供业务。
-2. **DB schema 不本地维护**：lab-shared 的 `sql/migrations/V*.sql` 是真源；本仓 EF Core 只做 *运行时校验*，不 `Migrate()`。与 lab-springboot 的 Flyway baseline-v13 冻结策略同哲学——不重复建表。
+2. **DB schema 不本地维护**（DB-First，ADR-0025/0033）：shared `src/db/schema.ts` 是真源（`db:migrate` 物化到共享 PG）；本仓 EF Core 只做 ORM 映射，不 `Migrate()`（禁 EF Migrations）。漂移防线 = `LabDbContextSchemaTest`（模型 ↔ 库逐列对照，红 = DB 演进或映射漂移）+ `scripts/sync-db.sh`（ADR-0026 marker）。
 3. **partial class 分层**：`Generated/Controllers.cs` 持有 abstract 基类，`Implementation/<Tag>Controller.cs` 持有 partial 实现——镜像 springboot 的 `api/controller/` 双层结构。
 5. **JWT HS256 真签**: ADR-0008 + Phase 2B 镜像 saas 删 `RequireSignedTokens=false` (v0.1.17+ 起统一 HS256，dev/prod 同 `TokenValidationParameters`)。
 
@@ -59,6 +59,7 @@ lab-management-system-aspnetcore/
 │   └── conventions/                   ← 本仓编码细则
 ├── scripts/
 │   ├── gen-shared.sh                  ← 调 shared emit + nswag run + patch-generated.py
+│   ├── sync-db.sh                     ← DB-First schema 同步验证（LabDbContextSchemaTest）+ ADR-0026 marker
 │   └── patch-generated.py             ← NSwag 已知缺陷确定性修补（State / RequirementComparison）
 ├── src/
 │   ├── Program.cs                     ← DI 注册 + JwtBearer + CORS + dev/ef 分支
@@ -257,9 +258,9 @@ InMemoryXxxStore    EfXxxStore
 
 **EF Core（prod，`Lab:Data:Provider=ef`）**：
 
-- `LabDbContext` 镜像 shared SQL 表结构（`contracts`, `receipts`, `samples`, `test_records`, `inspection_models`, `inspection_specialties`, ...）；
-- 与 shared SQL 同步靠 `sync-db.mjs`（[lab-shared 仓](../../lab-management-system-shared/scripts/sync-db.mjs)，pg driver 走 [lab-nextjs 借链](../../lab-management-system-nextjs/scripts/borrow-from-nextjs-pg.mjs)）灌库，不靠 EF Migrations；
-- EF Migrations 本仓**不维护**（[ADR-0010 §6](#6-adr-0010-待办) open question）；
+- `LabDbContext` 镜像共享 PG 表结构（`contracts`, `sample_receipts`, `samples`, `test_records`, `inspection_models`, `inspection_specialties`, ...）——运行时实体 = NSwag DTO 类（DTO==entity 零转换层）；
+- DB-First（ADR-0025/0033）：schema 真源 = shared `src/db/schema.ts`（`db:migrate` 物化）；漂移防线 = `LabDbContextSchemaTest`（EF 全模型 ↔ 库 information_schema 逐列对照：模型列 ⊆ 库列 / NOT NULL 无 default 列必映射 / PK 集合全等）；
+- `scripts/sync-db.sh` 跑该测试 + 写 ADR-0026 marker；不靠 EF Migrations（禁）；
 - DI 在 `Program.cs` 用 `if (dataProvider == "ef")` 二选一。
 
 **fixture 一致性**：
@@ -438,7 +439,7 @@ app.Run()
 ### 4.2 改契约 → 三端同步（NSwag 重生链）
 
 ```
-1. [lab-shared] 改 tsp/main.tsp 或 sql/migrations/V00N+1__*.sql
+1. [lab-shared] 改 tsp/main.tsp（API 契约）或 src/db/schema.ts（DB schema，随后 db:migrate）
    ↓ git commit + push
 
 2. [lab-shared] npm run build           ← emit:openapi + tsc --noEmit
@@ -476,7 +477,7 @@ app.Run()
 **关键检查点**：
 
 - 改契约时必须**先**改 shared BASE tree 的 F 级（[ADR-0003](../../../docs/adr/0003-function-tree-requires-human-approval.md)），再改本仓 I 级子项；否则 L5 红；
-- `gen-shared.sh` 不会 `cp` SQL 文件——本仓 EF 不 Migrate，schema 真源永远是 shared SQL；
+- `gen-shared.sh` 只管 API 契约（NSwag）——DB 侧走 `scripts/sync-db.sh`（schema 真源 = shared `src/db/schema.ts`，ADR-0025/0033）；
 - `patch-generated.py` 是确定性 AST 修补，幂等可重放；
 - `dotnet test` 测试**禁止并行**：`[assembly: CollectionBehavior(DisableTestParallelization)]`——InMemoryStore 是 Singleton fixture，并发修改抛 `Collection was modified`；
 - skip/xfail 的测试**禁止挂 fn-ID**（CLAUDE.md 硬约束 + 父仓 ADR-0002）。
@@ -545,9 +546,8 @@ python "$ROOT/scripts/patch-generated.py"
 |---|---|---|
 | Codegen 工具 | openapi-generator-maven-plugin（Java） | NSwag CLI（C#） |
 | 产物位置 | `src/main/java/.../controller/` | `src/Controllers/Generated/Controllers.cs` |
-| DB 同步 | Flyway（`db/migration/V*.sql` cp 自 shared） | EF Core 仅 ORM 镜像，不 Migrate；库由 sync-db 灌 |
-| SQL 拷贝 | `cp shared/sql/migrations/V*.sql db/migration/` 含 cmp abort 防护 | ❌ 不拷贝（本仓无 db/migration/） |
-| DIVERGED_VERSIONS | V014/V017 永久分叉白名单 | 不适用（无 SQL 拷贝） |
+| DB 同步 | 已退役 Flyway；scaffold-entities.sh → entity/Generated/ 镜像 | `LabDbContextSchemaTest` 模型↔库对照 + `sync-db.sh` marker（禁 EF Migrations） |
+| SQL 拷贝 | 历史模式（已退役） | 本仓自始无 db/migration/ |
 
 **契约同步失败时**：
 
@@ -557,23 +557,18 @@ python "$ROOT/scripts/patch-generated.py"
 
 ---
 
-## 6. ADR-0010 待办
+## 6. DB-First 消费协议（ADR-0025 / ADR-0033，了结 ADR-0010 待办）
 
-**ADR-0010**（父仓 [00010-aspnetcore-ef-mirrors-sql.md](../../../docs/adr/0010-aspnetcore-ef-mirrors-sql.md)）：EF Core Migrations 应镜像 shared SQL DDL。
+**历史**：ADR-0010 曾问「EF Migrations 是否镜像 shared SQL DDL」。DB-First（ADR-0025/0033）下该 open question 已了结：**不用 EF Migrations**——schema 真源 = shared `src/db/schema.ts`（`db:migrate` 物化到共享 PG），本仓只读不写。
 
-**当前状态**：
+**本仓形态（与 saas-aspnetcore 的差异，偏差已记录）**：
 
-- 本仓 `Migrations/` 目录**不存在**——EF 只在 ORM 层（`LabDbContext`）声明 entity，schema 真源仍是 `../lab-management-system-shared/sql/migrations/V*.sql`；
-- prod DB schema 由 `lab-nextjs/scripts/sync-db.mjs` 从 shared SQL 灌入；
-- EF 启动时 **不** Migrate，仅 DbContext model 校验。
+- 运行时 EF 实体 = **NSwag DTO 类**（`Controllers/Generated/` 产物）——`LabDbContext` 手写映射（ToTable + Wire 枚举转换器 + jsonb/timestamptz converter），DTO==entity 零转换层。这层映射有真实语义价值，且被 `LabDbContextConfigTest`（42703 事故回归锁）钉住；
+- saas 式 `dotnet ef dbcontext scaffold` 产物是另一套 string 属性实体——用它换掉 DTO-as-entity 意味着 26 实体 × store/service 全量翻写 + 丢契约类型枚举，ADR-0033 的字面方案（scaffold → Generated/、废手写映射）在本仓**不可行**；
+- 替代防线（严格更强）：`tests/Harness/LabDbContextSchemaTest.cs` 把 EF 全模型与共享 PG 物化态逐列对照——同时捕获 **DB 演进**（schema.ts 改了 → 测试红 = 标准工作流）与**映射漂移**（漏 ToTable/列名错 → 42703 类事故提前到测试期，scaffold 镜像反而测不出后者）；
+- `scripts/sync-db.sh`：跑该测试 + 写 ADR-0026 marker（db_synced_sha）；首次运行即抓到真漂移（`param_interfaces` 未跟 V013 rename → 已修 `inspection_param_interfaces`/`inspection_param_interface_links`）。
 
-**open question**（详见父仓 docs/adr/0010）：
-
-- 是否补 `Migrations/InitialSchema.cs`（EF 镜像 shared SQL DDL）？
-- 还是修订 ADR-0010 改口"EF 不维护 migration，schema 唯一真源是 shared SQL"？
-- 与 springboot 仓 Flyway baseline-v13 冻结策略的关系？
-
-**当前决定**：维持现状（不补 EF Migrations），与 springboot baseline-v13 冻结同哲学——schema 由 shared SQL 单一管理。
+**ADR-0029 纪律**：发现「本仓需要 ≠ shared schema」列候选方案停下问人；ADR-0033 是获批双边通道，不构成日常单方面改 shared 的许可。
 
 ---
 
@@ -591,8 +586,11 @@ python "$ROOT/scripts/patch-generated.py"
 
 | ADR | 主题 | 在本仓的落地点 |
 |---|---|---|
-| [0007](../../../docs/adr/0007-shared-sql-ssot.md) | shared 双 SSOT | schema 真源 = shared SQL；本仓不维护 SQL |
-| [0010](../../../docs/adr/0010-aspnetcore-ef-mirrors-sql.md) | aspnetcore EF 应镜像 SQL | 待办：本仓暂不补 EF Migrations（§6） |
+| [0007](../../../docs/adr/0007-shared-sql-ssot.md) | shared 双 SSOT | 历史基础：DB 真源在 shared（原 SQL 迁移，现 `src/db/schema.ts`）；本仓不维护 DDL |
+| [0010](../../../docs/adr/0010-aspnetcore-ef-mirrors-sql.md) | aspnetcore EF 应镜像 SQL | 已了结：禁 EF Migrations，DB-First 取代（§6，ADR-0025/0033） |
+| [0025](../../../docs/adr/0025-db-first-drizzle-schema-ssot.md) | DB-First：schema.ts 为 DB SSOT | 真源 = shared `src/db/schema.ts`；漂移防线 = LabDbContextSchemaTest + sync-db.sh |
+| [0026](../../../docs/adr/0026-last-gen-shared-staleness-marker.md) | last-gen-shared.json marker | gen-shared.sh（api）+ sync-db.sh（db）双类别落盘 |
+| [0033](../../../docs/adr/0033-lab-family-align-saas-reform.md) | lab 家族对齐 saas 改造 | 本仓 DB-First 消费协议的获批通道（scaffold→schema-test 偏差已记录，§6） |
 | [0014](../../../docs/conventions/multi-repo-family.md#4-后端配置env-driven-单-urladr-0014) | env-driven 单 URL | 本仓配置全部走 env（Lab:Jwt:Secret 等） |
 | [0003](../../../docs/adr/0003-function-tree-requires-human-approval.md) | 功能清单变更需人批 | 改 F/I 走 `/tree-change` |
 
@@ -615,7 +613,9 @@ python "$ROOT/scripts/patch-generated.py"
 | **NSwag** | OpenAPI → C# controller codegen | `aspnetcore.nswag` 配置驱动 |
 | **abstract Controller** | NSwag `controllerStyle=Abstract` | 路由在基类，方法 stub 抛 `NotImplementedException`，partial 实现覆盖 |
 | **InMemory fixture** | 进程内 fixture | 与 lab-msw / lab-springboot InMemory 业务形状一致 |
-| **EF Core** | ORM 框架 | 本仓仅 ORM 镜像，**不 Migrate**（schema 仍 shared SQL） |
+| **EF Core** | ORM 框架 | 本仓仅 ORM 映射，**不 Migrate**（schema 真源 = shared `src/db/schema.ts`） |
+| **LabDbContextSchemaTest** | DB-First 漂移测试 | EF 全模型 ↔ 库 information_schema 逐列对照；DB 演进与映射漂移双捕获（§6） |
+| **sync-db.sh** | DB 同步验证脚本 | 跑 schema 测试 + 写 ADR-0026 marker |
 | **TenantGuard** | 路径 tenantId vs JWT claim 校验 | tenant-scoped 接口第一行调 |
 | **TenantContext (ITenantContext)** | 从 JWT claim 解 tenant_id | scoped，dev fallback `TENANT-001` |
 | **LabJwtSigner** | HMAC HS256 JWT 签发器 | 拒 alg=none（v0.1.17 起） |
@@ -691,6 +691,6 @@ python "$ROOT/scripts/patch-generated.py"
 | 测试并行跑 | `Collection was modified`（InMemory Singleton fixture 并发写） | `[assembly: CollectionBehavior(DisableTestParallelization)]` |
 | 跳过 TenantGuard | 跨租户访问 | tenant-scoped endpoint 第一行必调 `TenantGuard.VerifyPathTenant` |
 | Lab:Jwt:Secret 缺失 | dev fallback 密钥泄漏 | 启动校验长度 ≥32 字节；prod env 注入；env-file 别写（deploy 烘焙） |
-| EF 不 Migrate 启动失败 | DbContext model 与 DB schema 不一致 | 用 sync-db 灌 shared SQL；不补 EF Migration（§6 open question） |
+| EF 模型与库漂移 | `LabDbContextSchemaTest` 红（模型列 ∉ 库 / PK 错 / NOT NULL 缺映射） | DB 没改 = 修本仓映射；shared schema.ts 刚演进 = 同步映射后 commit（§6） |
 | patch-generated.py AST 改不动 | NSwag 升级改变输出格式 | patch 是确定性文本替换；若失败人工修脚本后重放 |
 | `appsettings.json` 写连接串 | 密钥泄漏入 git | 走 appsettings.Development.json 或 env；CI lint 拦硬编码 |

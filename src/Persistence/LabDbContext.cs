@@ -9,13 +9,15 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 /// <summary>
-/// EF Core 映射 lab_dev 共库（shared/sql/migrations V001-V014 累计态）。
-/// EF 只镜像、不 Migrate（与 springboot Flyway baseline 冻结同一哲学，shared SQL 是 SSOT）。
+/// EF Core 映射共享 PG 库——DB-First（ADR-0025/ADR-0033）：schema 真源 =
+/// shared src/db/schema.ts（db:migrate 物化到 lab_dev/lab_test），本仓只读不写、
+/// 禁 EF Migrations；漂移防线 = tests/Harness/LabDbContextSchemaTest.cs（模型 ↔ 库逐列对照）
+/// + scripts/sync-db.sh（ADR-0026 marker）。
 ///
 /// 实体直接复用 NSwag 生成的 DTO 类（stores/services 的既有类型，换装零转换层）：
-/// - 列名走 UseSnakeCaseNamingConvention（PascalCase -&gt; snake_case，与 SQL 全量一致，
-///   逐列核对过 V001-V014；表名用 ToTable 显式给）
-/// - 枚举列 V014 后全是 text，值 = 契约小写串（[EnumMember]），走 Wire 转换器 --
+/// - 列名走 UseSnakeCaseNamingConvention（PascalCase -&gt; snake_case，与 SSOT DDL 全量一致；
+///   表名用 ToTable 显式给）
+/// - 枚举列全是 text，值 = 契约小写串（[EnumMember]），走 Wire 转换器 --
 ///   与线上 JSON 同一套值（net8 EF 默认 HasConversion&lt;string&gt; 用成员名，会分叉）
 /// - jsonb 列：List&lt;string&gt; / List&lt;POCO&gt; / IDictionary（object 值需数据源
 ///   EnableDynamicJson，见 Program.cs）
@@ -157,7 +159,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         });
         b.Entity<ParamInterface>(e =>
         {
-            e.ToTable("param_interfaces");
+            e.ToTable("inspection_param_interfaces");
             e.HasKey(x => x.Code);
             e.Property(x => x.Config).HasColumnType("jsonb");
             e.Ignore(x => x.AdditionalProperties);
@@ -211,7 +213,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         });
         b.Entity<ParamInterfaceLink>(e =>
         {
-            e.ToTable("param_interface_links");
+            e.ToTable("inspection_param_interface_links");
             e.HasKey(x => new { x.InspectionParameterCode, x.ParamInterfaceCode });
             e.Property(x => x.Config).HasColumnType("jsonb");
             e.Ignore(x => x.AdditionalProperties);
@@ -228,7 +230,9 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
 
     // === 枚举 wire 转换器：值 = [EnumMember]（契约小写串），与 EnumMemberEnumConverter 同源 ===
 
-    private static readonly Dictionary<Type, object> WireCache = new();
+    // 并发安全：xUnit 默认跨类并行，多个 context 会同时建模型并经 Wire<T>() 写此缓存
+    // （无锁 Dictionary 在并行模型构建下间歇性炸 get_Model——2026-09-13 门禁两次红根因）。
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, object> WireCache = new();
 
     private static ValueConverter<T, string> Wire<T>()
         where T : struct, Enum
@@ -243,8 +247,7 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         var converter = new ValueConverter<T, string>(
             v => toWire(v),
             s => fromWire(s));
-        WireCache[typeof(T)] = converter;
-        return converter;
+        return (ValueConverter<T, string>)WireCache.GetOrAdd(typeof(T), converter);
     }
 
     private static Func<T, string> ToWireMap<T>()

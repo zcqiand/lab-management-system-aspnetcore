@@ -59,6 +59,10 @@ public sealed class EfStorePgTest : IDisposable
                 CreatedAt = "2026-01-01T00:00:00Z",
                 UpdatedAt = "2026-01-01T00:00:00Z",
             });
+
+            // 两次 SaveChanges：DTO 实体间无 EF navigation（FK 只在 DB 层），
+            // 单批双插入 EF 拓扑排序不到依赖，objects 会先于 specialties 落库 → 23503。
+            db.SaveChanges();
         }
 
         if (!db.InspectionObjects.Any(o => o.Code == ObjCode))

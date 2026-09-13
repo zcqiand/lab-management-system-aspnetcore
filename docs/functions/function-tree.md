@@ -24,6 +24,9 @@
 > 编号镜像 lab-management-system-springboot 功能清单（含跳号，如 M03 无 F04、
 > M04 从 F06 起），保证家族跨仓同一 ID 指同一功能。I 级子项不预拆，
 > 等第一个需求落到对应模块时再拆。
+>
+> DB-First（ADR-0025/0033）：schema 真源 = shared `src/db/schema.ts`；本仓 EF 映射
+> 漂移防线 = `LabDbContextSchemaTest` + `scripts/sync-db.sh`（禁 EF Migrations）。
 
 ---
 

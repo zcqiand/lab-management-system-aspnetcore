@@ -7,6 +7,8 @@
 
 实验室管理系统的 C# 后端（与 springboot 仓对称的真实后端镜像）。
 NSwag 读 shared 仓 OpenAPI 生成 abstract Controllers；手写 partial 实现类承接业务逻辑。
+DB-First 消费层（ADR-0025/0033）：schema 真源 = shared `src/db/schema.ts`，本仓只读不写、
+禁 EF Migrations；漂移防线 = `bash scripts/sync-db.sh`（LabDbContextSchemaTest + marker）。
 
 ## 2. 铁律
 
@@ -28,11 +30,12 @@ ASP.NET Core 8 + xUnit + JwtBearer + NSwag codegen + TRX trace 适配器。明�
 ## 4. 验收
 
 - suite 根目录跑 `python scripts/gate.py -p lab-management-system-aspnetcore`
-- 改了 shared → `bash scripts/gen-shared.sh` 再跑门禁
+- 改了 shared API 契约 → `bash scripts/gen-shared.sh`；改了 shared DB schema（已 db:migrate）→ `bash scripts/sync-db.sh`；然后跑门禁
 
 ## 5. 指向别处
 
 - 契约真源 → `../lab-management-system-shared`
+- DDL 真源 → `../lab-management-system-shared/src/db/schema.ts`（DB-First, ADR-0025）
 - 决策 → `docs/adr/`；细则 → `docs/conventions/`；待办 → `PLAN.md`；版本 → `CHANGELOG.md`
 
 ## 6. 工作循环
