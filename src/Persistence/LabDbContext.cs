@@ -225,6 +225,25 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
             e.Property(x => x.ReportNameCode).IsRequired(false);
             e.Ignore(x => x.AdditionalProperties);
         });
+
+        // === 全局读容忍（REQ-2026-001 live 实证收口）===
+        // NSwag 生成 DTO 无 NRT ? 注解 + <Nullable>enable</Nullable> → EF 把全部引用属性
+        // 推断为 required，任何可空列遇 NULL 行即 InvalidCastException 500
+        // （config / report_name_code / description / source_hash / ext_fields 相继实证，
+        // 后者证明仅放宽 string 不够——jsonb 的 List<POCO> 同病）。
+        // 统一放宽全部引用类型属性为可空：写入侧 NOT NULL 仍由 PG 约束把守
+        // （ADR-0025 DB-First，库是 SSOT），EF 侧不重复校验、读取侧不再炸。
+        // 逐列 IsRequired(false) 是此策略实施前的点状补丁，已被本段覆盖。
+        foreach (var entityType in b.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (!property.ClrType.IsValueType && !property.IsKey())
+                {
+                    property.IsNullable = true;
+                }
+            }
+        }
     }
 
     private static void CatalogEntity<TEntity>(EntityTypeBuilder<TEntity> e, string table)
