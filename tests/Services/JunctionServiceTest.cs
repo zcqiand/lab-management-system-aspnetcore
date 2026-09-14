@@ -221,14 +221,16 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F03.I07")]
-    public void UnlinkParamInterface_missing404_thenSucceeds()
+    public void UnlinkParamInterface_idempotent204()
     {
+        // REQ-2026-001：unlink 幂等（契约 unlink = void，未命中不抛；
+        // 原 KeyNotFound→404 断言随 UnlinkParamInterface 语义变更同 commit 移除）
         var svc = Svc();
 
-        Assert.Throws<KeyNotFoundException>(() => svc.UnlinkParamInterface("P-GHOST", "PI-GHOST"));
+        svc.UnlinkParamInterface("P-GHOST", "PI-GHOST"); // 未命中静默
         svc.LinkParamInterface(new ParamInterfaceLink { InspectionParameterCode = "P-1", ParamInterfaceCode = "PI-1" });
         svc.UnlinkParamInterface("P-1", "PI-1");
-        Assert.Throws<KeyNotFoundException>(() => svc.UnlinkParamInterface("P-1", "PI-1")); // 已删 404
+        svc.UnlinkParamInterface("P-1", "PI-1"); // 已删再删幂等
     }
 
     // === junction GET（Page<T> 契约补齐 — link 后按 query 过滤取回）===

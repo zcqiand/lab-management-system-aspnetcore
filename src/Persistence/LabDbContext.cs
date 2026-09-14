@@ -161,7 +161,10 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         {
             e.ToTable("inspection_param_interfaces");
             e.HasKey(x => x.Code);
-            e.Property(x => x.Config).HasColumnType("jsonb");
+            e.Property(x => x.Config).HasColumnType("jsonb")
+                // DB 列可空（schema.ts config jsonb 无 notNull），生成 DTO 无 NRT ? 注解
+                // → EF 按 NRT 推断成 required，NULL 行物化即 500（REQ-2026-001 live 实证）
+                .IsRequired(false);
             e.Ignore(x => x.AdditionalProperties);
         });
 
@@ -215,7 +218,11 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
         {
             e.ToTable("inspection_param_interface_links");
             e.HasKey(x => new { x.InspectionParameterCode, x.ParamInterfaceCode });
-            e.Property(x => x.Config).HasColumnType("jsonb");
+            e.Property(x => x.Config).HasColumnType("jsonb")
+                .IsRequired(false);
+            // 同上：report_name_code 列可空（schema.ts 无 notNull），DTO 无 ? 注解
+            // → NRT 推断 required，NULL 行物化即 500（REQ-2026-001 live 实证）
+            e.Property(x => x.ReportNameCode).IsRequired(false);
             e.Ignore(x => x.AdditionalProperties);
         });
     }

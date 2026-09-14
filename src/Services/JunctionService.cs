@@ -5,7 +5,7 @@ using Lab.AspNetCore.Data;
 
 /// <summary>
 /// B6 八组 junction link/unlink。语义镜像 springboot InspectionJunctionService：
-/// link = upsert（同 PK 重复不报错覆盖）；unlink miss → 404。
+/// link = upsert（同 PK 重复不报错覆盖）；unlink 幂等 204（REQ-2026-001）。
 /// role 在 PK 内的两组：object-standard / report-name-standard。
 /// </summary>
 public sealed class JunctionService(IJunctionStore store)
@@ -137,10 +137,9 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkParamInterface(string parameterCode, string interfaceCode)
     {
-        if (!store.DeleteParamInterface(parameterCode, interfaceCode))
-        {
-            throw new KeyNotFoundException("param-interface link not found");
-        }
+        // 幂等 204（REQ-2026-001 四方一致：msw/nextjs/springboot 未命中也 204，
+        // 契约 unlink = void；KeyNotFound→404 是「资源不存在」语义，不适用于幂等 unlink）
+        store.DeleteParamInterface(parameterCode, interfaceCode);
     }
 
     public IReadOnlyList<ParamInterfaceLink> ListParamInterfaceLinks(string? inspectionParameterCode, string? paramInterfaceCode) =>

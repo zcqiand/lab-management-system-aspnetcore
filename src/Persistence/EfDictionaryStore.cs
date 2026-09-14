@@ -188,7 +188,7 @@ public sealed class EfDictionaryStore(LabDbContext db) : IDictionaryStore
 /// <summary>
 /// B6 八组 junction。link 前置 FK 校验（DB 真实 FK 生效：V008/V009/V010/V011），
 /// 幽灵 code 转 ArgumentException（全局异常映射 400），避免裸 23503 变 500。
-/// unlink miss 返回 false（service 层转 404），upsert 语义与内存版一致。
+/// unlink 幂等（miss 返回 false 不抛，REQ-2026-001 四方一致 204）。
 /// </summary>
 public sealed class EfJunctionStore(LabDbContext db) : IJunctionStore
 {

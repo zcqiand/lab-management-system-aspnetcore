@@ -23,7 +23,12 @@ if (shimUrls is not null)
 
 // B1 认证域底座（镜像 lab-springboot SecurityConfig）：
 //   permitAll = login / refresh / sso/**，其余 authenticated。
-builder.Services.AddControllers();
+// NRT 隐式 Required 推断关闭（REQ-2026-001 live 实证）：<Nullable>enable</Nullable> 下
+// 生成 DTO 无 ? 注解的可空引用属性（Config/Description/ReportNameCode…）被 MVC 隐式标
+// Required → 契约可选字段缺省即 400。契约必填字段的校验走 NSwag 产出的显式
+// [Required] 属性，不受此开关影响（与 springboot @Valid + msw/nextjs 宽松绑定对齐）。
+builder.Services.AddControllers(o =>
+    o.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 // LabOptions:Lab json 段绑定(appsettings dev 值)+ flat env 直读入口
 // (2026-08-28 key 统一:SSO 属性 getter 优先读 flat LAB_SAAS_*/LAB_SSO_*,
 // 与 lab-springboot yml 占位符同名;json 段作 dev fallback)

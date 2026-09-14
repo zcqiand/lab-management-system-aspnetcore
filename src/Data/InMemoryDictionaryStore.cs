@@ -112,7 +112,7 @@ public sealed class InMemoryDictionaryStore : IDictionaryStore
 
 /// <summary>
 /// B6 八组 junction 内存存储。语义镜像 springboot InspectionJunctionService：
-/// link = upsert（同 PK 重复不报错，覆盖更新）；unlink miss → 404。
+/// link = upsert（同 PK 重复不报错，覆盖更新）；unlink 幂等 204（REQ-2026-001）。
 /// role 在 PK 内的两组（object-standard / report-name-standard）：同 code 对不同 role 是两行。
 /// </summary>
 public sealed class InMemoryJunctionStore : IJunctionStore
