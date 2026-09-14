@@ -1,19 +1,20 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "ADR-0033 阶段二：M05.F02.I01 改挂 M05.F01.I06",
+  "current_task": "REQ-2026-001：NRT 双层修复 + unlink 幂等——已上线",
   "done": [
-    "阶段一：db-first 消费（schema-test 验证链，ADR-0033 偏差：本仓以 schema-test 代替 scaffold）",
-    "function-tree 子项重编号 + M05.F02 F 行标已废弃（行不删号不回收）+ M05.F01.I06 已上线",
-    "SummaryController/SummaryService doc comment + design/flow-function-map 改挂 I06；commit af5197d"
+    "LabDbContext Config/ReportNameCode 可空列 IsRequired(false)（EF 物化 NULL 500）",
+    "Program.cs SuppressImplicitRequiredAttributeForNonNullableReferenceTypes（契约可选字段缺省 400；NSwag 显式 [Required] 不受影响）",
+    "UnlinkParamInterface KeyNotFound→404 改幂等 204（契约 void 语义）；单测同 commit；commit caa6163"
   ],
   "next": [
-    "阶段三 e2e 接入（E2E_*_URL fail-fast）"
+    "其余 6 组 junction unlink 幂等化候选（同款 404 语义）"
   ],
   "open_questions": [],
   "dont": [
-    "改 .harness/stack.json 前先确认 exit code 语义（2=停下问人）"
+    "改 .harness/stack.json 前先确认 exit code 语义（2=停下问人）",
+    "改完源码必须 rebuild 再起服务（旧 DLL 锁 exe：MSB3026/3027）"
   ],
   "active_branch": "master",
-  "last_session_at": "2026-09-13"
+  "last_session_at": "2026-09-14"
 }
