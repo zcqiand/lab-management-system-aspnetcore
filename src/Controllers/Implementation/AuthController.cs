@@ -65,14 +65,17 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
 
     private void AppendStateCookie(string cookieValue)
     {
+        // dev（http://localhost 明文）：SameSite=Lax 且不带 Secure —— 5201↔5204 是
+        // same-site（端口不参与 site 计算），Lax 随 XHR 携带；`Secure; SameSite=None`
+        // 在明文 http 下部分浏览器不落盘 → callback 恒 "missing lab_sso_state
+        // cookie" 500（2026-09-14 浏览器实测回归）。prod（https 反代跨域部署，
+        // Host 非 loopback）保持 None + Secure。
+        var isLocalDev = Request.Host.Host is "localhost" or "127.0.0.1" or "::1";
         var opts = new CookieOptions
         {
             HttpOnly = true,
-            // 跨源 cookie（5202 前端 ↔ 5204 后端）必须 SameSite=None + Secure：
-            // Lax 不随跨站 XHR POST 携带，None 要求 Secure（localhost 是浏览器
-            // 可信上下文，http://localhost 可写 Secure cookie）。dev/prod 统一。
-            Secure = true,
-            SameSite = SameSiteMode.None,
+            Secure = !isLocalDev,
+            SameSite = isLocalDev ? SameSiteMode.Lax : SameSiteMode.None,
             Path = "/api/auth/sso/callback",
             MaxAge = TimeSpan.FromSeconds(300),
         };
