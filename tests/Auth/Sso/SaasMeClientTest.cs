@@ -45,12 +45,14 @@ public class SaasMeClientTest
     [Trait("Fn", "M01.F04.I01")]
     public async Task ListMyMenusAsync_mapShape_byAppCode_returnsList()
     {
-        // saas /me/menus 按契约返 { appCode: [EffectiveMenuNode...] }
+        // saas /me/menus 按契约返 { appCode: [EffectiveMenuNode...] }；
+        // 名称字段是 title（2026-09-14 实测 payload，name 从未存在 ——
+        // 与 lab-nextjs menu-snapshot 同一轮 /apps 重命名漂移，JsonPropertyName("title") 修复）。
         var body = """
         {
           "lab-management": [
-            { "id": "g1", "name": "资源管理", "icon": "resource",
-              "children": [ { "id": "c1", "name": "合同管理", "path": "/contracts", "icon": "clipboard" } ] }
+            { "id": "g1", "title": "资源管理", "type": "directory", "icon": "resource",
+              "children": [ { "id": "c1", "title": "合同管理", "type": "menu", "path": "/contracts", "icon": "clipboard" } ] }
           ]
         }
         """;

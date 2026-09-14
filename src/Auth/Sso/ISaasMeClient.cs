@@ -18,6 +18,14 @@ public interface ISaasMeClient
 public sealed class SaasMenuNode
 {
     public string Id { get; set; } = "";
+
+    /// <summary>
+    /// saas 实际下发字段是 <c>title</c>（2026-09-14 实测 /me/menus payload：
+    /// id/clientId/parentId/title/type/path/icon/sortOrder/children）。
+    /// 原无注解的 Name 绑 "name" 恒反序列化为空串 → 菜单 label 全空白
+    /// （与 lab-nextjs menu-snapshot.ts 同一轮 2026-09-08 /apps 重命名漂移）。
+    /// </summary>
+    [System.Text.Json.Serialization.JsonPropertyName("title")]
     public string Name { get; set; } = "";
     public string? Path { get; set; }
     public string? Icon { get; set; }
