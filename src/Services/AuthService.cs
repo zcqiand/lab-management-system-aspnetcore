@@ -121,8 +121,10 @@ public sealed class AuthService
         // saas /token 返回新 refresh_token) + CacheMenus 重填 cache。
         _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
-        _membershipCache.Put(labUser.Id, TenantsFrom(memberships));
-        return Session(labUser, tenantId, TenantsFrom(memberships), t.RefreshToken);
+        // 2026-09-15 租户显示名：同 SsoCallback，瞬时持 token 拉平台租户列表注入真名
+        var tenantNameById = FetchTenantNames(labUser.Id, t.AccessToken);
+        _membershipCache.Put(labUser.Id, TenantsFrom(memberships, tenantNameById));
+        return Session(labUser, tenantId, TenantsFrom(memberships, tenantNameById), t.RefreshToken);
     }
 
     public void Logout()
@@ -281,10 +283,16 @@ public sealed class AuthService
         // 菜单快照：瞬时持有 saas accessToken 的唯一时点，顺手拉菜单进缓存（失败不阻塞登录）
         _directory.SetSaasRefreshToken(labUser.Id, t.RefreshToken ?? "");
         CacheMenus(labUser.Id, t.AccessToken);
-        _membershipCache.Put(labUser.Id, TenantsFrom(memberships));
+        // 2026-09-15 租户显示名：memberships 契约只有 tenantId 不带名字，趁同一
+        // 瞬时窗口拉 saas 平台租户列表（GET /api/v1/admin/tenants，guard 只验 JWT）
+        // 建 tenantId→{name, tenantKey} 映射填真名（lab-nextjs sso/callback 同款）。
+        // 快照与登录响应 tenants 同源 —— Me() 读出的也是真名。失败只 warn 降级
+        // name=tenantId（与菜单快照同款 best-effort，不阻塞登录）。
+        var tenantNameById = FetchTenantNames(labUser.Id, t.AccessToken);
+        _membershipCache.Put(labUser.Id, TenantsFrom(memberships, tenantNameById));
         // 2026-09-03 设计 §4.1.4：token 带 tenant_id claim（whoami currentTenantId），
         // Me() 的 currentTenantId 不再落 demo 默认租户
-        return Session(labUser, saasUser.CurrentTenantId, TenantsFrom(memberships), t.RefreshToken);
+        return Session(labUser, saasUser.CurrentTenantId, TenantsFrom(memberships, tenantNameById), t.RefreshToken);
     }
 
     // === helpers ===
@@ -321,14 +329,47 @@ public sealed class AuthService
         };
     }
 
-    private static List<MyTenant> TenantsFrom(List<SaasTenantMembership> memberships)
+    /// <summary>
+    /// 2026-09-15 租户显示名：拉 saas 平台租户列表建 tenantId→{name, tenantKey} 映射。
+    /// 失败（saas 5xx/网络/4xx）只 warn 返空字典 —— 名字降级 tenantId，不阻塞登录
+    /// （与 <see cref="CacheMenus"/> 同款 best-effort）。
+    /// </summary>
+    private Dictionary<string, SaasPlatformTenant> FetchTenantNames(string? userId, string? saasAccessToken)
     {
-        return memberships.Select(m => new MyTenant
+        if (userId is null || saasAccessToken is null) return new();
+        try
         {
-            TenantId = m.TenantId,
-            Code = m.TenantId,
-            Name = m.TenantId,
-            RoleIds = m.RoleIds?.ToList() ?? new List<string>(),
+            return _saasMe.ListPlatformTenantsAsync(saasAccessToken).GetAwaiter().GetResult()
+                .Where(t => !string.IsNullOrEmpty(t.Id))
+                .GroupBy(t => t.Id)
+                .ToDictionary(g => g.Key, g => g.First());
+        }
+        catch (Exception e)
+        {
+            Console.Error.WriteLine($"[tenant-name] lookup failed for {userId}: {e.Message}");
+            return new();
+        }
+    }
+
+    private static List<MyTenant> TenantsFrom(List<SaasTenantMembership> memberships) =>
+        TenantsFrom(memberships, new Dictionary<string, SaasPlatformTenant>());
+
+    /// <summary>
+    /// memberships → MyTenant。nameById 命中时 Code=tenantKey、Name=name；
+    /// miss（列表拉取失败/租户未在平台注册）降级 Code=Name=tenantId —— 切换器最差显示 UUID，不空。
+    /// </summary>
+    private static List<MyTenant> TenantsFrom(List<SaasTenantMembership> memberships, Dictionary<string, SaasPlatformTenant> nameById)
+    {
+        return memberships.Select(m =>
+        {
+            nameById.TryGetValue(m.TenantId, out var t);
+            return new MyTenant
+            {
+                TenantId = m.TenantId,
+                Code = !string.IsNullOrEmpty(t?.TenantKey) ? t.TenantKey : m.TenantId,
+                Name = !string.IsNullOrEmpty(t?.Name) ? t.Name : m.TenantId,
+                RoleIds = m.RoleIds?.ToList() ?? new List<string>(),
+            };
         }).ToList();
     }
 

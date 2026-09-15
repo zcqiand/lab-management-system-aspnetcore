@@ -375,6 +375,94 @@ public class AuthServiceTest
         _service.Logout();
     }
 
+    // === 2026-09-15 租户显示名（lab-nextjs sso/callback 同款修复推广）===
+    // memberships 契约只有 tenantId：SSO/refresh 瞬时持 accessToken 时拉 saas
+    // GET /api/v1/admin/tenants 建 tenantId→{name, tenantKey} 映射，填进登录响应
+    // tenants 与 membership 快照（Me() 同源读取，切换器数据源）。
+    // 拉取失败只 warn 不阻塞登录（name 降级 tenantId，与菜单快照同款 best-effort）。
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I03")]
+    public void SsoCallback_tenantsCarryRealNames_notTenantId()
+    {
+        var auth = _service.SsoAuthorize("http://localhost:5173/login", "st-tenant-name-1");
+        var res = _service.SsoCallback(new SsoCallbackRequest
+        {
+            Grant_type = OAuthGrantType.Authorization_code,
+            Code = "dev-code",
+            Redirect_uri = "http://localhost:5173/login",
+            State = "st-tenant-name-1",
+        }, auth.CookieValue);
+
+        Assert.Equal("00000000-0000-0000-0000-000000000001", res.Tenants[0].TenantId);
+        Assert.Equal("ACME Corp", res.Tenants[0].Name);
+        Assert.Equal("acme", res.Tenants[0].Code);
+    }
+
+    [Fact]
+    [Trait("Fn", "M00.F01.I01")]
+    public void Me_ssoUser_snapshotCarriesRealNames()
+    {
+        var auth = _service.SsoAuthorize("http://localhost:5173/login", "st-tenant-name-2");
+        _service.SsoCallback(new SsoCallbackRequest
+        {
+            Grant_type = OAuthGrantType.Authorization_code,
+            Code = "dev-code",
+            Redirect_uri = "http://localhost:5173/login",
+            State = "st-tenant-name-2",
+        }, auth.CookieValue);
+
+        var me = _service.Me(new Dictionary<string, object> { ["sub"] = "00000000-0000-0000-0000-b00000000001" });
+
+        Assert.Equal("ACME Corp", me.Tenants[0].Name);
+        Assert.Equal("acme", me.Tenants[0].Code);
+    }
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I03")]
+    public void SsoCallback_tenantListUnavailable_degradesToTenantId()
+    {
+        // saas /admin/tenants 5xx：登录不阻塞，name/code 降级回 tenantId
+        var failing = new DegradedSaasMeClient();
+        var degraded = new AuthService(
+            new ConfigUserDirectory("dev123456"),
+            new LabJwtSigner(Secret, "lab-test", 3600, 604800),
+            new NoopSaasAuthClient(),
+            failing,
+            new StateCookieManager(Secret),
+            Microsoft.Extensions.Options.Options.Create(Opts));
+        var auth = degraded.SsoAuthorize("http://localhost:5173/login", "st-tenant-name-3");
+        var res = degraded.SsoCallback(new SsoCallbackRequest
+        {
+            Grant_type = OAuthGrantType.Authorization_code,
+            Code = "dev-code",
+            Redirect_uri = "http://localhost:5173/login",
+            State = "st-tenant-name-3",
+        }, auth.CookieValue);
+
+        Assert.Single(res.Tenants);
+        Assert.Equal("00000000-0000-0000-0000-000000000001", res.Tenants[0].Name);
+        Assert.Equal("00000000-0000-0000-0000-000000000001", res.Tenants[0].Code);
+    }
+
+    /// <summary>saas /admin/tenants 恒 5xx 的 stub（其余端点委托 Noop 种子；NoopSaasMeClient 是 sealed，走组合）。</summary>
+    private sealed class DegradedSaasMeClient : ISaasMeClient
+    {
+        private readonly NoopSaasMeClient _inner = new();
+
+        public Task<SaasCurrentUser> WhoamiAsync(string saasAccessToken, CancellationToken ct = default) =>
+            _inner.WhoamiAsync(saasAccessToken, ct);
+
+        public Task<List<SaasTenantMembership>> ListMyTenantsAsync(string saasAccessToken, CancellationToken ct = default) =>
+            _inner.ListMyTenantsAsync(saasAccessToken, ct);
+
+        public Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default) =>
+            _inner.ListMyMenusAsync(saasAccessToken, appCode, ct);
+
+        public Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default) =>
+            throw new System.Net.Http.HttpRequestException("saas /admin/tenants 5xx");
+    }
+
     private static string DecodeB64Url(string s)
     {
         var padded = s.Replace('-', '+').Replace('_', '/');

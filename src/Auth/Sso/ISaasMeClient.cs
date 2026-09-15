@@ -12,6 +12,27 @@ public interface ISaasMeClient
     Task<List<SaasTenantMembership>> ListMyTenantsAsync(string saasAccessToken, CancellationToken ct = default);
     /// <summary>saas /me/menus?appCode=...：当前用户在指定 app 下的有效菜单树（EffectiveMenuNode）。</summary>
     Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default);
+    /// <summary>
+    /// 2026-09-15 租户显示名：saas GET /api/v1/admin/tenants 平台租户列表（guard 只验 JWT——
+    /// 任何登录用户可读）。memberships 契约只有 tenantId 不带名字，SSO/refresh 瞬时持
+    /// accessToken 时调本方法建 tenantId→{name, tenantKey} 映射填真名（lab-nextjs 同款修复）。
+    /// </summary>
+    Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default);
+}
+
+/// <summary>saas 平台租户行（id/name/tenantKey）。name/tenantKey 用于 memberships 的 tenantId→显示名映射。</summary>
+public sealed class SaasPlatformTenant
+{
+    public string Id { get; set; } = "";
+    public string? Name { get; set; }
+    public string? TenantKey { get; set; }
+}
+
+/// <summary>saas GET /api/v1/admin/tenants 分页壳（与家族 list 端点约定同形）。</summary>
+public sealed class SaasPlatformTenantPage
+{
+    public List<SaasPlatformTenant>? Items { get; set; }
+    public long? Total { get; set; }
 }
 
 /// <summary>saas EffectiveMenuNode（saas /me/menus 返回形状，字段与 saas DB MenuRow 一致）。</summary>
@@ -110,6 +131,16 @@ public sealed class HttpSaasMeClient : ISaasMeClient
         }
         return list;
     }
+
+    public async Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default)
+    {
+        var req = new HttpRequestMessage(HttpMethod.Get, "/api/v1/admin/tenants?page=0&pageSize=100");
+        req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", saasAccessToken);
+        var resp = await _http.SendAsync(req, ct);
+        resp.EnsureSuccessStatusCode();
+        var page = await resp.Content.ReadFromJsonAsync<SaasPlatformTenantPage>(cancellationToken: ct);
+        return page?.Items ?? new List<SaasPlatformTenant>();
+    }
 }
 
 public sealed class NoopSaasMeClient : ISaasMeClient
@@ -146,5 +177,15 @@ public sealed class NoopSaasMeClient : ISaasMeClient
     public Task<List<SaasMenuNode>> ListMyMenusAsync(string saasAccessToken, string appCode, CancellationToken ct = default)
     {
         return Task.FromResult(new List<SaasMenuNode>());
+    }
+
+    /// noop：与 saas_dev 种子同值（id -001 = ACME Corp / acme），让 no-sso
+    /// profile 也能演练 name/tenantKey 注入而非 UUID 充名（springboot Noop 同款）。
+    public Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default)
+    {
+        return Task.FromResult(new List<SaasPlatformTenant>
+        {
+            new() { Id = "00000000-0000-0000-0000-000000000001", Name = "ACME Corp", TenantKey = "acme" },
+        });
     }
 }
