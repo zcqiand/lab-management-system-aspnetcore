@@ -78,10 +78,10 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     # Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS（Phase 4 起老 key Lab__Cors__* 废弃）。
     printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5201,http://localhost:5202,http://localhost:5203\n' "$NGINX_DOMAIN"
     # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
-    # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-mgmt', 因为 shared/openapi.yaml
+    # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-management', 因为 shared/openapi.yaml
     # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
     # saas-nextjs 走 string. 固定 UUID 是跨 3 saas 后端的最小公约数. (后续 PR 改 TypeSpec
-    # 移除 @format 后可改回 'lab-mgmt')
+    # 移除 @format 后可改回 'lab-management')
     # 2026-08-28 key 统一:Lab__Sso__* 段映射全部废弃,flat key 与 lab-springboot 同名
     printf 'LAB_SSO_PROFILE=real\n'
     printf 'LAB_SAAS_BASE_URL=https://saas-aspnetcore.xiangru.uk\n'
