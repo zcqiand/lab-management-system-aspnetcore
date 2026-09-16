@@ -45,16 +45,16 @@ public sealed class StateCookieManager
     {
         if (string.IsNullOrEmpty(cookieValue))
         {
-            throw new InvalidOperationException("missing lab_sso_state cookie");
+            throw new ArgumentException("missing lab_sso_state cookie");
         }
         if (string.IsNullOrEmpty(bodyState))
         {
-            throw new InvalidOperationException("missing state in body");
+            throw new ArgumentException("missing state in body");
         }
         var parts = cookieValue.Split('.');
         if (parts.Length != 3)
         {
-            throw new InvalidOperationException("malformed lab_sso_state cookie");
+            throw new ArgumentException("malformed lab_sso_state cookie");
         }
         var nonce = parts[0];
         var signature = parts[1];
@@ -62,20 +62,20 @@ public sealed class StateCookieManager
         var expectedSig = Hmac($"{nonce}.{payload}");
         if (!ConstantTimeEquals(expectedSig, signature))
         {
-            throw new InvalidOperationException("lab_sso_state signature mismatch");
+            throw new ArgumentException("lab_sso_state signature mismatch");
         }
         var json = Encoding.UTF8.GetString(Base64UrlDecode(payload));
         var sp = JsonSerializer.Deserialize<StatePayload>(json)
-            ?? throw new InvalidOperationException("invalid state payload");
+            ?? throw new ArgumentException("invalid state payload");
         // cookie 内存的「authorize 时前端发的 state」必须与 body 回传的一致（§10.12）
         if (sp.state is null || sp.state != bodyState)
         {
-            throw new InvalidOperationException("client state mismatch (CSRF suspected)");
+            throw new ArgumentException("client state mismatch (CSRF suspected)");
         }
         var now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         if (sp.ts == 0 || now - sp.ts > MaxAgeSeconds)
         {
-            throw new InvalidOperationException("lab_sso_state expired");
+            throw new ArgumentException("lab_sso_state expired");
         }
         return sp.redirect ?? "";
     }
