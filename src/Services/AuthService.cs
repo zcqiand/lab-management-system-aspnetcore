@@ -78,7 +78,14 @@ public sealed class AuthService
         {
             Console.Error.WriteLine($"[login] service-account menu snapshot failed for {user.Id}: {e.Message}");
         }
-        return Session(user, null, null);
+        // 2026-09-16 Phase 2 测试切真（T11 live 首跑实证）：no-sso 密码登录铸 token 必须带
+        // tenant_id claim —— nextjs（config.ts: claims.tenant_id ?? directory.defaultTenant()）
+        // 与 springboot（currentTenantIdOrDefaultStatic）的家族语义都是「claim 缺 → directory
+        // 默认租户」，aspnetcore 单侧 token 不带 claim 令全部租户域业务端点 401，四方比对全红。
+        // 这里在签发侧落 identity（config 定义目录，非字面量、非请求期 fallback），与 SSO 路径
+        // Session(labUser, saasUser.CurrentTenantId, …) 同构；TenantContext 的 ADR-0019 严格
+        // 校验保持不变（无 claim 的 token 依旧 401）。
+        return Session(user, _directory.DefaultTenant().TenantId, null);
     }
 
     // === M01.F05.I04 刷新 token ===
