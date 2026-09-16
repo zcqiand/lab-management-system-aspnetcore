@@ -201,7 +201,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         {
             Items = items.ToList(),
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         };
     }
@@ -213,7 +213,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         {
             Items = items.ToList(),
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         };
     }
@@ -225,7 +225,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         {
             Items = items.ToList(),
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         };
     }
@@ -237,7 +237,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         {
             Items = items.ToList(),
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         };
     }
@@ -312,7 +312,7 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         });
     }
@@ -436,7 +436,7 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? count,
+            PageSize = pageSize ?? items.Count,
             Total = count,
         });
     }

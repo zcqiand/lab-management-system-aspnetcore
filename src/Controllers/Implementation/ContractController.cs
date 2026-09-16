@@ -24,7 +24,7 @@ public sealed class ContractsController(ContractService service, ITenantContext 
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? items.Count,
+            PageSize = pageSize ?? 20,
             Total = items.Count,
         });
     }
@@ -63,7 +63,7 @@ public sealed class ReceiptsController(SampleReceiptService service, ITenantCont
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? items.Count,
+            PageSize = pageSize ?? 20,
             Total = items.Count,
         });
     }
@@ -114,7 +114,7 @@ public sealed class ReportFlowController(ReportFlowService service, ITenantConte
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? 50,
+            PageSize = pageSize ?? 20,
             Total = items.Count,
         });
     }
@@ -138,7 +138,7 @@ public sealed class SamplesController(SampleService service, ITenantContext tena
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? items.Count,
+            PageSize = pageSize ?? 20,
             Total = items.Count,
         });
     }
@@ -178,7 +178,7 @@ public sealed class TestRecordsController(TestRecordService service, ITenantCont
         {
             Items = items,
             Page = page ?? 1,
-            PageSize = pageSize ?? items.Count,
+            PageSize = pageSize ?? 20,
             Total = items.Count,
         });
     }
