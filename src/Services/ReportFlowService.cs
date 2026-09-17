@@ -4,15 +4,23 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 
 /// <summary>
-/// M03.F05-F08 报告流程状态机（B3）。语义镜像 springboot ReportFlowService：
+/// M03.F01-F08 流程动作状态机（B3）。语义镜像 springboot ReportFlowService：
 ///
 ///   SUBMIT  : receiving→task_assignment→data_entry→review→approval→issuance→archived（archived 无 next）
 ///   RETURN  : task_assignment→receiving, data_entry→task_assignment, review→data_entry,
 ///             approval→review, issuance→approval, archived→issuance（receiving 无 prev）
 ///   WITHDRAW: 仅 receiving 自转移；其他态 invalid
 ///
-/// POST /api/receipts/flow 批量：单条失败不炸整批，进 FlowActionResult{ok=false,message}。
-/// 每次转移 append FlowHistoryEntry 到 flow_history。
+/// 2026-09-17 重整（lab-shared commit 13122e9）：原 7 阶段 × {submit/return/withdraw} = 21 op +
+/// 4 list*queue + 2 batch 全部收敛为 7 个 act op：
+///   POST /api/receipts/{receiving|assigning|data-entry|review|approve|issuance|archived}/act
+/// 共享端点 body.action={SUBMIT|RETURN|WITHDRAW} 区分动作。
+/// 接受 action 范围因 stage 而异：
+///   - early 3 stages {SUBMIT, RETURN, WITHDRAW}，WITHDRAW 仅 receiving 合法
+///   - report 3 stages {SUBMIT, RETURN}
+///   - archived {SUBMIT}（终态无 next/prev，写 history 当 audit）
+///
+/// 单条失败不炸整批，进 FlowActionResult{ok=false,message}。每次转移 append FlowHistoryEntry。
 /// </summary>
 public sealed class ReportFlowService(IFlowStore store)
 {
@@ -38,43 +46,41 @@ public sealed class ReportFlowService(IFlowStore store)
 
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    /// <summary>M03.F05.I01 队列：stage 精确 + tenant 收口，pageSize 默认 50 cap 200。</summary>
-    public IReadOnlyList<SampleReceipt> FlowQueue(string tenantId, FlowStatus stage, int? pageSize) =>
-        store.FlowQueue(tenantId, stage, pageSize ?? 50);
+    // === 2026-09-17 重整 — 7 阶段全 act 模式 ===
+    // 早期 3 阶段（M03.F01/F02/F03）允许 SUBMIT/RETURN/WITHDRAW，
+    // 报告 4 阶段（M03.F05/F06/F07/F08）允许 SUBMIT/RETURN（archived 仅 SUBMIT）。
 
-    /// <summary>M03.F05.I03/F06.I01-I03/F07.I03/F08.I03 批量推进。单条失败容错。</summary>
-    public IReadOnlyList<FlowActionResult> SubmitAction(string tenantId, FlowActionRequest body)
-    {
-        var results = new List<FlowActionResult>();
-        foreach (var id in body.Ids)
-        {
-            results.Add(TryTransition(tenantId, id, body.Action, body.Operator ?? "", body.Reason ?? ""));
-        }
-        return results;
-    }
+    /// <summary>M03.F01.I08/I09/I10 receiving 态 act — 允许 submit/return/withdraw。</summary>
+    public ICollection<FlowActionResult> ActFlowReceiving(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Receiving,
+            new[] { FlowAction.Submit, FlowAction.Return, FlowAction.Withdraw });
 
-    // === §1 lab-shared b114f34 拆端点 — late 4 stage 共用 act 端点（submit + return，
-    // body.action 区分）。Withdraw 在 late stage 拒绝。语义镜像 shared/tsp/routes/
-    // report-flow.tsp @route("/review/act|approve/act|issuance/act|archived/act")。
-    // 接受 action 范围因 stage 而异：review/approve/issuance {submit, return}，
-    // archived 仅 {submit}（archived 自转移写 history，对应原 SubmitAction action=Submit 行为）。
+    /// <summary>M03.F02.I05/I06/I07 task_assignment 态 act — 允许 submit/return/withdraw。
+    /// WITHDRAW 在非 receiving 阶段由 ActForStage 拒（Invalid transition）。</summary>
+    public ICollection<FlowActionResult> ActFlowAssigning(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Task_assignment,
+            new[] { FlowAction.Submit, FlowAction.Return, FlowAction.Withdraw });
 
-    /// <summary>M03.F05.I03 review 态共用 act — submit 推进 / return 退回。</summary>
+    /// <summary>M03.F03.I12/I13/I14 data_entry 态 act — 允许 submit/return/withdraw。
+    /// WITHDRAW 在非 receiving 阶段由 ActForStage 拒（Invalid transition）。</summary>
+    public ICollection<FlowActionResult> ActFlowDataEntry(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Data_entry,
+            new[] { FlowAction.Submit, FlowAction.Return, FlowAction.Withdraw });
+
+    /// <summary>M03.F05.I07/I08/I09 review 态 act — submit 推进 / return 退回。</summary>
     public ICollection<FlowActionResult> ActFlowReview(string tenantId, FlowActionRequest body) =>
         ActForStage(tenantId, body, FlowStatus.Review, new[] { FlowAction.Submit, FlowAction.Return });
 
-    /// <summary>M03.F06.I03 approval 态共用 act — submit 推进 / return 退回。</summary>
+    /// <summary>M03.F06.I05/I06/I07 approval 态 act — submit 推进 / return 退回。</summary>
     public ICollection<FlowActionResult> ActFlowApprove(string tenantId, FlowActionRequest body) =>
         ActForStage(tenantId, body, FlowStatus.Approval, new[] { FlowAction.Submit, FlowAction.Return });
 
-    /// <summary>M03.F07.I03 issuance 态共用 act — submit 推进 / return 退回。</summary>
+    /// <summary>M03.F07.I05/I06/I07 issuance 态 act — submit 推进 / return 退回。</summary>
     public ICollection<FlowActionResult> ActFlowIssuance(string tenantId, FlowActionRequest body) =>
         ActForStage(tenantId, body, FlowStatus.Issuance, new[] { FlowAction.Submit, FlowAction.Return });
 
-    /// <summary>M03.F08.I03 archived 态共用 act — submit 写 history 当 audit，return/withdraw 拒绝。
-    /// 不走 TryTransition：archived 终态无 next/prev，由本方法直接 append FlowHistoryEntry。
-    /// 业务解读：shared .tsp 把 /archived/act 列为 "submit/return 共用端点"，submit 当
-    /// "归档后补操作" audit，return 因 archived 无 prev 拒。</summary>
+    /// <summary>M03.F08.I05/I06/I07 archived 态 act — 仅 submit 写 history 当 audit，return/withdraw 拒绝。
+    /// 不走 TryTransition：archived 终态无 next/prev，由本方法直接 append FlowHistoryEntry。</summary>
     public ICollection<FlowActionResult> ActFlowArchived(string tenantId, FlowActionRequest body)
     {
         var results = new List<FlowActionResult>();

@@ -46,11 +46,11 @@ public sealed class ContractsController(ContractService service, ITenantContext 
 }
 
 /// <summary>
-/// M03.F01 接样 + M03.F02 任务分配（B3，原 7 端点）
-/// + §1 lab-shared b114f34 拆端点后 19 个 flow action/queue 端点（F01/F02/F03/F05/F06/F07/F08）。
-/// 2026-09-17：report-flow.tsp 合并到 sample-receipts.tsp，NSwag 重新分桶，原 ReportFlowControllerBase
-/// 退场，19 endpoint 全进 ReceiptsControllerBase。本 controller 注入 ReportFlowService 实现其中
-/// 4 个已完成的 ActFlow*，其余 13 端点暂 NotImplementedException 等 PR-2/3/4。
+/// M03.F01 接样 + M03.F02 任务分配（B3，CRUD 7 端点）
+/// + 2026-09-17 重整后 7 个 act 端点（F01/F02/F03/F05/F06/F07/F08 流程动作全 act 模式）。
+/// 早期 3 阶段 submit/return/withdraw × 3 = 9 端点 + 报告 4 阶段批量 + 4 list*queue 已全部
+/// 收敛到 7 个 POST /{stage}/act 共享端点（body.action={SUBMIT|RETURN|WITHDRAW}）。
+/// 本 controller 注入 ReportFlowService 全部 7 个 ActFlow* 实现。
 /// </summary>
 [ApiController]
 [Authorize]
@@ -102,43 +102,23 @@ public sealed class ReceiptsController(
     public override Task<SampleReceipt> AssignTask(string id, [FromBody] AssignTaskRequest body) =>
         Task.FromResult(_service.AssignTask(_tenantContext.TenantId, id, body));
 
-    // === §1 lab-shared b114f34 拆端点 — PR-1 (deebb8f) 4 个 ActFlow* 已实现 ===
-    public override Task<ICollection<FlowActionResult>> ActFlowApprove([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowApprove(_tenantContext.TenantId, body));
-    public override Task<ICollection<FlowActionResult>> ActFlowArchived([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowArchived(_tenantContext.TenantId, body));
-    public override Task<ICollection<FlowActionResult>> ActFlowIssuance([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowIssuance(_tenantContext.TenantId, body));
+    // === 2026-09-17 重整 — 7 阶段全 act 模式（lab-shared commit 13122e9）===
+    // 早期 3 阶段（F01/F02/F03）允许 {SUBMIT, RETURN, WITHDRAW}；
+    // 报告 4 阶段（F05/F06/F07/F08）允许 {SUBMIT, RETURN}（archived 仅 SUBMIT）。
+    public override Task<ICollection<FlowActionResult>> ActFlowReceiving([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowReceiving(_tenantContext.TenantId, body));
+    public override Task<ICollection<FlowActionResult>> ActFlowAssigning([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowAssigning(_tenantContext.TenantId, body));
+    public override Task<ICollection<FlowActionResult>> ActFlowDataEntry([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowDataEntry(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowReview([FromBody] FlowActionRequest body) =>
         Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowReview(_tenantContext.TenantId, body));
-
-    // === §1 lab-shared b114f34 拆端点 — PR-2 (早期 3 阶段 submit/return/withdraw × 3 = 9 端点)
-    // + PR-3 (review 批量 batch-submit/batch-return + 4 list*queue) — 待实现占位 ===
-    public override Task<ICollection<FlowActionResult>> WithdrawFlowAssigning([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowAssigning 实现");
-    public override Task<ICollection<FlowActionResult>> WithdrawFlowDataEntry([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowDataEntry 实现");
-    public override Task<ICollection<FlowActionResult>> WithdrawFlowReceiving([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowReceiving 实现");
-    public override Task<ICollection<FlowActionResult>> ReturnFlowAssigning([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowAssigning 实现");
-    public override Task<ICollection<FlowActionResult>> ReturnFlowDataEntry([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowDataEntry 实现");
-    public override Task<ICollection<FlowActionResult>> ReturnFlowReceiving([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowReceiving 实现");
-    public override Task<ICollection<FlowActionResult>> SubmitFlowAssigningSubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowAssigningSubmit 实现");
-    public override Task<ICollection<FlowActionResult>> SubmitFlowDataEntrySubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowDataEntrySubmit 实现");
-    public override Task<ICollection<FlowActionResult>> SubmitFlowReceivingSubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowReceivingSubmit 实现");
-    public override Task<ICollection<FlowActionResult>> BatchReturnFlowReview([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.BatchReturnFlowReview 实现");
-    public override Task<ICollection<FlowActionResult>> BatchSubmitFlowReview([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.BatchSubmitFlowReview 实现");
-
-    // === §1 lab-shared b114f34 4 list*queue 端点 — 2026-09-17 已删除（function-tree F05/F06/F07/F08.I01 标 已废弃）；
-    // 队列数据走前端列表筛选替代。ReceiptsControllerBase 不再含这 4 abstract method，无需 override ===
+    public override Task<ICollection<FlowActionResult>> ActFlowApprove([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowApprove(_tenantContext.TenantId, body));
+    public override Task<ICollection<FlowActionResult>> ActFlowIssuance([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowIssuance(_tenantContext.TenantId, body));
+    public override Task<ICollection<FlowActionResult>> ActFlowArchived([FromBody] FlowActionRequest body) =>
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowArchived(_tenantContext.TenantId, body));
 }
 
 /// <summary>M03.F03.I01-I05 样品 CRUD（B3，5 端点）。</summary>
