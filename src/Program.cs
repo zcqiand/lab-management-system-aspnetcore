@@ -48,7 +48,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "lab-management-system-aspnetcore",
         Version = "v1",
-        Description = "ASP.NET Core 8 后端。NSwag 读 ../lab-management-system-shared/generated/openapi/openapi.yaml 产 Controllers.cs（待 B2 接 NSwag 后启用）；当前为 B1 认证域 9 端点手写。",
+        Description = "ASP.NET Core 8 后端。NSwag 读 ../lab-management-system-shared/generated/openapi/openapi.yaml 产 AllGenerated.cs → 按类拆分为 src/Controllers/Generated/<Tag>Controller.cs + src/Models/Generated/<Dto>.cs（spec §2.2，14 controllers + 151 models）；concrete 实现见 src/Controllers/Implementation/。",
     });
 });
 // signer 必须在 AddJwtBearer lambda 外创建+注册：该 lambda 惰性执行

@@ -19,7 +19,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GENERATED = ROOT / "src" / "Controllers" / "Generated" / "Controllers.cs"
+# §2.2（2026-09-17）：patch 作用在 NSwag 产出的中间文件 AllGenerated.cs 上（split 之前），
+# 修补随 split 落到 per-class 文件。
+GENERATED = ROOT / "src" / "Controllers" / "Generated" / "AllGenerated.cs"
 
 
 def patch_state_property(text: str) -> str:

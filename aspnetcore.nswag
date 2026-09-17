@@ -12,7 +12,7 @@
       "operationGenerationMode": "MultipleClientsFromOperationId",
       "className": "{controller}",
       "namespace": "Lab.AspNetCore.Controllers.Generated",
-      "output": "src/Controllers/Generated/Controllers.cs",
+      "output": "src/Controllers/Generated/AllGenerated.cs",
       "controllerBaseClass": "ControllerBase",
       "controllerStyle": "Abstract",
       "controllerTarget": "AspNetCore",

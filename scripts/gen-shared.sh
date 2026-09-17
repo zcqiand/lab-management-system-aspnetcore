@@ -4,9 +4,13 @@
 #   shared 仓 = TypeSpec → OpenAPI.yaml 纯契约源，本仓用 NSwag CLI 现生成。
 #
 # 产物：
-#   - src/Controllers/Generated/{Tag}Controller.cs — abstract 基类，
-#     方法 stub 抛 NotImplementedException
-#   - src/Models/Generated/*.cs — DTO record
+#   - src/Controllers/Generated/{Tag}Controller.cs — abstract 基类（§2.2 按 tag 拆，14 个）
+#   - src/Models/Generated/*.cs — DTO + enum（§2.2 split 自 AllGenerated.cs，151 个）
+#
+# §2.2 决策（2026-09-17）：NSwag 单次 run 产 AllGenerated.cs（中间产物）→ patch-generated.py
+# 修补 → split-nswag-output.py 按 ClassDeclarationSyntax 切分 14 controllers + 151 models。
+# AllGenerated.cs 在 split 后删除。NSwag 原生不支持 per-tag 拆分（multipleClients+outputPerOperation
+# 实测无效，{controller} token 不会按 tag 替换）。
 #
 # 手写 controller 放 src/Controllers/Implementation/{Tag}Controller.cs，
 # partial 继承生成基类提供业务逻辑（镜像 springboot 的 api/controller 分层）。
@@ -28,12 +32,22 @@ if [ ! -f "$OPENAPI" ]; then
   exit 1
 fi
 
-echo "[gen-shared] step 2/2 — NSwag → src/Controllers/Generated/ + src/Models/Generated/..."
+echo "[gen-shared] step 2/2 — NSwag → AllGenerated.cs → patch → split..."
 mkdir -p "$ROOT/src/Controllers/Generated" "$ROOT/src/Models/Generated"
 
 (cd "$ROOT" && nswag run "$NSWAG_CONFIG")
 
-echo "[gen-shared] patch — NSwag 已知缺陷确定性修补（State / RequirementComparison）..."
+echo "[gen-shared] patch — NSwag 已知缺陷确定性修补（State / RequirementComparison / nullable query）..."
 python "$ROOT/scripts/patch-generated.py"
+
+# §2.2（2026-09-17）：NSwag 单文件 AllGenerated.cs → 按类拆为多文件
+# （14 controllers + 151 models）。split 必须在 patch 之后，确保 patch 注入的
+# State/nullable/#nullable enable 等修补随类落到对应文件。
+python3 "$ROOT/scripts/split-nswag-output.py" "$ROOT/src/Controllers/Generated/AllGenerated.cs" \
+  "$ROOT/src/Controllers/Generated" "$ROOT/src/Models/Generated" \
+  || { echo "[gen-shared] ERROR: split failed" >&2; exit 1; }
+
+# 删除合并前的大文件（已拆出 14+151 个 per-class 文件）
+rm -f "$ROOT/src/Controllers/Generated/AllGenerated.cs"
 
 echo "[gen-shared] OK"
