@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
 
         /// <summary>
-        /// 是否启用 SSO 跳转(msw=false / nextjs=true / springboot/aspnetcore 视实现)
+        /// 是否启用 SSO 跳转(nextjs=true / springboot/aspnetcore 视实现)
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("sso")]
         public bool Sso { get; set; }
@@ -56,6 +56,6 @@ namespace Lab.AspNetCore.Controllers.Generated
     }
 
     /// <summary>
-    /// 已废弃 (ADR-0014);4 个槽位,id 锁定避免拼写漂移
+    /// 已废弃 (ADR-0014);3 个槽位,id 锁定避免拼写漂移。msw 成员 2026-09-17 随 msw 仓剔除删除
     /// </summary>
 }

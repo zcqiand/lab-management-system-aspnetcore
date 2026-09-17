@@ -32,17 +32,14 @@ namespace Lab.AspNetCore.Controllers.Generated
     public enum BackendId
     {
 
-        [System.Runtime.Serialization.EnumMember(Value = @"msw")]
-        Msw = 0,
-
         [System.Runtime.Serialization.EnumMember(Value = @"nextjs")]
-        Nextjs = 1,
+        Nextjs = 0,
 
         [System.Runtime.Serialization.EnumMember(Value = @"springboot")]
-        Springboot = 2,
+        Springboot = 1,
 
         [System.Runtime.Serialization.EnumMember(Value = @"aspnetcore")]
-        Aspnetcore = 3,
+        Aspnetcore = 2,
 
     }
 
