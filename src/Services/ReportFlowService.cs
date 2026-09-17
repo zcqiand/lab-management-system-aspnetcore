@@ -53,6 +53,113 @@ public sealed class ReportFlowService(IFlowStore store)
         return results;
     }
 
+    // === §1 lab-shared b114f34 拆端点 — late 4 stage 共用 act 端点（submit + return，
+    // body.action 区分）。Withdraw 在 late stage 拒绝。语义镜像 shared/tsp/routes/
+    // report-flow.tsp @route("/review/act|approve/act|issuance/act|archived/act")。
+    // 接受 action 范围因 stage 而异：review/approve/issuance {submit, return}，
+    // archived 仅 {submit}（archived 自转移写 history，对应原 SubmitAction action=Submit 行为）。
+
+    /// <summary>M03.F05.I03 review 态共用 act — submit 推进 / return 退回。</summary>
+    public ICollection<FlowActionResult> ActFlowReview(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Review, new[] { FlowAction.Submit, FlowAction.Return });
+
+    /// <summary>M03.F06.I03 approval 态共用 act — submit 推进 / return 退回。</summary>
+    public ICollection<FlowActionResult> ActFlowApprove(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Approval, new[] { FlowAction.Submit, FlowAction.Return });
+
+    /// <summary>M03.F07.I03 issuance 态共用 act — submit 推进 / return 退回。</summary>
+    public ICollection<FlowActionResult> ActFlowIssuance(string tenantId, FlowActionRequest body) =>
+        ActForStage(tenantId, body, FlowStatus.Issuance, new[] { FlowAction.Submit, FlowAction.Return });
+
+    /// <summary>M03.F08.I03 archived 态共用 act — submit 写 history 当 audit，return/withdraw 拒绝。
+    /// 不走 TryTransition：archived 终态无 next/prev，由本方法直接 append FlowHistoryEntry。
+    /// 业务解读：shared .tsp 把 /archived/act 列为 "submit/return 共用端点"，submit 当
+    /// "归档后补操作" audit，return 因 archived 无 prev 拒。</summary>
+    public ICollection<FlowActionResult> ActFlowArchived(string tenantId, FlowActionRequest body)
+    {
+        var results = new List<FlowActionResult>();
+        foreach (var id in body.Ids)
+        {
+            var r = store.FindReceipt(tenantId, id);
+            if (r is null)
+            {
+                results.Add(new FlowActionResult { Id = id, Ok = false, Message = "Receipt not found" });
+                continue;
+            }
+            if (r.FlowStatus != FlowStatus.Archived)
+            {
+                results.Add(new FlowActionResult
+                {
+                    Id = id,
+                    Ok = false,
+                    Message = $"Stage mismatch: endpoint requires archived but receipt is {Snake(r.FlowStatus)}",
+                });
+                continue;
+            }
+            if (body.Action != FlowAction.Submit)
+            {
+                results.Add(new FlowActionResult
+                {
+                    Id = id,
+                    Ok = false,
+                    Message = $"Action not allowed: archived stage accepts only submit but got {Snake(body.Action)}",
+                });
+                continue;
+            }
+            // 写 history 当 audit，状态保持 archived
+            r.FlowHistory.Add(new FlowHistoryEntry
+            {
+                Action = FlowAction.Submit,
+                From = FlowStatus.Archived,
+                To = FlowStatus.Archived,
+                Operator = body.Operator ?? "",
+                At = Now(),
+                Reason = body.Reason ?? "archived: post-archive audit",
+            });
+            r.UpdatedAt = Now();
+            store.SaveReceipt(r);
+            results.Add(new FlowActionResult { Id = id, Ok = true, FlowStatus = FlowStatus.Archived });
+        }
+        return results;
+    }
+
+    private ICollection<FlowActionResult> ActForStage(
+        string tenantId, FlowActionRequest body, FlowStatus requiredStage, IReadOnlyCollection<FlowAction> allowed)
+    {
+        var results = new List<FlowActionResult>();
+        foreach (var id in body.Ids)
+        {
+            var r = store.FindReceipt(tenantId, id);
+            if (r is null)
+            {
+                results.Add(new FlowActionResult { Id = id, Ok = false, Message = "Receipt not found" });
+                continue;
+            }
+            if (r.FlowStatus != requiredStage)
+            {
+                results.Add(new FlowActionResult
+                {
+                    Id = id,
+                    Ok = false,
+                    Message = $"Stage mismatch: endpoint requires {Snake(requiredStage)} but receipt is {Snake(r.FlowStatus)}",
+                });
+                continue;
+            }
+            if (!allowed.Contains(body.Action))
+            {
+                results.Add(new FlowActionResult
+                {
+                    Id = id,
+                    Ok = false,
+                    Message = $"Action not allowed: {Snake(requiredStage)} stage accepts only [{string.Join(",", allowed.Select(Snake))}] but got {Snake(body.Action)}",
+                });
+                continue;
+            }
+            results.Add(TryTransition(tenantId, id, body.Action, body.Operator ?? "", body.Reason ?? ""));
+        }
+        return results;
+    }
+
     private FlowActionResult TryTransition(string tenantId, string id, FlowAction action, string op, string reason)
     {
         var r = store.FindReceipt(tenantId, id);

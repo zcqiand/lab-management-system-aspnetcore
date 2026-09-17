@@ -111,13 +111,13 @@ public sealed class ReportFlowController(ReportFlowService service, ITenantConte
     // 见 docs/conventions/codegen-impl-drift.md §5.1 + gen-shared.sh 注释。
     // 修复纪律：保持签名与 abstract 一致，业务逻辑后续 PR 逐个补 + 同 commit 加 test。
     public override Task<ICollection<FlowActionResult>> ActFlowApprove([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ActFlowApprove 实现");
+        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowApprove(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowArchived([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ActFlowArchived 实现");
+        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowArchived(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowIssuance([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ActFlowIssuance 实现");
+        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowIssuance(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowReview([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ActFlowReview 实现");
+        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowReview(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> WithdrawFlowAssigning([FromBody] FlowActionRequest body) =>
         throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.WithdrawFlowAssigning 实现");
     public override Task<ICollection<FlowActionResult>> WithdrawFlowDataEntry([FromBody] FlowActionRequest body) =>
