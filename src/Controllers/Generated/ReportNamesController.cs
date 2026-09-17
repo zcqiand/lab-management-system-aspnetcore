@@ -6,7 +6,7 @@
 //----------------------
 
 using Microsoft.AspNetCore.Mvc;
-#pragma warning disable CS8618 // patch-generated: 生成 DTO 的 _additionalProperties 惰性初始化模式与 NRT 全量检查不兼容，只压本文件
+#pragma warning disable CS8618 // patch-generated: string? 注解需显式上下文（CS8669）；
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'
@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
-        public abstract System.Threading.Tasks.Task<Response18> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
+        public abstract System.Threading.Tasks.Task<Response21> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
@@ -49,7 +49,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/object")]
-        public abstract System.Threading.Tasks.Task<Response19> ListObjectReportNameLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode);
+        public abstract System.Threading.Tasks.Task<Response22> ListObjectReportNameLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/parameter")]
@@ -61,7 +61,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/parameter")]
-        public abstract System.Threading.Tasks.Task<Response20> ListReportNameParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionParameterCode);
+        public abstract System.Threading.Tasks.Task<Response23> ListReportNameParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionParameterCode);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/standard")]
@@ -73,7 +73,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/standard")]
-        public abstract System.Threading.Tasks.Task<Response21> ListReportNameStandardLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardRole? role);
+        public abstract System.Threading.Tasks.Task<Response24> ListReportNameStandardLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardRole? role);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/{code}")]

@@ -6,7 +6,7 @@
 //----------------------
 
 using Microsoft.AspNetCore.Mvc;
-#pragma warning disable CS8618 // patch-generated: 生成 DTO 的 _additionalProperties 惰性初始化模式与 NRT 全量检查不兼容，只压本文件
+#pragma warning disable CS8618 // patch-generated: string? 注解需显式上下文（CS8669）；
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'
@@ -32,12 +32,80 @@ namespace Lab.AspNetCore.Controllers.Generated
     public abstract class ReportFlowControllerBase : ControllerBase
     {
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/flow")]
-        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> SubmitFlowAction([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/approve/act")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowApprove([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/flow/queue")]
-        public abstract System.Threading.Tasks.Task<Response17> ListFlowQueue([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowStatus stage, [Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/approve/queue")]
+        public abstract System.Threading.Tasks.Task<Response17> ListApproveQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/archived/act")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowArchived([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/archived/queue")]
+        public abstract System.Threading.Tasks.Task<Response18> ListArchivedQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/assigning/return")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ReturnFlowAssigning([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/assigning/submit")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> SubmitFlowAssigningSubmit([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/assigning/withdraw")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> WithdrawFlowAssigning([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/data-entry/return")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ReturnFlowDataEntry([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/data-entry/submit")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> SubmitFlowDataEntrySubmit([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/data-entry/withdraw")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> WithdrawFlowDataEntry([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/issuance/act")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowIssuance([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/issuance/queue")]
+        public abstract System.Threading.Tasks.Task<Response19> ListIssuanceQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/receiving/return")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ReturnFlowReceiving([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/receiving/submit")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> SubmitFlowReceivingSubmit([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/receiving/withdraw")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> WithdrawFlowReceiving([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/act")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowReview([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/batch-return")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> BatchReturnFlowReview([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/batch-submit")]
+        public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> BatchSubmitFlowReview([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/queue")]
+        public abstract System.Threading.Tasks.Task<Response20> ListReviewQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
 
     }
 }

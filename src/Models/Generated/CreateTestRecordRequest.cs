@@ -6,7 +6,7 @@
 //----------------------
 
 using Microsoft.AspNetCore.Mvc;
-#pragma warning disable CS8618 // patch-generated: 生成 DTO 的 _additionalProperties 惰性初始化模式与 NRT 全量检查不兼容，只压本文件
+#pragma warning disable CS8618 // patch-generated: string? 注解需显式上下文（CS8669）；
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'

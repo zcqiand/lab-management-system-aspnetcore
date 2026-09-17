@@ -50,4 +50,20 @@ python3 "$ROOT/scripts/split-nswag-output.py" "$ROOT/src/Controllers/Generated/A
 # 删除合并前的大文件（已拆出 14+151 个 per-class 文件）
 rm -f "$ROOT/src/Controllers/Generated/AllGenerated.cs"
 
+# §X.1（2026-09-17）漂移自检：Implementation 是手写 partial 业务，与 NSwag 重生成的
+# abstract 不同源（见 docs/conventions/codegen-impl-drift.md）。regen 后立即 build
+# 失败即 fail-fast（人工看 build 红在 regen 完成后才发现是迟发现，已修契约
+# 见 §4.2）。
+echo "[gen-shared] drift self-check — build 验证 Implementation ↔ Generated 对齐..."
+if ! dotnet build "$ROOT/src/Lab.AspNetCore.csproj" --nologo -v quiet > "$ROOT/.gen-shared-build.log" 2>&1; then
+  echo "[gen-shared] ERROR: build failed after regen — Implementation 漂移" >&2
+  echo "[gen-shared] tail of build log:" >&2
+  tail -40 "$ROOT/.gen-shared-build.log" >&2
+  echo "" >&2
+  echo "[gen-shared] 修复方向见 docs/conventions/codegen-impl-drift.md §4.2" >&2
+  echo "[gen-shared] （修 Implementation + Service，不能改 Generated/abstract）" >&2
+  exit 1
+fi
+rm -f "$ROOT/.gen-shared-build.log"
+
 echo "[gen-shared] OK"

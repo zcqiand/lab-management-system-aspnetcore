@@ -6,7 +6,7 @@
 //----------------------
 
 using Microsoft.AspNetCore.Mvc;
-#pragma warning disable CS8618 // patch-generated: 生成 DTO 的 _additionalProperties 惰性初始化模式与 NRT 全量检查不兼容，只压本文件
+#pragma warning disable CS8618 // patch-generated: string? 注解需显式上下文（CS8669）；
 #pragma warning disable 108 // Disable "CS0108 '{derivedDto}.ToJson()' hides inherited member '{dtoBase}.ToJson()'. Use the new keyword if hiding was intended."
 #pragma warning disable 114 // Disable "CS0114 '{derivedDto}.RaisePropertyChanged(String)' hides inherited member 'dtoBase.RaisePropertyChanged(String)'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword."
 #pragma warning disable 472 // Disable "CS0472 The result of the expression is always 'false' since a value of type 'Int32' is never equal to 'null' of type 'Int32?'
@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/samples")]
-        public abstract System.Threading.Tasks.Task<Response22> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
+        public abstract System.Threading.Tasks.Task<Response25> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/samples")]
@@ -50,6 +50,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/samples/{id}")]
         public abstract System.Threading.Tasks.Task DeleteSample([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string id);
+
+        /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPut, Microsoft.AspNetCore.Mvc.Route("api/samples/{id}/ext")]
+        public abstract System.Threading.Tasks.Task<Sample> UpdateSampleExt([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string id, [Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] UpdateSampleExtRequest body);
 
     }
 }

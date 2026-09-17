@@ -29,23 +29,12 @@ namespace Lab.AspNetCore.Controllers.Generated
     using System = global::System;
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class BackendRegistry
+    public partial class UpdateSampleExtRequest
     {
 
-        /// <summary>
-        /// 当前激活后端
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("active")]
-        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
-        [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<BackendId>))]
-        public BackendId Active { get; set; }
-
-        /// <summary>
-        /// 可切换列表(通常包含全部 4 个槽位)
-        /// </summary>
-        [System.Text.Json.Serialization.JsonPropertyName("available")]
+        [System.Text.Json.Serialization.JsonPropertyName("ext")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<BackendConfig> Available { get; set; } = new System.Collections.Generic.List<BackendConfig>();
+        public System.Collections.Generic.IDictionary<string, string> Ext { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
