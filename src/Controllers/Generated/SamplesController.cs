@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/samples")]
-        public abstract System.Threading.Tasks.Task<Response25> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
+        public abstract System.Threading.Tasks.Task<Response21> ListSamples([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? receiptId, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/samples")]

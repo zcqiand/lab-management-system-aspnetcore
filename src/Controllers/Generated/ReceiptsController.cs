@@ -44,16 +44,8 @@ namespace Lab.AspNetCore.Controllers.Generated
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowApprove([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/approve/queue")]
-        public abstract System.Threading.Tasks.Task<Response17> ListApproveQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
-
-        /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/archived/act")]
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowArchived([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
-
-        /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/archived/queue")]
-        public abstract System.Threading.Tasks.Task<Response18> ListArchivedQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/assigning/return")]
@@ -84,10 +76,6 @@ namespace Lab.AspNetCore.Controllers.Generated
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ActFlowIssuance([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
 
         /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/issuance/queue")]
-        public abstract System.Threading.Tasks.Task<Response19> ListIssuanceQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
-
-        /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/receiving/return")]
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> ReturnFlowReceiving([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
 
@@ -110,10 +98,6 @@ namespace Lab.AspNetCore.Controllers.Generated
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/batch-submit")]
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<FlowActionResult>> BatchSubmitFlowReview([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] FlowActionRequest body);
-
-        /// <returns>The request has succeeded.</returns>
-        [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/review/queue")]
-        public abstract System.Threading.Tasks.Task<Response20> ListReviewQueue([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts/{id}")]

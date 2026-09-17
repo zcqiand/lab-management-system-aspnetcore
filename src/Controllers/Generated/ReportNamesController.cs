@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
-        public abstract System.Threading.Tasks.Task<Response21> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
+        public abstract System.Threading.Tasks.Task<Response17> ListReportNames([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names")]
@@ -49,7 +49,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/object")]
-        public abstract System.Threading.Tasks.Task<Response22> ListObjectReportNameLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode);
+        public abstract System.Threading.Tasks.Task<Response18> ListObjectReportNameLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/parameter")]
@@ -61,7 +61,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/parameter")]
-        public abstract System.Threading.Tasks.Task<Response23> ListReportNameParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionParameterCode);
+        public abstract System.Threading.Tasks.Task<Response19> ListReportNameParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionParameterCode);
 
         /// <returns>There is no content to send for this request, but the headers may be useful.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/standard")]
@@ -73,7 +73,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/links/standard")]
-        public abstract System.Threading.Tasks.Task<Response24> ListReportNameStandardLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardRole? role);
+        public abstract System.Threading.Tasks.Task<Response20> ListReportNameStandardLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? reportNameCode, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardRole? role);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/report-names/{code}")]

@@ -301,14 +301,14 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
     private readonly DictionaryService _service = service;
     private readonly JunctionService _junction = junction;
 
-    public override Task<Response21> ListReportNames(
+    public override Task<Response17> ListReportNames(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
         [FromQuery] string? keyword)
     {
         var items = _service.ListReportNames(keyword).ToList();
         int count = items.Count;
-        return Task.FromResult(new Response21
+        return Task.FromResult(new Response17
         {
             Items = items,
             Page = page ?? 1,
@@ -370,13 +370,13 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
 
     // === junction GET（Page<T> 短 envelope，shared 契约补齐）===
 
-    public override Task<Response22> ListObjectReportNameLinks(
+    public override Task<Response18> ListObjectReportNameLinks(
         [FromQuery] string? inspectionObjectCode,
         [FromQuery] string? reportNameCode)
     {
         var items = _junction.ListObjectReportNameLinks(inspectionObjectCode, reportNameCode).ToList();
         int count = items.Count;
-        return Task.FromResult(new Response22
+        return Task.FromResult(new Response18
         {
             Items = items,
             Page = 1,
@@ -385,13 +385,13 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
         });
     }
 
-    public override Task<Response24> ListReportNameStandardLinks(
+    public override Task<Response20> ListReportNameStandardLinks(
         [FromQuery] string? reportNameCode,
         [FromQuery] InspectionStandardRole? role)
     {
         var items = _junction.ListReportNameStandardLinks(reportNameCode, role).ToList();
         int count = items.Count;
-        return Task.FromResult(new Response24
+        return Task.FromResult(new Response20
         {
             Items = items,
             Page = 1,
@@ -400,13 +400,13 @@ public sealed class ReportNamesController(DictionaryService service, JunctionSer
         });
     }
 
-    public override Task<Response23> ListReportNameParameterLinks(
+    public override Task<Response19> ListReportNameParameterLinks(
         [FromQuery] string? reportNameCode,
         [FromQuery] string? inspectionParameterCode)
     {
         var items = _junction.ListReportNameParameterLinks(reportNameCode, inspectionParameterCode).ToList();
         int count = items.Count;
-        return Task.FromResult(new Response23
+        return Task.FromResult(new Response19
         {
             Items = items,
             Page = 1,

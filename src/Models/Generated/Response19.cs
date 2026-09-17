@@ -34,7 +34,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.List<SampleReceipt> Items { get; set; } = new System.Collections.Generic.List<SampleReceipt>();
+        public System.Collections.Generic.List<ReportNameParameterLink> Items { get; set; } = new System.Collections.Generic.List<ReportNameParameterLink>();
 
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }

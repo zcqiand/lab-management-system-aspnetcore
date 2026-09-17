@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/test-records")]
-        public abstract System.Threading.Tasks.Task<Response26> ListTestRecords([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? sampleId, [Microsoft.AspNetCore.Mvc.FromQuery] string? parameterCode);
+        public abstract System.Threading.Tasks.Task<Response22> ListTestRecords([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? sampleId, [Microsoft.AspNetCore.Mvc.FromQuery] string? parameterCode);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/test-records")]
