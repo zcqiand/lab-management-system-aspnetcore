@@ -45,13 +45,23 @@ public sealed class ContractsController(ContractService service, ITenantContext 
     }
 }
 
-/// <summary>M03.F01 接样 + M03.F02 任务分配（B3，7 端点）。</summary>
+/// <summary>
+/// M03.F01 接样 + M03.F02 任务分配（B3，原 7 端点）
+/// + §1 lab-shared b114f34 拆端点后 19 个 flow action/queue 端点（F01/F02/F03/F05/F06/F07/F08）。
+/// 2026-09-17：report-flow.tsp 合并到 sample-receipts.tsp，NSwag 重新分桶，原 ReportFlowControllerBase
+/// 退场，19 endpoint 全进 ReceiptsControllerBase。本 controller 注入 ReportFlowService 实现其中
+/// 4 个已完成的 ActFlow*，其余 13 端点暂 NotImplementedException 等 PR-2/3/4。
+/// </summary>
 [ApiController]
 [Authorize]
-public sealed class ReceiptsController(SampleReceiptService service, ITenantContext tenantContext)
+public sealed class ReceiptsController(
+    SampleReceiptService service,
+    ReportFlowService flowService,
+    ITenantContext tenantContext)
     : ReceiptsControllerBase
 {
     private readonly SampleReceiptService _service = service;
+    private readonly ReportFlowService _flowService = flowService;
     private readonly ITenantContext _tenantContext = tenantContext;
 
     public override Task<Response16> ListReceipts(
@@ -91,63 +101,49 @@ public sealed class ReceiptsController(SampleReceiptService service, ITenantCont
     // M03.F02.I01 任务分配
     public override Task<SampleReceipt> AssignTask(string id, [FromBody] AssignTaskRequest body) =>
         Task.FromResult(_service.AssignTask(_tenantContext.TenantId, id, body));
-}
 
-/// <summary>M03.F05-F08 流程队列 + 批量推进（B3，2 端点，F05-F08 共 12 个 I 级复用）。</summary>
-[ApiController]
-[Authorize]
-public sealed class ReportFlowController(ReportFlowService service, ITenantContext tenantContext)
-    : ReportFlowControllerBase
-{
-    private readonly ReportFlowService _service = service;
-    private readonly ITenantContext _tenantContext = tenantContext;
-
-    // === §1 lab-shared b114f34 拆端点 = 不豁免替代：原 SubmitFlowAction / ListFlowQueue
-    // 共享端点已删除，替换为 19 个独立 flow action / queue 端点（见下方 NotImplementedException
-    // 占位）。原 .NET service.SubmitAction / .FlowQueue 仍保留（其他 impl 可能引用），后续
-    // 端点实现后即可下线。 ===
-
-    // === §1 lab-shared b114f34 新拆端点 1:1 命中 — 待实现占位（NotImplementedException）===
-    // 见 docs/conventions/codegen-impl-drift.md §5.1 + gen-shared.sh 注释。
-    // 修复纪律：保持签名与 abstract 一致，业务逻辑后续 PR 逐个补 + 同 commit 加 test。
+    // === §1 lab-shared b114f34 拆端点 — PR-1 (deebb8f) 4 个 ActFlow* 已实现 ===
     public override Task<ICollection<FlowActionResult>> ActFlowApprove([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowApprove(_tenantContext.TenantId, body));
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowApprove(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowArchived([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowArchived(_tenantContext.TenantId, body));
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowArchived(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowIssuance([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowIssuance(_tenantContext.TenantId, body));
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowIssuance(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowReview([FromBody] FlowActionRequest body) =>
-        Task.FromResult<ICollection<FlowActionResult>>(_service.ActFlowReview(_tenantContext.TenantId, body));
+        Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowReview(_tenantContext.TenantId, body));
+
+    // === §1 lab-shared b114f34 拆端点 — PR-2 (早期 3 阶段 submit/return/withdraw × 3 = 9 端点)
+    // + PR-3 (review 批量 batch-submit/batch-return + 4 list*queue) — 待实现占位 ===
     public override Task<ICollection<FlowActionResult>> WithdrawFlowAssigning([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.WithdrawFlowAssigning 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowAssigning 实现");
     public override Task<ICollection<FlowActionResult>> WithdrawFlowDataEntry([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.WithdrawFlowDataEntry 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowDataEntry 实现");
     public override Task<ICollection<FlowActionResult>> WithdrawFlowReceiving([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.WithdrawFlowReceiving 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.WithdrawFlowReceiving 实现");
     public override Task<ICollection<FlowActionResult>> ReturnFlowAssigning([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ReturnFlowAssigning 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowAssigning 实现");
     public override Task<ICollection<FlowActionResult>> ReturnFlowDataEntry([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ReturnFlowDataEntry 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowDataEntry 实现");
     public override Task<ICollection<FlowActionResult>> ReturnFlowReceiving([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ReturnFlowReceiving 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.ReturnFlowReceiving 实现");
     public override Task<ICollection<FlowActionResult>> SubmitFlowAssigningSubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.SubmitFlowAssigningSubmit 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowAssigningSubmit 实现");
     public override Task<ICollection<FlowActionResult>> SubmitFlowDataEntrySubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.SubmitFlowDataEntrySubmit 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowDataEntrySubmit 实现");
     public override Task<ICollection<FlowActionResult>> SubmitFlowReceivingSubmit([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.SubmitFlowReceivingSubmit 实现");
+        throw new NotImplementedException("§1 b114f34 PR-2: 待 ReportFlowService.SubmitFlowReceivingSubmit 实现");
     public override Task<ICollection<FlowActionResult>> BatchReturnFlowReview([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.BatchReturnFlowReview 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.BatchReturnFlowReview 实现");
     public override Task<ICollection<FlowActionResult>> BatchSubmitFlowReview([FromBody] FlowActionRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.BatchSubmitFlowReview 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.BatchSubmitFlowReview 实现");
     public override Task<Response20> ListReviewQueue([FromQuery] int? page, [FromQuery] int? pageSize) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ListReviewQueue 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.ListReviewQueue 实现");
     public override Task<Response17> ListApproveQueue([FromQuery] int? page, [FromQuery] int? pageSize) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ListApproveQueue 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.ListApproveQueue 实现");
     public override Task<Response19> ListIssuanceQueue([FromQuery] int? page, [FromQuery] int? pageSize) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ListIssuanceQueue 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.ListIssuanceQueue 实现");
     public override Task<Response18> ListArchivedQueue([FromQuery] int? page, [FromQuery] int? pageSize) =>
-        throw new NotImplementedException("§1 b114f34: 待 ReportFlowService.ListArchivedQueue 实现");
+        throw new NotImplementedException("§1 b114f34 PR-3: 待 ReportFlowService.ListArchivedQueue 实现");
 }
 
 /// <summary>M03.F03.I01-I05 样品 CRUD（B3，5 端点）。</summary>
