@@ -223,18 +223,22 @@ def main():
     mark("samples/create", status == 200 and sample.get("id"),
          [f"status {status}: {str(sample)[:200]}"])
 
-    # 流程：receiving --submit--> task_assignment --return--> receiving（前进一级即回退验证）
-    check("flow/submit", "POST", "/api/receipts/flow", token=tok,
+    # 流程（ADR-0035 7 阶段全 act 模式，action 为契约小写枚举）：
+    # receiving --SUBMIT--> task_assignment --RETURN--> receiving --WITHDRAW--> receiving（自转移）
+    # 旧 /api/receipts/flow 与 /flow/queue 已删（队列改前端列表筛选）
+    check("flow/submit", "POST", "/api/receipts/receiving/act", token=tok,
           body={"ids": [receipt["id"]], "action": "submit", "operator": "smoke员"},
           verify=lambda r: assert_(r[0]["ok"] is True
                                    and r[0]["flowStatus"] == "task_assignment",
                                    f"unexpected {r}"))
-    check("flow/return", "POST", "/api/receipts/flow", token=tok,
+    check("flow/return", "POST", "/api/receipts/assigning/act", token=tok,
           body={"ids": [receipt["id"]], "action": "return", "operator": "smoke员"},
           verify=lambda r: assert_(r[0]["ok"] is True and r[0]["flowStatus"] == "receiving",
                                    f"unexpected {r}"))
-    check("flow/queue", "GET", "/api/receipts/flow/queue?stage=task_assignment", token=tok,
-          verify=lambda r: assert_(isinstance(r.get("items"), list), f"not paged: {str(r)[:100]}"))
+    check("flow/withdraw", "POST", "/api/receipts/receiving/act", token=tok,
+          body={"ids": [receipt["id"]], "action": "withdraw", "operator": "smoke员"},
+          verify=lambda r: assert_(r[0]["ok"] is True and r[0]["flowStatus"] == "receiving",
+                                   f"unexpected {r}"))
 
     status, record = call("POST", "/api/test-records", tok, {
         "sampleId": sample["id"], "parameterCode": "P-SMOKE",
