@@ -10,9 +10,9 @@ using Xunit;
 ///
 /// 历史 (2026-09-04 prod incident)：
 /// tests/Harness/TestDb.cs:28 + LabDbContextModelTest.cs:22 都挂了 convention，
-/// src/Program.cs:141 (LAB_DATA_PROVIDER=ef 路径) 漏挂 → prod 首查 SampleReceipt
+/// src/Program.cs (恒 ef 路径) 漏挂 → prod 首查 SampleReceipt
 /// 触发 Npgsql 42703 column s."Id" does not exist (DB 列 snake_case id)。
-/// memory 分支测试全绿 prod 首请求 500 是典型盲区。
+/// 单测绿而 prod 首请求 500 是典型盲区。
 ///
 /// 抽到 LabDbContextConfig.UseLabNpgsql 后 prod (Program.cs) 与 test (TestDb) 同源，
 /// 未来谁去掉 convention 这套测试立刻红。

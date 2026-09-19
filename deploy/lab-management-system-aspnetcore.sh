@@ -62,9 +62,8 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     printf 'DATABASE_URL=%s\n' "$DATABASE_URL"
     printf 'DATABASE_NAME=lab_prod\n'
     printf 'SERVER_PORT=5204\n'
-    # lab 仓 PostgreSQL 路径（与 lab-springboot 同库）：Provider=ef；
-    # 2026-08-28 key 统一:flat LAB_DATA_PROVIDER(Lab__Data__Provider 段映射废弃)
-    printf 'LAB_DATA_PROVIDER=ef\n'
+    # lab 仓 PostgreSQL 路径（与 lab-springboot 同库）：恒 ef（LAB_DATA_PROVIDER key
+    # 已随 memory provider 模式删除，2026-09-20 人裁；DATABASE_URL 必填）。
     # JWT 签名密钥（HS256 ≥32B）。prod 必填 —— 不落 dev 默认值。
     # StateCookieManager 也复用同一密钥（HS256 签 SSO state），所以只填这一个。
     # key 名与 Program.cs 读者一致（JWT_SIGNING_KEY；曾写 Lab__Jwt__Secret 无 flat 读者，
@@ -83,7 +82,6 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     # saas-nextjs 走 string. 固定 UUID 是跨 3 saas 后端的最小公约数. (后续 PR 改 TypeSpec
     # 移除 @format 后可改回 'lab-management')
     # 2026-08-28 key 统一:Lab__Sso__* 段映射全部废弃,flat key 与 lab-springboot 同名
-    printf 'LAB_SSO_PROFILE=real\n'
     printf 'LAB_SAAS_BASE_URL=https://saas-aspnetcore.xiangru.uk\n'
     # 登录 UI 同栈匹配：lab-vue 后端是 lab-aspnetcore → 登录页指 saas-vue
     #（2026-08-29 前指 saas-react；saas-vue LoginPage 已补 OAuth code 回跳）
@@ -118,7 +116,7 @@ if ! grep -q '^JWT_SIGNING_KEY=' "$BASE/aspnetcore.env"; then
 fi
 # v0.1.9: SSO 配置校验 + 2026-08-28 key 对齐迁移(append-if-missing 到
 # .env.production 全集;key 集合契约由 suite L0.5 check_deploy_parity 锁死)。
-# secret 类缺了 fail-fast 不再 WARNING 降级 —— 静默 no-sso 在 prod 是事故不是兜底。
+# secret 类缺了 fail-fast 不再 WARNING 降级 —— 静默降级在 prod 是事故不是兜底。
 if [ -f "$BASE/aspnetcore.env" ]; then
   append_if_missing() {
     key="$1"; val="$2"
@@ -128,8 +126,6 @@ if [ -f "$BASE/aspnetcore.env" ]; then
       printf '%s=%s\n' "$key" "$val" >> "$BASE/aspnetcore.env"
     fi
   }
-  append_if_missing LAB_SSO_PROFILE 'real'
-  append_if_missing LAB_DATA_PROVIDER 'ef'
   append_if_missing LAB_SAAS_BASE_URL 'https://saas-aspnetcore.xiangru.uk'
   # v0.2.7: 登录 UI 同栈匹配 saas-vue（lab-vue 后端 = 本仓；ADR-0014 T-10 曾指
   # saas-react，现改 saas-vue 对齐 vue 栈）。存量 env 里脚本旧默认 saas-react
@@ -143,7 +139,7 @@ if [ -f "$BASE/aspnetcore.env" ]; then
   append_if_missing LAB_SAAS_CLIENT_ID '11111111-1111-1111-1111-111111111111'
   if ! grep -q '^LAB_SAAS_CLIENT_SECRET=' "$BASE/aspnetcore.env"; then
     if [ -z "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
-      echo "ERROR: LAB_SAAS_CLIENT_SECRET missing in $BASE/aspnetcore.env and not forwarded via ci.yml envs (静默降级 no-sso 在 prod 是事故)" >&2
+      echo "ERROR: LAB_SAAS_CLIENT_SECRET missing in $BASE/aspnetcore.env and not forwarded via ci.yml envs (静默降级在 prod 是事故)" >&2
       exit 1
     fi
     append_if_missing LAB_SAAS_CLIENT_SECRET "$LAB_SAAS_CLIENT_SECRET"

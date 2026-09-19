@@ -7,6 +7,7 @@ using Lab.AspNetCore.Auth.State;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Directory;
 using Lab.AspNetCore.Services;
+using Lab.AspNetCore.Tests.TestDoubles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Xunit;

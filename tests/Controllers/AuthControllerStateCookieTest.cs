@@ -7,6 +7,7 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Directory;
 using Lab.AspNetCore.Controllers.Implementation;
 using Lab.AspNetCore.Services;
+using Lab.AspNetCore.Tests.TestDoubles;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;

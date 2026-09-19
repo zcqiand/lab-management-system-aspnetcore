@@ -6,7 +6,6 @@
 // 用法：
 //   var key = ConfigBuilder.RequireJwtSigningKey(builder.Configuration);
 //   var cors = ConfigBuilder.RequireCorsOrigins(builder.Configuration);
-//   var ssoProfile = ConfigBuilder.RequireSsoProfile(builder.Configuration);
 
 using System.Text;
 
@@ -62,28 +61,7 @@ public static class ConfigBuilder
     }
 
     /// <summary>
-    /// SSO profile（"no-sso" | "real"）。缺失 throw。dev 用 "no-sso",prod 必须显式 "real"
-    /// 走 saas 真路径。
-    /// </summary>
-    public static string RequireSsoProfile(IConfiguration cfg)
-    {
-        var v = cfg["LAB_SSO_PROFILE"];
-        if (string.IsNullOrEmpty(v))
-        {
-            throw new InvalidOperationException(
-                "LAB_SSO_PROFILE env is required (ADR-0019 禁 \"no-sso\" 兜底). " +
-                "Set to \"no-sso\" (dev) or \"real\" (prod).");
-        }
-        if (v != "no-sso" && v != "real")
-        {
-            throw new InvalidOperationException(
-                $"LAB_SSO_PROFILE 非法值 {v}（必须 \"no-sso\" 或 \"real\"）");
-        }
-        return v;
-    }
-
-    /// <summary>
-    /// Lab:Auth:DevPassword（demo 目录密码,no-sso profile 才用）。缺失 throw。
+    /// Lab:Auth:DevPassword（demo 目录密码，密码登录用）。缺失 throw。
     /// dev 必填（即使 dev profile 也要求显式声明,不允许 "dev123456" 字面兜底）。
     /// </summary>
     public static string RequireDevPassword(IConfiguration cfg)

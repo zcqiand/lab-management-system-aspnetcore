@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 /// memory 分支测试全绿、prod 首请求炸 Kw 翻译错误）。
 ///
 /// 连接串读 LAB_TEST_DATABASE_URL（Npgsql 格式），缺省回落 dev 同款真库
-/// （appsettings.Development.json 的 Lab:Data:ConnectionString 是同一个共享 PG）。
+/// （.env.local / .env.example 的 DATABASE_URL 是同一个共享 PG）。
 /// 每个 fixture 用独立 tenant_id 隔离数据，dispose 时按 tenant 清理。
 /// </summary>
 public static class TestDb

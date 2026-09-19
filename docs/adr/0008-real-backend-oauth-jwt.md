@@ -58,7 +58,9 @@ lab-management-system 多仓家族长期在 B1 "鉴权占位" 状态:
 - SSO 路径:saas 拿 email → 查 lab directory → 不存在则 `Upsert`(默认 roleCode="viewer")
 - me/switchTenant:用 `sub` claim (user.id) 优先按 `FindById` 查,退化 `FindByEmail` / `FindByUsername`
 
-### 6. dev 降级:`no-sso` profile
+### 6. dev 降级:`no-sso` profile（**已废止**，2026-09-20 人裁）
+
+> lab 家族恒 real SSO；Noop 客户端迁测试项目作替身，`LAB_SSO_PROFILE` key 全家族删除（详见 5.48 批次）。
 
 - `appsettings.Development.json` 加 `Lab:Sso:Profile: "no-sso"` 默认值
 - `no-sso` 模式:`Program.cs` 注册 `NoopSaasAuthClient` + `NoopSaasMeClient`,行为固定为 admin session + 3 租户种子(镜像 lab-msw handlers-extra.ts)
@@ -114,7 +116,8 @@ lab-management-system 多仓家族长期在 B1 "鉴权占位" 状态:
 - ✅ JWT 真签名,任意篡改会被拒
 - ✅ SSO 真调 saas `/oauth/authorize` + `/oauth/token`,saas 端能审计到 grant flow
 - ✅ Refresh 真走 saas 续签,和 msw 模式兼容
-- ✅ dev 离线模式保留(no-sso profile),前端 msw 链路不需要任何改动
+- ✅ dev 离线模式保留(no-sso profile),前端 msw 链路不需要任何改动（**已废止**，2026-09-20 人裁：
+  no-sso profile 与 memory provider 全家族删除，见 §6 废止注记）
 - ⚠️ 跨仓时序敏感(env 缺失 / shared 未发都会 block)
 - ⚠️ username 主键暂时改为 email,长期需迁移到 saas uuid
 

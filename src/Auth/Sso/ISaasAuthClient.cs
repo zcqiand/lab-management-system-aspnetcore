@@ -102,39 +102,3 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
         return result ?? throw new SaasAuthException.UpstreamUnavailable("saas returned empty login response");
     }
 }
-
-/// <summary>
-/// dev 离线模式：返回 admin session（与 lab-msw 行为一致）。
-/// </summary>
-public sealed class NoopSaasAuthClient : ISaasAuthClient
-{
-    public Task<AuthorizeCodeResponse> AuthorizeAsync(string redirectUri, string scope, string state, CancellationToken ct = default)
-    {
-        return Task.FromResult(new AuthorizeCodeResponse { Code = "dev-code", State = state });
-    }
-
-    public Task<TokenResponse> TokenAsync(string grantType, string? code, string? refreshToken, string? redirectUri, CancellationToken ct = default)
-    {
-        return Task.FromResult(new TokenResponse
-        {
-            AccessToken = "dev-access-token",
-            RefreshToken = "dev-refresh-token",
-            TokenType = "Bearer",
-            ExpiresIn = 3600,
-            Scope = "openid",
-        });
-    }
-
-    /// noop：与 TokenAsync 同款假 accessToken（服务账号快照路径走通，NoopSaasMeClient 返回空树）
-    public Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default)
-    {
-        return Task.FromResult(new TokenResponse
-        {
-            AccessToken = "dev-service-access-token",
-            RefreshToken = "dev-service-refresh-token",
-            TokenType = "Bearer",
-            ExpiresIn = 3600,
-            Scope = "openid",
-        });
-    }
-}

@@ -34,10 +34,8 @@ public sealed class LabOptions
         /// <summary>flat env 读取入口(经 LabOptions.Config 注入;测试可不设)。</summary>
         public IConfiguration? Config { internal get; set; }
 
-        // ADR-0019：删 "no-sso" 兜底。Profile 必须显式 env 注入 ("no-sso" / "real")。
-        public string? Profile { get; set; }
-
         // 各 getter：flat env 优先,缺省回落 json 段。json 段已删字面默认值,缺即空串由调用方校验。
+        // (SsoSection.Profile 已删:2026-09-20 人裁恒 real,no-sso profile 全家族废弃)
         public string SaasBase => Config?["LAB_SAAS_BASE_URL"] ?? _saasBase ?? "";
         public string LoginUrl => Config?["LAB_SSO_LOGIN_URL"] ?? _loginUrl ?? "";
         public string ClientId => Config?["LAB_SAAS_CLIENT_ID"] ?? _clientId ?? "";
