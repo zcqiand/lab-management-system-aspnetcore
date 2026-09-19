@@ -94,6 +94,8 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     printf 'LAB_SSO_CALLBACK_REDIRECT=https://lab-react.xiangru.uk/login\n'
     printf 'LAB_SAAS_SERVICE_USER=%s\n' "$LAB_SAAS_SERVICE_USER"
     printf 'LAB_SAAS_SERVICE_PASSWORD=%s\n' "$LAB_SAAS_SERVICE_PASSWORD"
+    # 5.33 服务账号登录 LoginRequest.clientId(saas 契约必填;非 secret,oauth_client code 形固定值)
+    printf 'LAB_SAAS_SERVICE_CLIENT_ID=lab-management\n'
     # ADR-0019：ConfigUserDirectory 删 "dev123456" 字面兜底后必填（demo 目录口令，
     # 值=契约值（.env.production 明文），非真 secret；Secrets 可覆盖。
     printf 'Lab__Auth__DevPassword=%s\n' "${LAB_AUTH_DEV_PASSWORD:-dev123456}"
@@ -156,6 +158,8 @@ if [ -f "$BASE/aspnetcore.env" ]; then
     append_if_missing LAB_SAAS_SERVICE_USER "$LAB_SAAS_SERVICE_USER"
     append_if_missing LAB_SAAS_SERVICE_PASSWORD "$LAB_SAAS_SERVICE_PASSWORD"
   fi
+  # 5.33 服务账号登录 LoginRequest.clientId:非 secret,固定 code 形字面量补(存量 env-file 迁移)
+  append_if_missing LAB_SAAS_SERVICE_CLIENT_ID 'lab-management'
   append_if_missing DATABASE_NAME 'lab_prod'
   append_if_missing SERVER_PORT '5204'
   append_if_missing JWT_ISSUER 'lab-management-system'

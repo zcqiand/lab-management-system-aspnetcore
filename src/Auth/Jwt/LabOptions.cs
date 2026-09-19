@@ -45,6 +45,9 @@ public sealed class LabOptions
         public string DefaultTenantId => Config?["LAB_SAAS_DEFAULT_TENANT_ID"] ?? _defaultTenantId ?? "";
         public string ServiceUser => Config?["LAB_SAAS_SERVICE_USER"] ?? _serviceUser ?? "";
         public string ServicePassword => Config?["LAB_SAAS_SERVICE_PASSWORD"] ?? _servicePassword ?? "";
+        /// <summary>服务账号登录的 LoginRequest.clientId（saas 契约必填;2026-09-19 5.33 补,
+        /// oauth_client code 形 = lab-management,与 OAuth code 流的 ClientId 分开配）。</summary>
+        public string ServiceClientId => Config?["LAB_SAAS_SERVICE_CLIENT_ID"] ?? _serviceClientId ?? "";
         public string CallbackRedirectBase => Config?["LAB_SSO_CALLBACK_REDIRECT"] ?? _callbackRedirectBase ?? "";
 
         // Lab:Sso json 段绑定字段(appsettings*.json dev 值;flat env 优先)
@@ -56,6 +59,7 @@ public sealed class LabOptions
         public string? _defaultTenantId { get; set; }
         public string? _serviceUser { get; set; }
         public string? _servicePassword { get; set; }
+        public string? _serviceClientId { get; set; }
         public string? _callbackRedirectBase { get; set; }
 
         /// <summary>有效登录页 base：显式 LoginUrl 优先，缺省回落 SaasBase。</summary>

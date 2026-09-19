@@ -44,6 +44,8 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
         if (string.IsNullOrEmpty(_sso.ClientId)) throw new InvalidOperationException("LAB_SAAS_CLIENT_ID required");
         if (string.IsNullOrEmpty(_sso.ClientSecret)) throw new InvalidOperationException("LAB_SAAS_CLIENT_SECRET required");
         if (string.IsNullOrEmpty(_sso.DefaultTenantId)) throw new InvalidOperationException("LAB_SAAS_DEFAULT_TENANT_ID required");
+        // 5.33：服务账号登录 clientId 是业务身份字段（ADR-0019），缺失 fail-fast 不兜底
+        if (string.IsNullOrEmpty(_sso.ServiceClientId)) throw new InvalidOperationException("LAB_SAAS_SERVICE_CLIENT_ID required");
         _http.BaseAddress ??= new Uri(_sso.SaasBase);
         _http.DefaultRequestHeaders.Accept.Clear();
         _http.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
@@ -86,11 +88,13 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
 
     public async Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default)
     {
+        // 2026-09-19 5.33：body 对齐 saas LoginRequest {username, password, clientId}——clientId 取
+        // LAB_SAAS_SERVICE_CLIENT_ID；陈旧字段 tenantCode 删（契约无此字段，修前 saas 400 fieldErrors）。
         var body = new Dictionary<string, string>
         {
             ["username"] = username,
             ["password"] = password,
-            ["tenantCode"] = _sso.DefaultTenantId,
+            ["clientId"] = _sso.ServiceClientId,
         };
         var resp = await _http.PostAsJsonAsync("/api/v1/auth/login", body, ct);
         resp.EnsureSuccessStatusCode();
