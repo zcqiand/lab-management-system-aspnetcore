@@ -1,20 +1,23 @@
 {
   "schema": 1,
   "project": "lab-management-system-aspnetcore",
-  "current_task": "REQ-2026-001：NRT 双层修复 + unlink 幂等——已上线",
+  "current_task": "2026-09-19 family-leftovers wave 收口（Task 6）：本仓 L3 编译三轮固定红（真红池项）——ReportFlowServiceTest.cs 未对齐 220ee0f act 模式",
   "done": [
     "LabDbContext Config/ReportNameCode 可空列 IsRequired(false)（EF 物化 NULL 500）",
     "Program.cs SuppressImplicitRequiredAttributeForNonNullableReferenceTypes（契约可选字段缺省 400；NSwag 显式 [Required] 不受影响）",
-    "UnlinkParamInterface KeyNotFound→404 改幂等 204（契约 void 语义）；单测同 commit；commit caa6163"
+    "UnlinkParamInterface KeyNotFound→404 改幂等 204（契约 void 语义）；单测同 commit；commit caa6163",
+    "Task 6：L3 真红定位登记池项（归 act 模式收口批/5.17 联动）"
   ],
   "next": [
-    "其余 6 组 junction unlink 幂等化候选（同款 404 语义）"
+    "修 tests/Services/ReportFlowServiceTest.cs 对齐 220ee0f act 模式（删 FlowQueue/SubmitAction 引用），先红后改"
   ],
   "open_questions": [],
   "dont": [
     "改 .harness/stack.json 前先确认 exit code 语义（2=停下问人）",
-    "改完源码必须 rebuild 再起服务（旧 DLL 锁 exe：MSB3026/3027）"
+    "改完源码必须 rebuild 再起服务（旧 DLL 锁 exe：MSB3026/3027）",
+    "运行时编译过 ≠ L3 绿：L3 编的是含 tests 的全量（dotnet build）；只起 dev server 验证会漏"
   ],
   "active_branch": "master",
-  "last_session_at": "2026-09-14"
+  "last_session_at": "2026-09-19",
+  "last_session_summary": "--all 三轮固定 FAIL L3：220ee0f（M03 act 模式）删 ReportFlowService.FlowQueue/SubmitAction 未同步 tests/Services/ReportFlowServiceTest.cs → CS1061×10+CS1503。运行时 src 可编译：live 栈 5204 正常起（B 段 live 4-way 在用）"
 }
