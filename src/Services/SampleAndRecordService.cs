@@ -90,6 +90,20 @@ public sealed class SampleService(IFlowStore store)
         Get(tenantId, id);
         store.DeleteSample(tenantId, id);
     }
+
+    /// <summary>
+    /// M03.F01.I07 ext 补录（5.54 live 实证补实现，此前是 b114f34 占位
+    /// NotImplementedException → 500）：整体替换 ext（合并是前端职责，镜像 springboot
+    /// SampleService.updateExt）；id 不存在走 Get 的 KeyNotFoundException → 全局映射 404。
+    /// </summary>
+    public Sample UpdateExt(string tenantId, string id, UpdateSampleExtRequest body)
+    {
+        var s = Get(tenantId, id);
+        s.Ext = new Dictionary<string, string>(body.Ext);
+        s.UpdatedAt = Now();
+        store.SaveSample(s);
+        return s;
+    }
 }
 
 /// <summary>

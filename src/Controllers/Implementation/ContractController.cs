@@ -159,9 +159,9 @@ public sealed class SamplesController(SampleService service, ITenantContext tena
         return Task.CompletedTask;
     }
 
-    // === §1 lab-shared b114f34 新拆端点 — 待实现占位 ===
+    // === §1 lab-shared b114f34 新拆端点（5.54 live 补实现，镜像 springboot samplesUpdateSampleExt）===
     public override Task<Sample> UpdateSampleExt(string id, [FromBody] UpdateSampleExtRequest body) =>
-        throw new NotImplementedException("§1 b114f34: 待 SampleService.UpdateSampleExt 实现");
+        Task.FromResult(_service.UpdateExt(_tenantContext.TenantId, id, body));
 }
 
 /// <summary>M03.F03.I06-I11 检测记录 CRUD + 改判（B3，6 端点；verdict 是 PATCH）。</summary>
