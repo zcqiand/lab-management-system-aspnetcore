@@ -79,10 +79,11 @@ public sealed class ReportFlowService(IFlowStore store)
     public ICollection<FlowActionResult> ActFlowIssuance(string tenantId, FlowActionRequest body) =>
         ActForStage(tenantId, body, FlowStatus.Issuance, new[] { FlowAction.Submit, FlowAction.Return });
 
-    /// <summary>M03.F08.I05/I06/I07 archived 态 act — 仅 submit 写 history 当 audit，return/withdraw 拒绝。
+    /// <summary>M03.F08.I05/I06/I07 archived 态 act 端点 — 仅 submit 写 history 当 audit，return/withdraw 拒绝。
     /// 不走 TryTransition：archived 终态无 next/prev，由本方法直接 append FlowHistoryEntry。</summary>
     public ICollection<FlowActionResult> ActFlowArchived(string tenantId, FlowActionRequest body)
     {
+        RequireOperator(body);
         var results = new List<FlowActionResult>();
         foreach (var id in body.Ids)
         {
@@ -134,6 +135,7 @@ public sealed class ReportFlowService(IFlowStore store)
     private ICollection<FlowActionResult> ActForStage(
         string tenantId, FlowActionRequest body, FlowStatus requiredStage, IReadOnlyCollection<FlowAction> allowed)
     {
+        RequireOperator(body);
         var results = new List<FlowActionResult>();
         foreach (var id in body.Ids)
         {
@@ -228,5 +230,19 @@ public sealed class ReportFlowService(IFlowStore store)
     {
         var name = e.ToString();
         return name.Length == 0 ? "" : char.ToLowerInvariant(name[0]) + name[1..];
+    }
+
+    /// <summary>
+    /// 5.75 operator 契约必填边缘对齐（SSOT = lab-nextjs act-route.ts:39-46）：缺失与空串都 400。
+    /// service 层抛 ArgumentException → Program.cs UseExceptionHandler 映射 400（envelope
+    /// {error:"operator is required"}）；null 在 controller 层已被 MVC [BindRequired] 400 拦截，
+    /// 此处是 service 层防御 + 空串主拦。校验先于 per-id 循环（整批拒，与 nextjs act-route 顺序一致）。
+    /// </summary>
+    private static void RequireOperator(FlowActionRequest body)
+    {
+        if (string.IsNullOrEmpty(body.Operator))
+        {
+            throw new ArgumentException("operator is required");
+        }
     }
 }

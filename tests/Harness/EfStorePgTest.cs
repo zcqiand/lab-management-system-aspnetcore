@@ -147,4 +147,66 @@ public sealed class EfStorePgTest : IDisposable
         Assert.Single(all);
         Assert.Equal("v2", all[0].Name);
     }
+
+    // 5.75 现场回归：act 写路径 = FindReceipt（tracked 实例）原地 FlowHistory.Add + SaveReceipt。
+    // EF 默认 ValueComparer 对 List 属性做引用快照 → 同实例 mutate 侦测不到 → jsonb 不落库
+    // （症状：act 200 + lastSubmittedBy 已写，但 GET history 恒 []）。真库才能测出。
+    [Fact]
+    public void SaveReceipt_persistsInPlaceFlowHistoryMutation()
+    {
+        var store = new EfFlowStore(db);
+        var categoryCode = db.InspectionReportNames.OrderBy(x => x.Code).Select(x => x.Code).First();
+        db.Contracts.Add(new Contract
+        {
+            Id = "C-FH",
+            TenantId = Tenant,
+            ContractCode = "HT-FH",
+            ClientUnit = "cu",
+            ProjectName = "pn",
+            ConstructionUnit = "csu",
+            WitnessUnit = "wu",
+            Witness = "w",
+            Status = ContractStatus.Active,
+            CreatedAt = "t",
+            UpdatedAt = "t",
+        });
+        db.SaveChanges();
+
+        store.SaveReceipt(new SampleReceipt
+        {
+            Id = "R-FH",
+            TenantId = Tenant,
+            ContractId = "C-FH",
+            CommissionCode = "CM-FH",
+            CommissionDate = "2026-09-21",
+            CategoryCode = categoryCode,
+            ReceivedBy = "alice",
+            SampleSource = "client",
+            TestCategory = "concrete",
+            FlowStatus = FlowStatus.Receiving,
+            FlowHistory = new List<FlowHistoryEntry>(),
+            CreatedAt = "t",
+            UpdatedAt = "t",
+        });
+
+        // act 写路径同款：FindReceipt 返回 tracked 实例，原地 mutate，再 SaveReceipt
+        var tracked = store.FindReceipt(Tenant, "R-FH");
+        Assert.NotNull(tracked);
+        tracked!.FlowHistory.Add(new FlowHistoryEntry
+        {
+            Action = FlowAction.Return,
+            From = FlowStatus.Task_assignment,
+            To = FlowStatus.Receiving,
+            Operator = "ct",
+            At = "t",
+            Reason = "",
+        });
+        store.SaveReceipt(tracked);
+
+        // 全新 context 重读（同 context 命中已跟踪实例，测不出持久化）
+        using var fresh = TestDb.CreateContext();
+        var reread = fresh.SampleReceipts.First(r => r.TenantId == Tenant && r.Id == "R-FH");
+        Assert.Single(reread.FlowHistory);
+        Assert.Equal(FlowAction.Return, reread.FlowHistory[0].Action);
+    }
 }

@@ -180,7 +180,7 @@
 |---|---|---|---|---|---|
 | M03.F08.I01 | 归档队列 | 接口 | 前端+后端 | GET /api/receipts/flow/queue?stage=archived | 已上线 |
 | M03.F08.I02 | 归档查看 | 接口 | 前端+后端 | GET /api/receipts/{id} archived 视角 | 已上线 |
-| M03.F08.I03 | 归档退回 | 接口 | 前端+后端 | POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移。说明陈旧：/flow 端点已删，现行 = POST /api/receipts/archived/act 仅收 SUBMIT 自转移 audit | 已上线 |
+| M03.F08.I03 | 归档退回 | 接口 | 前端+后端 | POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移。2026-09-17 /flow 端点删除后本行无实现载体（src grep 零命中，见 deprecated-items.md §1）；2026-09-21 随 SB 5.76 同标 已废弃（端点锚定收敛至 M03.F08.I05：POST /api/receipts/archived/act 仅收 SUBMIT 自转移 audit） | 已废弃 |
 | M03.F08.I05 | 报告归档-提交 | 接口 | 前端+后端 | POST /api/receipts/archived/act，body.action={SUBMIT、RETURN、WITHDRAW} 三动作统一（2026-09-20 补登记，对齐 nextjs/springboot 树；audit 自转移按 submit 语义刷新 last_submitted_by，5.69） | 已上线 |
 
 ### M03.F09 接样单详情

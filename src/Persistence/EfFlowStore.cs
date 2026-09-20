@@ -50,8 +50,29 @@ public sealed class EfFlowStore(LabDbContext db) : IFlowStore
     public SampleReceipt? FindReceiptAnyTenant(string id) =>
         db.SampleReceipts.FirstOrDefault(r => r.Id == id);
 
-    public void SaveReceipt(SampleReceipt r) =>
-        EfStoreOps.Upsert(db, db.SampleReceipts, r, x => x.Id == r.Id);
+    /// <summary>receipt 落库。不走通用 Upsert：act 写路径 = FindReceipt（tracked 实例）原地
+    /// FlowHistory.Add 后回存，而 EF 默认 ValueComparer 对 List 属性做引用快照 —— 同实例
+    /// mutate 后 SetValues(自身) 检测不到变更，jsonb 列静默不落库（5.75 现场：act 200 但
+    /// GET history 恒 []）。显式为 jsonb List 换新实例触发 modified；标量（lastSubmittedBy
+    /// 等）仍走 SetValues 语义。</summary>
+    public void SaveReceipt(SampleReceipt r)
+    {
+        var existing = db.SampleReceipts.FirstOrDefault(x => x.TenantId == r.TenantId && x.Id == r.Id);
+        if (existing is null)
+        {
+            db.SampleReceipts.Add(r);
+        }
+        else
+        {
+            db.Entry(existing).CurrentValues.SetValues(r);
+            existing.FlowHistory = r.FlowHistory.ToList();
+            existing.JudgmentBasis = r.JudgmentBasis?.ToList() ?? new List<string>();
+            existing.TestingBasis = r.TestingBasis?.ToList() ?? new List<string>();
+            existing.TestParameters = r.TestParameters?.ToList() ?? new List<string>();
+        }
+
+        db.SaveChanges();
+    }
 
     public bool DeleteReceipt(string tenantId, string id, out int cascadedSamples)
     {

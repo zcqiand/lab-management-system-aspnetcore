@@ -37,8 +37,13 @@ public static class TestDb
     /// <summary>建 DbContext（EF 只镜像不 Migrate；表结构 = shared src/db/schema.ts 的 migrate 产物，ADR-0025/0033）。</summary>
     public static LabDbContext CreateContext()
     {
+        // 5.75 起 jsonb List 写路径（flow_history 等）进真库断言，测试 context 必须与 prod
+        // 同源：prod 走 NpgsqlDataSourceBuilder.EnableDynamicJson（Program.cs），此处同款挂上。
+        // 缺它 = 写 List<FlowHistoryEntry> 直接 NotSupportedException（dynamic JSON 未 opt-in）。
+        var dataSource = new Npgsql.NpgsqlDataSourceBuilder(ConnectionString).EnableDynamicJson().Build();
         var options = new DbContextOptionsBuilder<LabDbContext>()
-            .UseLabNpgsql(ConnectionString)
+            .UseNpgsql(dataSource)
+            .UseSnakeCaseNamingConvention()
             .Options;
 
         return new LabDbContext(options);

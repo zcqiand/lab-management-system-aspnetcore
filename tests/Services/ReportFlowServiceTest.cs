@@ -97,6 +97,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Return,
+            Operator = "ct",
         }).ToList();
 
         Assert.True(results[0].Ok);
@@ -115,6 +116,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-GHOST", "R-1" },
             Action = FlowAction.Submit,
+            Operator = "ct",
         }).ToList();
 
         Assert.False(results[0].Ok); // not found
@@ -146,6 +148,7 @@ public class ReportFlowServiceTest
             {
                 Ids = new List<string> { "R-1" },
                 Action = FlowAction.Submit,
+                Operator = "ct",
             }).ToList();
             Assert.True(results[0].Ok);
             Assert.Equal(expected, results[0].FlowStatus);
@@ -156,6 +159,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
+            Operator = "ct",
         }).ToList();
         Assert.True(audit[0].Ok);
         Assert.Equal(FlowStatus.Archived, audit[0].FlowStatus);
@@ -165,6 +169,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Return,
+            Operator = "ct",
         }).ToList();
         Assert.False(returned[0].Ok);
         Assert.Contains("Action not allowed", returned[0].Message);
@@ -180,6 +185,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Withdraw,
+            Operator = "ct",
         }).ToList();
         Assert.True(inReceiving[0].Ok);
         Assert.Equal(FlowStatus.Receiving, inReceiving[0].FlowStatus); // 自转移
@@ -188,6 +194,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-2" },
             Action = FlowAction.Withdraw,
+            Operator = "ct",
         }).ToList();
         Assert.False(inReview[0].Ok); // 非 receiving 不允许撤回
     }
@@ -209,6 +216,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
+            Operator = "ct",
         }).ToList();
         Assert.True(submits[0].Ok);
         Assert.Equal(FlowStatus.Approval, submits[0].FlowStatus);
@@ -217,6 +225,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-2" },
             Action = FlowAction.Return,
+            Operator = "ct",
         }).ToList();
         Assert.True(returns[0].Ok);
         Assert.Equal(FlowStatus.Data_entry, returns[0].FlowStatus);
@@ -237,6 +246,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Withdraw,
+            Operator = "ct",
         }).ToList();
 
         Assert.False(results[0].Ok);
@@ -259,6 +269,7 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
+            Operator = "ct",
         }).ToList();
         Assert.True(submitOk[0].Ok);
         Assert.Equal(FlowStatus.Archived, submitOk[0].FlowStatus); // 自转移
@@ -376,11 +387,60 @@ public class ReportFlowServiceTest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
+            Operator = "ct",
         }).ToList();
 
         Assert.False(results[0].Ok);
         Assert.Contains("Stage mismatch", results[0].Message);
         Assert.Equal(FlowStatus.Review, store.FindReceipt(Tenant, "R-1")!.FlowStatus);
         Assert.Empty(store.FindReceipt(Tenant, "R-1")!.FlowHistory);
+    }
+
+    // === 5.75 operator 契约必填边缘（SSOT = lab-nextjs act-route.ts:39-46）===
+    // 缺失/空串都 400 —— service 层抛 ArgumentException("operator is required")
+    //（Program.cs UseExceptionHandler: ArgumentException → 400）；missing 形态在
+    // controller 层已被 MVC [BindRequired] 400 拦截，此处是 service 层防御 + 空串主拦。
+    [Fact]
+    [Trait("Fn", "M03.F01.I08")]
+    public void ActFlowReceiving_blankOperator_throws()
+    {
+        var (_, flow) = Setup(("R-1", FlowStatus.Receiving));
+
+        var ex = Assert.Throws<ArgumentException>(() => flow.ActFlowReceiving(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "",
+        }));
+        Assert.Contains("operator is required", ex.Message);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I08")]
+    public void ActFlow_missingOperator_throws()
+    {
+        var (_, flow) = Setup(("R-1", FlowStatus.Receiving));
+
+        var ex = Assert.Throws<ArgumentException>(() => flow.ActFlowReceiving(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+        }));
+        Assert.Contains("operator is required", ex.Message);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F08.I05")]
+    public void ActFlowArchived_blankOperator_throws()
+    {
+        var (_, flow) = Setup(("R-1", FlowStatus.Archived));
+
+        var ex = Assert.Throws<ArgumentException>(() => flow.ActFlowArchived(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "",
+        }));
+        Assert.Contains("operator is required", ex.Message);
     }
 }
