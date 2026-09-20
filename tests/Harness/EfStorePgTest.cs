@@ -74,7 +74,10 @@ public sealed class EfStorePgTest : IDisposable
                 SourceProjectNo = "SRC-PG-T",
                 SourceProjectName = "PG 测试项目",
                 Name = "PG 测试对象",
-                SortOrder = 0,
+                // 5.74：父行常驻 lab_test（Cleanup 有意不清），SortOrder 必须压尾——
+                // 曾用 0 抢占 lab-react CategoryDictList 默认选中位（客户端按
+                // sortOrder 升序取 [0]），令 categoryDictPages M04.F06.I01 确定性红。
+                SortOrder = 9_999,
                 CreatedAt = "2026-01-01T00:00:00Z",
                 UpdatedAt = "2026-01-01T00:00:00Z",
             });
