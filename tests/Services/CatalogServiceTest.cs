@@ -109,6 +109,19 @@ public class CatalogServiceTest
 
     [Fact]
     [Trait("Fn", "M04.F06.I03")]
+    public void UpdateModel_explicitZeroSortOrderLands()
+    {
+        var store = new InMemoryCatalogStore();
+        store.SaveModel(Model("M-1", "型号", sortOrder: 5));
+        var service = new CatalogService(store);
+
+        var m = service.UpdateModel(Tenant, "M-1", new UpdateCatalogEntryRequest { SortOrder = 0 });
+
+        Assert.Equal(0, m.SortOrder); // 显式 0 生效（对齐 springboot 纯 null PATCH 语义）
+    }
+
+    [Fact]
+    [Trait("Fn", "M04.F06.I03")]
     public void UpdateModel_missing_throws404()
     {
         var service = new CatalogService(new InMemoryCatalogStore());

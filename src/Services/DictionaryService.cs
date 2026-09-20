@@ -42,7 +42,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         var s = GetSpecialty(code);
         if (body.OfficialNo is not null) s.OfficialNo = body.OfficialNo;
         if (body.Name is not null) s.Name = body.Name;
-        if (body.SortOrder is not null and not 0) s.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) s.SortOrder = body.SortOrder.Value;
         s.UpdatedAt = Now();
         store.SaveSpecialty(s);
         return s;
@@ -95,7 +95,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         if (body.Aliases is not null) p.Aliases = body.Aliases.ToList(); // 整体替换
         if (body.Unit is not null) p.Unit = body.Unit;
         if (body.SourceType is not null) p.SourceType = body.SourceType.Value;
-        if (body.SortOrder is not null and not 0) p.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) p.SortOrder = body.SortOrder.Value;
         p.UpdatedAt = Now();
         store.SaveParameter(p);
         return p;
@@ -144,7 +144,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         if (body.Status is not null) s.Status = body.Status.Value;
         if (body.SourceDocumentId is not null) s.SourceDocumentId = body.SourceDocumentId;
         if (body.SourceHash is not null) s.SourceHash = body.SourceHash;
-        if (body.SortOrder is not null and not 0) s.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) s.SortOrder = body.SortOrder.Value;
         s.UpdatedAt = Now();
         store.SaveStandard(s);
         return s;
@@ -194,7 +194,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         if (body.SummaryName is not null) r.SummaryName = body.SummaryName;
         if (body.ExtFields is not null) r.ExtFields = body.ExtFields.ToList();
         if (body.Description is not null) r.Description = body.Description;
-        if (body.SortOrder is not null and not 0) r.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) r.SortOrder = body.SortOrder.Value;
         r.UpdatedAt = Now();
         store.SaveReportName(r);
         return r;
@@ -243,7 +243,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         if (body.ComponentPath is not null) i.ComponentPath = body.ComponentPath;
         if (body.Description is not null) i.Description = body.Description;
         if (body.Config is not null) i.Config = new Dictionary<string, object>(body.Config);
-        if (body.SortOrder is not null and not 0) i.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) i.SortOrder = body.SortOrder.Value;
         i.UpdatedAt = Now();
         store.SaveInterface(i);
         return i;
@@ -298,7 +298,7 @@ public sealed class DictionaryService(IDictionaryStore store)
         if (body.SourceProjectNo is not null) o.SourceProjectNo = body.SourceProjectNo;
         if (body.SourceProjectName is not null) o.SourceProjectName = body.SourceProjectName;
         if (body.Name is not null) o.Name = body.Name;
-        if (body.SortOrder is not null and not 0) o.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) o.SortOrder = body.SortOrder.Value;
         o.UpdatedAt = Now();
         store.SaveObject(o);
         return o;

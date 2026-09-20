@@ -60,6 +60,18 @@ public class DictionaryServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F01.I04")]
+    public void UpdateSpecialty_explicitZeroSortOrderLands()
+    {
+        var svc = Svc();
+        svc.CreateSpecialty(new CreateInspectionSpecialtyRequest { Code = "SP-1", OfficialNo = "1", Name = "专项一", SortOrder = 5 });
+
+        var s = svc.UpdateSpecialty("SP-1", new UpdateInspectionSpecialtyRequest { SortOrder = 0 });
+
+        Assert.Equal(0, s.SortOrder); // 显式 0 生效（对齐 springboot 纯 null PATCH 语义）
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F01.I04")]
     public void DeleteSpecialty_missing404() =>
         Assert.Throws<KeyNotFoundException>(() => Svc().DeleteSpecialty("GHOST"));
 

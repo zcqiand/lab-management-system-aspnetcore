@@ -84,6 +84,32 @@ public class MethodAndRequirementServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F05.I04")]
+    public void UpdateRule_explicitZeroSpecimenCountLands()
+    {
+        var store = new InMemoryMethodStore();
+        store.Save(Rule("OBJ-A", "P-1"));
+        var service = new CalculationMethodService(store);
+
+        var r = service.Update("OBJ-A", "P-1", new UpdateCalculationMethodRequest { SpecimenCount = 0 });
+
+        Assert.Equal(0, r.SpecimenCount); // 显式 0 生效（对齐 springboot 纯 null PATCH 语义）
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F05.I04")]
+    public void UpdateRule_explicitZeroSortOrderLands()
+    {
+        var store = new InMemoryMethodStore();
+        store.Save(Rule("OBJ-A", "P-1", sortOrder: 5));
+        var service = new CalculationMethodService(store);
+
+        var r = service.Update("OBJ-A", "P-1", new UpdateCalculationMethodRequest { SortOrder = 0 });
+
+        Assert.Equal(0, r.SortOrder); // 显式 0 生效（对齐 springboot 纯 null PATCH 语义）
+    }
+
+    [Fact]
+    [Trait("Fn", "M06.F05.I04")]
     public void UpdateRule_missing404()
     {
         var service = new CalculationMethodService(new InMemoryMethodStore());

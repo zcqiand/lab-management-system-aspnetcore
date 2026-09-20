@@ -46,12 +46,12 @@ public sealed class CalculationMethodService(IMethodStore store)
         if (body.TestingStandardCode is not null) r.TestingStandardCode = body.TestingStandardCode;
         if (body.ReportNameCode is not null) r.ReportNameCode = body.ReportNameCode;
         if (body.AlgorithmType is not null) r.AlgorithmType = body.AlgorithmType.Value;
-        if (body.SpecimenCount is not null and not 0) r.SpecimenCount = body.SpecimenCount.Value;
+        if (body.SpecimenCount is not null) r.SpecimenCount = body.SpecimenCount.Value;
         if (body.Formula is not null) r.Formula = body.Formula;
         if (body.Conditions is not null) r.Conditions = body.Conditions;
         if (body.RoundingRule is not null) r.RoundingRule = body.RoundingRule;
         if (body.Remark is not null) r.Remark = body.Remark;
-        if (body.SortOrder is not null and not 0) r.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) r.SortOrder = body.SortOrder.Value;
         r.UpdatedAt = Now();
         store.Save(r);
         return r;
@@ -141,7 +141,7 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
         if (body.Spec is not null) t.Spec = body.Spec;
         if (body.Sieve is not null) t.Sieve = body.Sieve;
         if (body.Remark is not null) t.Remark = body.Remark;
-        if (body.SortOrder is not null and not 0) t.SortOrder = body.SortOrder.Value;
+        if (body.SortOrder is not null) t.SortOrder = body.SortOrder.Value;
         t.UpdatedAt = Now();
         store.Save(t);
         return t;
