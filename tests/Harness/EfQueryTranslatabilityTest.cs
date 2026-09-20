@@ -38,6 +38,11 @@ public class EfQueryTranslatabilityTest
 
         _ = Sql(EfFlowStore.BuildFilterContractsQuery(db, "TENANT-X", "kw", null));
         _ = Sql(EfFlowStore.BuildFilterReceiptsQuery(db, "TENANT-X", "CTR-1", null, "kw"));
+        // 5.57 三态 filter：native SQL 子查询 + 可翻译层组合（4 象限全覆盖）
+        _ = Sql(EfFlowStore.BuildFilterReceiptsQuery(db, "TENANT-X", null, null, null, "not_yet"));
+        _ = Sql(EfFlowStore.BuildFilterReceiptsQuery(db, "TENANT-X", null, FlowStatus.Receiving, null, "not_yet"));
+        _ = Sql(EfFlowStore.BuildFilterReceiptsQuery(db, "TENANT-X", null, null, null, "submitted"));
+        _ = Sql(EfFlowStore.BuildFilterReceiptsQuery(db, "TENANT-X", null, FlowStatus.Receiving, null, "submitted"));
         _ = Sql(EfFlowStore.BuildSummaryQuery(db, "TENANT-X", "ALL", "", ""));
         _ = Sql(EfFlowStore.BuildFlowQueueQuery(db, "TENANT-X", FlowStatus.Receiving, 50));
         _ = Sql(EfFlowStore.BuildFilterSamplesQuery(db, "TENANT-X", "RCP-1", "kw"));

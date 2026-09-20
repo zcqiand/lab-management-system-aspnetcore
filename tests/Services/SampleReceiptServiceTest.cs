@@ -143,6 +143,63 @@ public class SampleReceiptServiceTest
         Assert.Equal(FlowStatus.Task_assignment, history[0].To);
     }
 
+    // === 5.57 三态 filter（语义 SSOT = lab-nextjs db-queries.ts:53-58；镜像 springboot d100f99 ServiceTest 锚） ===
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I01")]
+    public void List_filterThreeState_notYetAndSubmitted()
+    {
+        var store = StoreWithContract();
+        var service = new SampleReceiptService(store);
+        var fresh = service.Create(Tenant, Req("WT-001")); // 新单：receiving + flow_history=[]
+        var moved = service.Create(Tenant, Req("WT-002"));
+        service.AssignTask(Tenant, moved.Id, new AssignTaskRequest { AssigneeId = "U-1", AssigneeName = "李四" });
+        // moved 已从 receiving submit 至 task_assignment（history 有 submit-from-receiving），
+        // 再补 lastSubmittedBy 模拟 submit 链路的完整落库（aspnetcore 写路径暂不写该列，见报告 concerns）
+        store.FindReceipt(Tenant, moved.Id)!.LastSubmittedBy = "李四";
+        store.SaveReceipt(store.FindReceipt(Tenant, moved.Id)!);
+        // history>0 但 lastSubmittedBy 为 null 的对照行（无 flowStatus 的 submitted 不得命中）
+        var noSubmitter = service.Create(Tenant, Req("WT-003"));
+        service.AssignTask(Tenant, noSubmitter.Id, new AssignTaskRequest { AssigneeId = "U-2", AssigneeName = "王五" });
+
+        // not_yet 无 flowStatus = 无流转记录的新单
+        var notYetAll = service.List(Tenant, null, null, null, "not_yet");
+        var notYetReceiving = service.List(Tenant, null, FlowStatus.Receiving, null, "not_yet");
+        // submitted 无 flowStatus = 有流转记录且 lastSubmittedBy 非空
+        var submittedAll = service.List(Tenant, null, null, null, "submitted");
+        // submitted 带 flowStatus = 已从本环节 submit 至下一环节（当前不在本环节）
+        var submittedReceiving = service.List(Tenant, null, FlowStatus.Receiving, null, "submitted");
+
+        Assert.Single(notYetAll);
+        Assert.Equal(fresh.Id, notYetAll[0].Id);
+        Assert.Single(notYetReceiving);
+        Assert.Equal(fresh.Id, notYetReceiving[0].Id);
+        Assert.Single(submittedAll);
+        Assert.Equal(moved.Id, submittedAll[0].Id); // noSubmitter 行 lastSubmittedBy=null 被排除
+        // 带 flowStatus 的 submitted 只看「不在本环节 + history 有 submit-from」，
+        // 不看 lastSubmittedBy —— noSubmitter 行同样命中
+        Assert.Equal(2, submittedReceiving.Count);
+        Assert.Contains(submittedReceiving, r => r.Id == moved.Id);
+        Assert.Contains(submittedReceiving, r => r.Id == noSubmitter.Id);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I01")]
+    public void List_unknownFilterEqualsAbsent()
+    {
+        // TSP 注记：filter 其余值不参与过滤（等同不传）——flowStatus 精确过滤照旧生效
+        var store = StoreWithContract();
+        var service = new SampleReceiptService(store);
+        var fresh = service.Create(Tenant, Req("WT-001"));
+        var moved = service.Create(Tenant, Req("WT-002"));
+        service.AssignTask(Tenant, moved.Id, new AssignTaskRequest { AssigneeId = "U-1", AssigneeName = "李四" });
+
+        var bogus = service.List(Tenant, null, FlowStatus.Receiving, null, "bogus");
+
+        Assert.Single(bogus);
+        Assert.Equal(fresh.Id, bogus[0].Id);
+    }
+
     // === M03.F02 任务分配 ===
 
     [Fact]

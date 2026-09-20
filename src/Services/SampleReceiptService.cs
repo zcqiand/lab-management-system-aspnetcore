@@ -13,8 +13,13 @@ public sealed class SampleReceiptService(IFlowStore store)
 {
     private static string Now() => DateTimeOffset.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss'Z'");
 
-    public IReadOnlyList<SampleReceipt> List(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword) =>
-        store.FilterReceipts(tenantId, contractId, flowStatus, keyword);
+    /// <summary>
+    /// 列表 + 三态 filter（5.57 入契约，语义 SSOT = lab-nextjs db-queries.ts:53-58）。filter 仅认
+    /// "not_yet"/"submitted"，其它值（含 null）等同不传 —— flowStatus 精确过滤照旧生效。
+    /// </summary>
+    public IReadOnlyList<SampleReceipt> List(
+        string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword, string? filter = null) =>
+        store.FilterReceipts(tenantId, contractId, flowStatus, keyword, filter);
 
     public SampleReceipt Get(string tenantId, string id) =>
         store.FindReceipt(tenantId, id) ?? throw new KeyNotFoundException($"receipt {id} not found");

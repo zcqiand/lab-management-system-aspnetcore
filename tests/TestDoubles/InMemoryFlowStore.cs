@@ -42,16 +42,41 @@ public sealed class InMemoryFlowStore : IFlowStore
 
     // === 接样 M03.F01（含 B4 summary 查询） ===
 
-    public IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword) =>
-        _receipts.Values
-            .Where(r => r.TenantId == tenantId)
+    /// <summary>
+    /// 列表 + 三态 filter（5.57 入契约，语义 SSOT = lab-nextjs db-queries.ts:53-58）：
+    ///   not_yet   = 停在 flowStatus 环节待提交（无 flowStatus 时 = 无流转记录的新单）
+    ///   submitted = 已从本环节 submit 至下一环节（无 flowStatus 时 = 有流转记录且记录了提交人）
+    ///   其余值（含 null）不参与过滤——flowStatus 精确过滤照旧生效。
+    /// </summary>
+    public IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword, string? filter = null)
+    {
+        IEnumerable<SampleReceipt> q = _receipts.Values.Where(r => r.TenantId == tenantId);
+        if (filter == "not_yet")
+        {
+            q = flowStatus is null
+                ? q.Where(r => r.FlowHistory.Count == 0)
+                : q.Where(r => r.FlowStatus == flowStatus);
+        }
+        else if (filter == "submitted")
+        {
+            q = flowStatus is null
+                ? q.Where(r => r.FlowHistory.Count > 0 && r.LastSubmittedBy != null)
+                : q.Where(r => r.FlowStatus != flowStatus
+                    && r.FlowHistory.Any(h => h.Action == FlowAction.Submit && h.From == flowStatus));
+        }
+        else if (flowStatus is not null)
+        {
+            q = q.Where(r => r.FlowStatus == flowStatus);
+        }
+
+        return q
             .Where(r => N(contractId) == "" || r.ContractId == N(contractId))
-            .Where(r => flowStatus is null || r.FlowStatus == flowStatus)
             .Where(r => string.IsNullOrEmpty(keyword)
                 || (r.CommissionCode ?? "").Contains(keyword, StringComparison.OrdinalIgnoreCase)
                 || (r.ProjectName ?? "").Contains(keyword, StringComparison.OrdinalIgnoreCase))
             .OrderBy(r => r.CreatedAt)
             .ToList();
+    }
 
     /// <summary>B4 summary：tenant（空串=全租户）+ categoryCode（ALL=不过滤）+ commissionDate 闭区间，commissionDate DESC, code。</summary>
     public IReadOnlyList<SampleReceipt> Summary(string tenantId, string categoryCode, string dateFrom, string dateTo) =>

@@ -33,7 +33,7 @@ namespace Lab.AspNetCore.Controllers.Generated
     {
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/receipts")]
-        public abstract System.Threading.Tasks.Task<Response16> ListReceipts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword, [Microsoft.AspNetCore.Mvc.FromQuery] string? contractId, [Microsoft.AspNetCore.Mvc.FromQuery] FlowStatus? flowStatus);
+        public abstract System.Threading.Tasks.Task<Response16> ListReceipts([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword, [Microsoft.AspNetCore.Mvc.FromQuery] string? contractId, [Microsoft.AspNetCore.Mvc.FromQuery] FlowStatus? flowStatus, [Microsoft.AspNetCore.Mvc.FromQuery] string? filter);
 
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/receipts")]

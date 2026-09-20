@@ -1,5 +1,6 @@
 namespace Lab.AspNetCore.Persistence;
 
+using System.Reflection;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 using Microsoft.EntityFrameworkCore;
@@ -34,8 +35,8 @@ public sealed class EfFlowStore(LabDbContext db) : IFlowStore
 
     // === 接样 M03.F01（含 B4 summary） ===
 
-    public IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword) =>
-        BuildFilterReceiptsQuery(db, tenantId, contractId, flowStatus, keyword).ToList();
+    public IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword, string? filter = null) =>
+        BuildFilterReceiptsQuery(db, tenantId, contractId, flowStatus, keyword, filter).ToList();
 
     public IReadOnlyList<SampleReceipt> Summary(string tenantId, string categoryCode, string dateFrom, string dateTo) =>
         BuildSummaryQuery(db, tenantId, categoryCode, dateFrom, dateTo).ToList();
@@ -114,13 +115,47 @@ public sealed class EfFlowStore(LabDbContext db) : IFlowStore
             .OrderBy(c => c.CreatedAt);
 
     internal static IQueryable<SampleReceipt> BuildFilterReceiptsQuery(
-        LabDbContext db, string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword) =>
-        db.SampleReceipts
+        LabDbContext db, string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword, string? filter = null)
+    {
+        // 三态 filter（5.57 入契约，语义 SSOT = lab-nextjs db-queries.ts:53-58）：jsonb 谓词
+        // （jsonb_array_length / jsonb_array_elements）EF 表达式树不可翻译——与 springboot
+        // d100f99 同款走 native SQL 子查询，其余条件在可翻译层照旧组合。其余 filter 值
+        // 等同不传（flowStatus 精确过滤照旧生效）。
+        IQueryable<SampleReceipt> core = filter switch
+        {
+            "not_yet" when flowStatus is null =>
+                db.SampleReceipts.FromSqlRaw("SELECT * FROM sample_receipts WHERE jsonb_array_length(flow_history) = 0"),
+            "not_yet" =>
+                db.SampleReceipts.FromSqlInterpolated(
+                    $"SELECT * FROM sample_receipts WHERE flow_status = {Wire(flowStatus.Value)}"),
+            "submitted" when flowStatus is null =>
+                db.SampleReceipts.FromSqlRaw("SELECT * FROM sample_receipts WHERE jsonb_array_length(flow_history) > 0 AND last_submitted_by IS NOT NULL"),
+            "submitted" =>
+                db.SampleReceipts.FromSqlInterpolated(
+                    $"""
+                    SELECT * FROM sample_receipts WHERE flow_status <> {Wire(flowStatus.Value)}
+                      AND EXISTS (SELECT 1 FROM jsonb_array_elements(flow_history) h
+                        WHERE h ->> 'action' = 'submit' AND h ->> 'from' = {Wire(flowStatus.Value)})
+                    """),
+            _ => db.SampleReceipts,
+        };
+
+        return core
             .Where(r => r.TenantId == tenantId)
             .Where(r => contractId == null || contractId == "" || r.ContractId == contractId)
-            .Where(r => flowStatus == null || r.FlowStatus == flowStatus)
+            .Where(r => filter == "not_yet" || filter == "submitted" || flowStatus == null || r.FlowStatus == flowStatus)
             .WhereKw(r => r.CommissionCode, r => r.ProjectName, keyword)
             .OrderBy(r => r.CreatedAt);
+    }
+
+    /// <summary>FlowStatus → 契约 wire 值（[EnumMember]；raw SQL 与 TEXT 化 flow_status 列直比，镜像 LabDbContext wire 转换器）。</summary>
+    private static string Wire(FlowStatus s)
+    {
+        var field = typeof(FlowStatus)
+            .GetFields(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)
+            .First(f => f.GetValue(null)!.Equals(s));
+        return field.GetCustomAttribute<System.Runtime.Serialization.EnumMemberAttribute>()?.Value ?? field.Name;
+    }
 
     internal static IQueryable<SampleReceipt> BuildSummaryQuery(
         LabDbContext db, string tenantId, string categoryCode, string dateFrom, string dateTo) =>

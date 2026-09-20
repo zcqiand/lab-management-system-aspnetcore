@@ -60,7 +60,7 @@ public interface IFlowStore
     bool DeleteContract(string tenantId, string id);
 
     // 接样 M03.F01（含 B4 summary）
-    IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword);
+    IReadOnlyList<SampleReceipt> FilterReceipts(string tenantId, string? contractId, FlowStatus? flowStatus, string? keyword, string? filter = null);
     IReadOnlyList<SampleReceipt> Summary(string tenantId, string categoryCode, string dateFrom, string dateTo);
     IReadOnlyList<SampleReceipt> FlowQueue(string tenantId, FlowStatus stage, int pageSize);
     SampleReceipt? FindReceipt(string tenantId, string id);

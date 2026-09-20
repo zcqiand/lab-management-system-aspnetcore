@@ -66,9 +66,9 @@ public sealed class ReceiptsController(
 
     public override Task<Response16> ListReceipts(
         [FromQuery] int? page, [FromQuery] int? pageSize, [FromQuery] string? keyword,
-        [FromQuery] string? contractId, [FromQuery] FlowStatus? flowStatus)
+        [FromQuery] string? contractId, [FromQuery] FlowStatus? flowStatus, [FromQuery] string? filter)
     {
-        var items = _service.List(_tenantContext.TenantId, contractId, flowStatus, keyword).ToList();
+        var items = _service.List(_tenantContext.TenantId, contractId, flowStatus, keyword, filter).ToList();
         return Task.FromResult(new Response16
         {
             Items = items,
