@@ -7,7 +7,7 @@ using Xunit;
 
 /// <summary>
 /// B6 八组 junction fnTest。语义基准：lab-springboot InspectionJunctionServiceTest：
-/// link = upsert（重复不报错覆盖）；unlink miss → 404。
+/// link = upsert（重复不报错覆盖）；unlink 幂等 204（REQ-2026-001 推广，Task 2.6）。
 /// @Fn 模式：link 挂创建侧 I，unlink 挂删除侧 I；归属不同 F 时双标
 /// （report-name-standard link = M06.F07.I07 + M06.F04.I07 等）。
 /// </summary>
@@ -30,14 +30,15 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F02.I06")]
-    public void UnlinkSpecialtyObject_missing404()
+    public void UnlinkSpecialtyObject_idempotent204()
     {
-        Assert.Throws<KeyNotFoundException>(() =>
-            Svc().UnlinkSpecialtyObject(new SpecialtyObjectLink
-            {
-                InspectionSpecialtyCode = "SP-GHOST",
-                InspectionObjectCode = "OBJ-GHOST",
-            }));
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（契约 unlink = void，未命中不抛；
+        // 原 KeyNotFound→404 断言随 Unlink 语义变更同 commit 移除）
+        Svc().UnlinkSpecialtyObject(new SpecialtyObjectLink
+        {
+            InspectionSpecialtyCode = "SP-GHOST",
+            InspectionObjectCode = "OBJ-GHOST",
+        }); // 未命中静默
     }
 
     [Fact]
@@ -49,12 +50,11 @@ public class JunctionServiceTest
 
         svc.UnlinkSpecialtyObject(new SpecialtyObjectLink { InspectionSpecialtyCode = "SP-1", InspectionObjectCode = "OBJ-1" });
 
-        Assert.Throws<KeyNotFoundException>(() =>
-            svc.UnlinkSpecialtyObject(new SpecialtyObjectLink
-            {
-                InspectionSpecialtyCode = "SP-1",
-                InspectionObjectCode = "OBJ-1",
-            })); // 已删再删 404
+        svc.UnlinkSpecialtyObject(new SpecialtyObjectLink
+        {
+            InspectionSpecialtyCode = "SP-1",
+            InspectionObjectCode = "OBJ-1",
+        }); // 已删再删幂等 204
     }
 
     // === object-parameter（link F02.I07 / unlink F02.I08） ===
@@ -73,8 +73,11 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F02.I08")]
-    public void UnlinkObjectParameter_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() => Svc().UnlinkObjectParameter("OBJ-GHOST", "P-GHOST"));
+    public void UnlinkObjectParameter_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkObjectParameter("OBJ-GHOST", "P-GHOST"); // 未命中静默
+    }
 
     // === object-standard（role 必填 + 在 PK；link F01.I05 / unlink F01.I06） ===
 
@@ -101,17 +104,18 @@ public class JunctionServiceTest
 
         // 删 TESTING 不影响 JUDGMENT
         svc.UnlinkObjectStandard("OBJ-1", "STD-1", InspectionStandardRole.TESTING);
-        Assert.Throws<KeyNotFoundException>(() =>
-            svc.UnlinkObjectStandard("OBJ-1", "STD-1", InspectionStandardRole.TESTING)); // 已删
+        svc.UnlinkObjectStandard("OBJ-1", "STD-1", InspectionStandardRole.TESTING); // 已删再删幂等 204
         // JUDGMENT 仍在：删它成功
         svc.UnlinkObjectStandard("OBJ-1", "STD-1", InspectionStandardRole.JUDGMENT);
     }
 
     [Fact]
     [Trait("Fn", "M06.F01.I06")]
-    public void UnlinkObjectStandard_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() =>
-            Svc().UnlinkObjectStandard("OBJ-GHOST", "STD-GHOST", InspectionStandardRole.TESTING));
+    public void UnlinkObjectStandard_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkObjectStandard("OBJ-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+    }
 
     // === standard-parameter（link F03.I05 / unlink F03.I06） ===
 
@@ -128,13 +132,15 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F03.I06")]
-    public void UnlinkStandardParameter_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() =>
-            Svc().UnlinkStandardParameter(new StandardParameterLink
-            {
-                InspectionStandardCode = "GHOST",
-                InspectionParameterCode = "GHOST",
-            }));
+    public void UnlinkStandardParameter_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkStandardParameter(new StandardParameterLink
+        {
+            InspectionStandardCode = "GHOST",
+            InspectionParameterCode = "GHOST",
+        }); // 未命中静默
+    }
 
     // === report-name-object（link F07.I06 / unlink F04.I05） ===
 
@@ -151,8 +157,11 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F04.I05")]
-    public void UnlinkObjectReportName_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() => Svc().UnlinkObjectReportName("OBJ-GHOST", "RN-GHOST"));
+    public void UnlinkObjectReportName_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkObjectReportName("OBJ-GHOST", "RN-GHOST"); // 未命中静默
+    }
 
     // === report-name-standard（role 在 PK；link 双标 F07.I07+F04.I07 / unlink F04.I07） ===
 
@@ -180,9 +189,11 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F04.I07")]
-    public void UnlinkReportNameStandard_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() =>
-            Svc().UnlinkReportNameStandard("RN-GHOST", "STD-GHOST", InspectionStandardRole.TESTING));
+    public void UnlinkReportNameStandard_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkReportNameStandard("RN-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+    }
 
     // === report-name-parameter（link 双标 F07.I08+F03.I07 / unlink F04.I06） ===
 
@@ -200,8 +211,11 @@ public class JunctionServiceTest
 
     [Fact]
     [Trait("Fn", "M06.F04.I06")]
-    public void UnlinkReportNameParameter_missing404() =>
-        Assert.Throws<KeyNotFoundException>(() => Svc().UnlinkReportNameParameter("RN-GHOST", "P-GHOST"));
+    public void UnlinkReportNameParameter_idempotent204()
+    {
+        // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
+        Svc().UnlinkReportNameParameter("RN-GHOST", "P-GHOST"); // 未命中静默
+    }
 
     // === param-interface（link F08.I06 / unlink F03.I07） ===
 

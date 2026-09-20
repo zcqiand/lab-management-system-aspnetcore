@@ -18,10 +18,9 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkSpecialtyObject(SpecialtyObjectLink body)
     {
-        if (!store.DeleteSpecialtyObject(body.InspectionSpecialtyCode, body.InspectionObjectCode))
-        {
-            throw new KeyNotFoundException("specialty-object link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 四方一致：msw/nextjs/springboot 未命中也 204，
+        // 契约 unlink = void；KeyNotFound→404 是「资源不存在」语义，不适用于幂等 unlink）
+        store.DeleteSpecialtyObject(body.InspectionSpecialtyCode, body.InspectionObjectCode);
     }
 
     public IReadOnlyList<SpecialtyObjectLink> ListSpecialtyObjectLinks(string? inspectionSpecialtyCode) =>
@@ -37,10 +36,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkObjectParameter(string objectCode, string parameterCode)
     {
-        if (!store.DeleteObjectParameter(objectCode, parameterCode))
-        {
-            throw new KeyNotFoundException("object-parameter link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteObjectParameter(objectCode, parameterCode);
     }
 
     public IReadOnlyList<ObjectParameterLink> ListObjectParameterLinks(string? inspectionObjectCode, string? inspectionParameterCode) =>
@@ -58,10 +55,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkObjectStandard(string objectCode, string standardCode, InspectionStandardRole role)
     {
-        if (!store.DeleteObjectStandard(objectCode, standardCode, RoleKey(role)))
-        {
-            throw new KeyNotFoundException("object-standard link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteObjectStandard(objectCode, standardCode, RoleKey(role));
     }
 
     public IReadOnlyList<ObjectStandardLink> ListObjectStandardLinks(string? inspectionObjectCode, InspectionStandardRole? role) =>
@@ -73,10 +68,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkStandardParameter(StandardParameterLink body)
     {
-        if (!store.DeleteStandardParameter(body.InspectionStandardCode, body.InspectionParameterCode))
-        {
-            throw new KeyNotFoundException("standard-parameter link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteStandardParameter(body.InspectionStandardCode, body.InspectionParameterCode);
     }
 
     public IReadOnlyList<StandardParameterLink> ListStandardParameterLinks(string? inspectionStandardCode, string? inspectionParameterCode) =>
@@ -88,10 +81,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkObjectReportName(string objectCode, string reportNameCode)
     {
-        if (!store.DeleteObjectReportName(objectCode, reportNameCode))
-        {
-            throw new KeyNotFoundException("object-report-name link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteObjectReportName(objectCode, reportNameCode);
     }
 
     public IReadOnlyList<ObjectReportNameLink> ListObjectReportNameLinks(string? inspectionObjectCode, string? reportNameCode) =>
@@ -107,10 +98,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkReportNameStandard(string reportNameCode, string standardCode, InspectionStandardRole role)
     {
-        if (!store.DeleteReportNameStandard(reportNameCode, standardCode, RoleKey(role)))
-        {
-            throw new KeyNotFoundException("report-name-standard link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteReportNameStandard(reportNameCode, standardCode, RoleKey(role));
     }
 
     public IReadOnlyList<ReportNameStandardLink> ListReportNameStandardLinks(string? reportNameCode, InspectionStandardRole? role) =>
@@ -122,10 +111,8 @@ public sealed class JunctionService(IJunctionStore store)
 
     public void UnlinkReportNameParameter(string reportNameCode, string parameterCode)
     {
-        if (!store.DeleteReportNameParameter(reportNameCode, parameterCode))
-        {
-            throw new KeyNotFoundException("report-name-parameter link not found");
-        }
+        // 幂等 204（Task 2.6 推广 REQ-2026-001 语义，同 UnlinkSpecialtyObject 注）
+        store.DeleteReportNameParameter(reportNameCode, parameterCode);
     }
 
     public IReadOnlyList<ReportNameParameterLink> ListReportNameParameterLinks(string? reportNameCode, string? inspectionParameterCode) =>
