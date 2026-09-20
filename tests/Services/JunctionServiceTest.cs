@@ -1,8 +1,8 @@
 namespace Lab.AspNetCore.Tests.Services;
 
 using Lab.AspNetCore.Controllers.Generated;
-using Lab.AspNetCore.Data;
 using Lab.AspNetCore.Services;
+using Lab.AspNetCore.Tests.TestDoubles;
 using Xunit;
 
 /// <summary>

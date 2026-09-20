@@ -1,7 +1,8 @@
-namespace Lab.AspNetCore.Data;
+namespace Lab.AspNetCore.Tests.TestDoubles;
 
 using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
+using Lab.AspNetCore.Data;
 
 /// <summary>
 /// B3 流程域内存存储（合同/接样/样品/检测记录），B4 汇总也从这里取数。

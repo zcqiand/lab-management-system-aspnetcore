@@ -2,9 +2,9 @@ namespace Lab.AspNetCore.Data;
 
 using Lab.AspNetCore.Controllers.Generated;
 
-// EF Core 换装（lab_dev 共库）抽的仓储契约：签名 = InMemory*Store 公共面原样上提，
+// EF Core 换装（lab_dev 共库）抽的仓储契约：签名 = 内存测试替身 Store 公共面原样上提，
 // service/controller/fnTest 一行不动。两个实现：
-//   InMemory*Store -- 测试与默认 dev（无 DB，语义快照）
+//   tests/TestDoubles 内存 Store -- 测试专用（无 DB，语义快照）
 //   Persistence/Ef*Store -- EF Core + Npgsql，镜像 shared SQL（真实 FK/唯一约束生效）
 // 注意：BrandDeleted 事件 / OnBrandDeleted（V011 SET NULL 模拟）刻意不进接口 --
 // EF 模式下该语义由 DB 的 ON DELETE SET NULL 原生承担。

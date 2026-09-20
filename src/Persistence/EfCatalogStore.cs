@@ -4,7 +4,7 @@ using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 using Microsoft.EntityFrameworkCore;
 
-// EF Core 仓储实现（lab_dev 共库）。语义逐条镜像 InMemory*Store：
+// EF Core 仓储实现（lab_dev 共库）。语义逐条镜像 tests/TestDoubles 内存 Store：
 // 过滤/排序/tenant 收口相同；upsert = 先查后 Add/SetValues；删除返回是否命中。
 // 与内存版的刻意分叉（真实约束生效，镜像 springboot JPA）：
 // - junction link 前置 FK 校验（内存版无校验，DB 会 23503 硬炸 -> 这里转 ArgumentException=400）

@@ -1,7 +1,8 @@
-namespace Lab.AspNetCore.Data;
+namespace Lab.AspNetCore.Tests.TestDoubles;
 
 using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
+using Lab.AspNetCore.Data;
 
 /// <summary>
 /// B5 检测能力字典内存存储（专项/参数/标准/报告名称/参数界面，全平台级无 tenant）。

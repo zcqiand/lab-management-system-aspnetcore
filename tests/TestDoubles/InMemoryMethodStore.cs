@@ -1,7 +1,8 @@
-namespace Lab.AspNetCore.Data;
+namespace Lab.AspNetCore.Tests.TestDoubles;
 
 using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
+using Lab.AspNetCore.Data;
 
 /// <summary>
 /// M06.F05 计算方法内存存储。复合主键 = (inspectionObjectCode, inspectionParameterCode)，

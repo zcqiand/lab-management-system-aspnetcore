@@ -1,7 +1,8 @@
-namespace Lab.AspNetCore.Data;
+namespace Lab.AspNetCore.Tests.TestDoubles;
 
 using System.Collections.Concurrent;
 using Lab.AspNetCore.Controllers.Generated;
+using Lab.AspNetCore.Data;
 
 /// <summary>
 /// B2 内存存储。语义镜像 lab-springboot B2 的 JPA repository（filter JPQL）：
