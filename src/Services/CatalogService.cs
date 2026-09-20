@@ -28,7 +28,7 @@ public sealed class CatalogService(ICatalogStore store)
             InspectionObjectCode = body.InspectionObjectCode ?? "",
             Name = body.Name,
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -42,7 +42,7 @@ public sealed class CatalogService(ICatalogStore store)
         if (body.InspectionObjectCode is not null) m.InspectionObjectCode = body.InspectionObjectCode;
         if (body.Name is not null) m.Name = body.Name;
         if (body.Remark is not null) m.Remark = body.Remark;
-        m.SortOrder = body.SortOrder != 0 ? body.SortOrder : m.SortOrder;
+        m.SortOrder = body.SortOrder is not null and not 0 ? body.SortOrder.Value : m.SortOrder;
         m.UpdatedAt = Now();
         store.SaveModel(m);
         return m;
@@ -71,7 +71,7 @@ public sealed class CatalogService(ICatalogStore store)
             InspectionObjectCode = body.InspectionObjectCode ?? "",
             Name = body.Name,
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -85,7 +85,7 @@ public sealed class CatalogService(ICatalogStore store)
         if (body.InspectionObjectCode is not null) s.InspectionObjectCode = body.InspectionObjectCode;
         if (body.Name is not null) s.Name = body.Name;
         if (body.Remark is not null) s.Remark = body.Remark;
-        s.SortOrder = body.SortOrder != 0 ? body.SortOrder : s.SortOrder;
+        s.SortOrder = body.SortOrder is not null and not 0 ? body.SortOrder.Value : s.SortOrder;
         s.UpdatedAt = Now();
         store.SaveSpec(s);
         return s;
@@ -114,7 +114,7 @@ public sealed class CatalogService(ICatalogStore store)
             InspectionObjectCode = body.InspectionObjectCode ?? "",
             Name = body.Name,
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -128,7 +128,7 @@ public sealed class CatalogService(ICatalogStore store)
         if (body.InspectionObjectCode is not null) g.InspectionObjectCode = body.InspectionObjectCode;
         if (body.Name is not null) g.Name = body.Name;
         if (body.Remark is not null) g.Remark = body.Remark;
-        g.SortOrder = body.SortOrder != 0 ? body.SortOrder : g.SortOrder;
+        g.SortOrder = body.SortOrder is not null and not 0 ? body.SortOrder.Value : g.SortOrder;
         g.UpdatedAt = Now();
         store.SaveGrade(g);
         return g;
@@ -157,7 +157,7 @@ public sealed class CatalogService(ICatalogStore store)
             InspectionObjectCode = body.InspectionObjectCode ?? "",
             Name = body.Name,
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -171,7 +171,7 @@ public sealed class CatalogService(ICatalogStore store)
         if (body.InspectionObjectCode is not null) b.InspectionObjectCode = body.InspectionObjectCode;
         if (body.Name is not null) b.Name = body.Name;
         if (body.Remark is not null) b.Remark = body.Remark;
-        b.SortOrder = body.SortOrder != 0 ? body.SortOrder : b.SortOrder;
+        b.SortOrder = body.SortOrder is not null and not 0 ? body.SortOrder.Value : b.SortOrder;
         b.UpdatedAt = Now();
         store.SaveBrand(b);
         return b;

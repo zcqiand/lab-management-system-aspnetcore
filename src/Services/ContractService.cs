@@ -44,7 +44,7 @@ public sealed class ContractService(IFlowStore store)
             ContactPerson = body.ContactPerson ?? null!,
             ContactPhone = body.ContactPhone ?? null!,
             EntrustedDate = body.EntrustedDate ?? null!,
-            Status = body.Status == default ? ContractStatus.Active : body.Status,
+            Status = body.Status ?? ContractStatus.Active,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -71,7 +71,7 @@ public sealed class ContractService(IFlowStore store)
         if (body.ContactPerson is not null) c.ContactPerson = body.ContactPerson;
         if (body.ContactPhone is not null) c.ContactPhone = body.ContactPhone;
         if (body.EntrustedDate is not null) c.EntrustedDate = body.EntrustedDate;
-        if (body.Status != default) c.Status = body.Status;
+        if (body.Status is not null) c.Status = body.Status.Value;
         c.UpdatedAt = Now();
         store.SaveContract(c);
         return c;

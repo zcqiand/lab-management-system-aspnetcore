@@ -49,7 +49,7 @@ public sealed class SummaryService(IFlowStore store, IDictionaryStore dictionary
                 ["categoryCode"] = r.CategoryCode ?? "",
                 ["projectName"] = r.ProjectName ?? "",
                 ["flowStatus"] = Snake(r.FlowStatus),
-                ["result"] = Snake(r.Result),
+                ["result"] = r.Result is null ? "" : Snake(r.Result.Value),
                 ["reportCode"] = r.ReportCode ?? "",
             })
             .ToList<IDictionary<string, string>>();

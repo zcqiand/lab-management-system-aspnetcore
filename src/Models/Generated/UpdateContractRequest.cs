@@ -82,7 +82,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ContractStatus>))]
-        public ContractStatus Status { get; set; }
+        public ContractStatus? Status { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

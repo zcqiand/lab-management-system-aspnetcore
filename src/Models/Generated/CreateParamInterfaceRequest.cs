@@ -47,10 +47,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Description { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("isOfficial")]
-        public bool IsOfficial { get; set; }
+        public bool? IsOfficial { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("config")]
         public System.Collections.Generic.IDictionary<string, object> Config { get; set; }

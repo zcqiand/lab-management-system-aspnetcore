@@ -26,13 +26,13 @@ public sealed class CalculationMethodService(IMethodStore store)
             InspectionParameterCode = body.InspectionParameterCode,
             TestingStandardCode = body.TestingStandardCode ?? "",
             ReportNameCode = body.ReportNameCode ?? "",
-            AlgorithmType = body.AlgorithmType == default ? CalculationAlgorithmType.Manual : body.AlgorithmType,
-            SpecimenCount = body.SpecimenCount == 0 ? 1 : body.SpecimenCount,
+            AlgorithmType = body.AlgorithmType ?? CalculationAlgorithmType.Manual,
+            SpecimenCount = body.SpecimenCount is null or 0 ? 1 : body.SpecimenCount.Value,
             Formula = body.Formula ?? "",
             Conditions = body.Conditions ?? "",
             RoundingRule = body.RoundingRule ?? "",
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -45,13 +45,13 @@ public sealed class CalculationMethodService(IMethodStore store)
         var r = Get(objectCode, parameterCode);
         if (body.TestingStandardCode is not null) r.TestingStandardCode = body.TestingStandardCode;
         if (body.ReportNameCode is not null) r.ReportNameCode = body.ReportNameCode;
-        if (body.AlgorithmType != default) r.AlgorithmType = body.AlgorithmType;
-        if (body.SpecimenCount != 0) r.SpecimenCount = body.SpecimenCount;
+        if (body.AlgorithmType is not null) r.AlgorithmType = body.AlgorithmType.Value;
+        if (body.SpecimenCount is not null and not 0) r.SpecimenCount = body.SpecimenCount.Value;
         if (body.Formula is not null) r.Formula = body.Formula;
         if (body.Conditions is not null) r.Conditions = body.Conditions;
         if (body.RoundingRule is not null) r.RoundingRule = body.RoundingRule;
         if (body.Remark is not null) r.Remark = body.Remark;
-        if (body.SortOrder != 0) r.SortOrder = body.SortOrder;
+        if (body.SortOrder is not null and not 0) r.SortOrder = body.SortOrder.Value;
         r.UpdatedAt = Now();
         store.Save(r);
         return r;
@@ -93,15 +93,15 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
             InspectionParameterCode = body.InspectionParameterCode,
             JudgmentStandardCode = body.JudgmentStandardCode,
             Conditions = body.Conditions ?? "",
-            ValueType = body.ValueType == default ? RequirementValueType.Numeric : body.ValueType,
+            ValueType = body.ValueType ?? RequirementValueType.Numeric,
             MinValue = body.MinValue,
             MaxValue = body.MaxValue,
             TargetValue = body.TargetValue ?? "",
             Expression = body.Expression ?? "",
             Unit = body.Unit ?? "",
-            Comparison = body.Comparison == default ? RequirementComparison.Ge : body.Comparison,
-            JudgmentMode = body.JudgmentMode == default ? RequirementJudgmentMode.Manual : body.JudgmentMode,
-            VerificationStatus = body.VerificationStatus == default ? RequirementVerificationStatus.Draft : body.VerificationStatus,
+            Comparison = body.Comparison ?? RequirementComparison.Ge,
+            JudgmentMode = body.JudgmentMode ?? RequirementJudgmentMode.Manual,
+            VerificationStatus = body.VerificationStatus ?? RequirementVerificationStatus.Draft,
             Clause = body.Clause ?? "",
             SourcePage = body.SourcePage,
             SourceHash = body.SourceHash ?? "",
@@ -111,7 +111,7 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
             Spec = body.Spec ?? "",
             Sieve = body.Sieve ?? "",
             Remark = body.Remark ?? "",
-            SortOrder = body.SortOrder,
+            SortOrder = body.SortOrder ?? 0,
             CreatedAt = now,
             UpdatedAt = now,
         };
@@ -123,17 +123,17 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
     {
         var t = Get(tenantId, objectCode, parameterCode, standardCode);
         if (body.Conditions is not null) t.Conditions = body.Conditions;
-        if (body.ValueType != default) t.ValueType = body.ValueType;
-        if (body.MinValue != 0) t.MinValue = body.MinValue;
-        if (body.MaxValue != 0) t.MaxValue = body.MaxValue;
+        if (body.ValueType is not null) t.ValueType = body.ValueType.Value;
+        if (body.MinValue is not null) t.MinValue = body.MinValue.Value;
+        if (body.MaxValue is not null) t.MaxValue = body.MaxValue.Value;
         if (body.TargetValue is not null) t.TargetValue = body.TargetValue;
         if (body.Expression is not null) t.Expression = body.Expression;
         if (body.Unit is not null) t.Unit = body.Unit;
-        if (body.Comparison != default) t.Comparison = body.Comparison;
-        if (body.JudgmentMode != default) t.JudgmentMode = body.JudgmentMode;
-        if (body.VerificationStatus != default) t.VerificationStatus = body.VerificationStatus;
+        if (body.Comparison is not null) t.Comparison = body.Comparison.Value;
+        if (body.JudgmentMode is not null) t.JudgmentMode = body.JudgmentMode.Value;
+        if (body.VerificationStatus is not null) t.VerificationStatus = body.VerificationStatus.Value;
         if (body.Clause is not null) t.Clause = body.Clause;
-        if (body.SourcePage != 0) t.SourcePage = body.SourcePage;
+        if (body.SourcePage is not null) t.SourcePage = body.SourcePage.Value;
         if (body.SourceHash is not null) t.SourceHash = body.SourceHash;
         if (body.Brand is not null) t.Brand = body.Brand;
         if (body.Model is not null) t.Model = body.Model;
@@ -141,7 +141,7 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
         if (body.Spec is not null) t.Spec = body.Spec;
         if (body.Sieve is not null) t.Sieve = body.Sieve;
         if (body.Remark is not null) t.Remark = body.Remark;
-        if (body.SortOrder != 0) t.SortOrder = body.SortOrder;
+        if (body.SortOrder is not null and not 0) t.SortOrder = body.SortOrder.Value;
         t.UpdatedAt = Now();
         store.Save(t);
         return t;

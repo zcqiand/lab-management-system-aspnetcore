@@ -57,10 +57,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         public RequirementValueType ValueType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("minValue")]
-        public int MinValue { get; set; }
+        public int? MinValue { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("maxValue")]
-        public int MaxValue { get; set; }
+        public int? MaxValue { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("targetValue")]
         public string TargetValue { get; set; }
@@ -90,7 +90,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Clause { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourcePage")]
-        public int SourcePage { get; set; }
+        public int? SourcePage { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceHash")]
         public string SourceHash { get; set; }

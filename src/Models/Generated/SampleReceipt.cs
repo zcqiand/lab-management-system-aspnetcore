@@ -169,7 +169,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("result")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ReceiptResult>))]
-        public ReceiptResult Result { get; set; }
+        public ReceiptResult? Result { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("issuedAt")]
         public string IssuedAt { get; set; }

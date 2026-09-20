@@ -56,7 +56,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Description { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

@@ -45,7 +45,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionStandardStatus>))]
-        public InspectionStandardStatus Status { get; set; }
+        public InspectionStandardStatus? Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceDocumentId")]
         public string SourceDocumentId { get; set; }
@@ -54,7 +54,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string SourceHash { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

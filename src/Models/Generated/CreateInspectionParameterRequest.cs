@@ -59,10 +59,10 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceType")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<InspectionParameterSourceType>))]
-        public InspectionParameterSourceType SourceType { get; set; }
+        public InspectionParameterSourceType? SourceType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

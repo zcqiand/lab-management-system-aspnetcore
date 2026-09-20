@@ -46,7 +46,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public ExtFieldDefType Type { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("required")]
-        public bool Required { get; set; }
+        public bool? Required { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("options")]
         public System.Collections.Generic.List<string> Options { get; set; }
@@ -56,7 +56,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("source")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<ExtFieldDefSource>))]
-        public ExtFieldDefSource Source { get; set; }
+        public ExtFieldDefSource? Source { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

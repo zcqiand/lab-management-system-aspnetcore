@@ -79,7 +79,9 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
             e.Property(x => x.TestParameters).HasColumnType("jsonb");
             e.Property(x => x.FlowHistory).HasColumnType("jsonb");
             e.Property(x => x.FlowStatus).HasConversion(Wire<FlowStatus>());
-            e.Property(x => x.Result).HasConversion(Wire<ReceiptResult>());
+            // 5.52：result 列可空（schema.ts 无 notNull，receiving 行合法 NULL），
+            // 生成属性 ReceiptResult? → 用可空 wire 转换器，NULL 直通不兜底
+            e.Property(x => x.Result).HasConversion(WireNullable<ReceiptResult>());
             e.Property(x => x.IssuedAt).HasColumnType("timestamptz").HasConversion(IsoDateTime);
             e.Ignore(x => x.AdditionalProperties);
         });
@@ -274,6 +276,30 @@ public class LabDbContext(DbContextOptions<LabDbContext> options) : DbContext(op
             v => toWire(v),
             s => fromWire(s));
         return (ValueConverter<T, string>)WireCache.GetOrAdd(typeof(T), converter);
+    }
+
+    // 5.52：可选枚举属性（NSwag generateOptionalPropertiesAsNullable 翻成 T?）专用。
+    // 语义 = DB NULL ↔ CLR null 直通（receiving 行 result 合法 NULL，禁止兜底成枚举字面量）；
+    // EF 本就不把 null 传进转换器，这里显式处理是为表达式自身闭合 + 单测可断言 null 直通。
+    // 与 Wire<T> 分缓存：WireCache 按 typeof(T) 键，同一 T 两款转换器互不覆盖。
+    private static readonly System.Collections.Concurrent.ConcurrentDictionary<Type, object> WireNullableCache = new();
+
+    private static ValueConverter<T?, string> WireNullable<T>()
+        where T : struct, Enum
+    {
+        if (WireNullableCache.TryGetValue(typeof(T), out var cached))
+        {
+            return (ValueConverter<T?, string>)cached;
+        }
+
+        var toWire = ToWireMap<T>();
+        var fromWire = TolerantFromWire<T>();
+        // toProvider 的 null 分支：EF 不把 null 传进转换器，此分支纯为表达式闭合；
+        // null! 只压 CS8603 注解警告，运行时语义仍是「null 不经此路」
+        var converter = new ValueConverter<T?, string>(
+            v => v.HasValue ? toWire(v.Value) : null!,
+            s => s == null ? null : (T?)fromWire(s));
+        return (ValueConverter<T?, string>)WireNullableCache.GetOrAdd(typeof(T), converter);
     }
 
     private static Func<T, string> ToWireMap<T>()

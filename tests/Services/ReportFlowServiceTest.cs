@@ -8,6 +8,13 @@ using Xunit;
 /// <summary>
 /// M03.F05/F06 流程状态机 fnTest（B3）。语义基准：lab-springboot ReportFlowServiceTest
 /// （SUBMIT 前进 / RETURN 退回 / 容错批量 / 队列过滤）。
+///
+/// 5.49-① 同步（2026-09-20）：2026-09-17 lab-shared 13122e9 重整把 FlowQueue/SubmitAction
+/// 从 service 删除（收敛为 7 个 act 端点 + URL 隐式 stage 校验），测试未随迁导致编译不过
+/// （11 error CS1061/CS1503 自 220ee0f）。本文件断言已同步现行实现语义：
+///   - 队列过滤下沉 IFlowStore（service 无 queue 面），等价改写为 store 契约断言
+///   - 单端点 SubmitAction → 各 stage act 端点（ActFlow*）
+///   - 「archived SUBMIT invalid」断言随 archived 自转移 audit 语义删除，改断言现行行为
 /// </summary>
 public class ReportFlowServiceTest
 {
@@ -47,11 +54,11 @@ public class ReportFlowServiceTest
     [Trait("Fn", "M03.F08.I01")]
     public void FlowQueue_filtersByStage()
     {
-        var (store, flow) = Setup(("R-1", FlowStatus.Review), ("R-2", FlowStatus.Review), ("R-3", FlowStatus.Approval));
+        var (store, _) = Setup(("R-1", FlowStatus.Review), ("R-2", FlowStatus.Review), ("R-3", FlowStatus.Approval));
 
-        var queue = flow.FlowQueue(Tenant, FlowStatus.Review, 50);
-        var issuanceQueue = flow.FlowQueue(Tenant, FlowStatus.Issuance, 50);
-        var archivedQueue = flow.FlowQueue(Tenant, FlowStatus.Archived, 50);
+        var queue = store.FlowQueue(Tenant, FlowStatus.Review, 50);
+        var issuanceQueue = store.FlowQueue(Tenant, FlowStatus.Issuance, 50);
+        var archivedQueue = store.FlowQueue(Tenant, FlowStatus.Archived, 50);
 
         Assert.Equal(2, queue.Count);
         Assert.All(queue, r => Assert.Equal(FlowStatus.Review, r.FlowStatus));
@@ -62,19 +69,16 @@ public class ReportFlowServiceTest
     [Fact]
     [Trait("Fn", "M03.F06.I01")]
     [Trait("Fn", "M03.F05.I03")]
-    [Trait("Fn", "M03.F06.I03")]
-    [Trait("Fn", "M03.F07.I03")]
-    [Trait("Fn", "M03.F08.I03")]
-    public void SubmitAction_advance_reviewToApproval()
+    public void ActFlowReview_submit_advancesReviewToApproval()
     {
         var (store, flow) = Setup(("R-1", FlowStatus.Review));
 
-        var results = flow.SubmitAction(Tenant, new FlowActionRequest
+        var results = flow.ActFlowReview(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
             Operator = "审核员",
-        });
+        }).ToList();
 
         Assert.True(results[0].Ok);
         Assert.Equal(FlowStatus.Approval, results[0].FlowStatus);
@@ -85,66 +89,85 @@ public class ReportFlowServiceTest
 
     [Fact]
     [Trait("Fn", "M03.F06.I01")]
-    public void SubmitAction_return_approvalToReview()
+    public void ActFlowApprove_return_returnsApprovalToReview()
     {
         var (_, flow) = Setup(("R-1", FlowStatus.Approval));
 
-        var results = flow.SubmitAction(Tenant, new FlowActionRequest
+        var results = flow.ActFlowApprove(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Return,
-        });
+        }).ToList();
 
         Assert.True(results[0].Ok);
         Assert.Equal(FlowStatus.Review, results[0].FlowStatus);
     }
 
     [Fact]
-    [Trait("Fn", "M03.F06.I01")]
-    public void SubmitAction_missing_andInvalid_failWithoutBreakingBatch()
+    [Trait("Fn", "M03.F06.I03")]
+    public void ActFlow_missing_andStageMismatch_failWithoutBreakingBatch()
     {
-        var (_, flow) = Setup(("R-1", FlowStatus.Archived)); // archived 无 next
+        // 5.49-① 同步：原「archived SUBMIT invalid」断言随 archived 自转移语义删除；
+        // 现行等价失效路径 = not found + stage mismatch（单条失败不炸整批不变）。
+        var (_, flow) = Setup(("R-1", FlowStatus.Receiving));
 
-        var results = flow.SubmitAction(Tenant, new FlowActionRequest
+        var results = flow.ActFlowReview(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-GHOST", "R-1" },
             Action = FlowAction.Submit,
-        });
+        }).ToList();
 
         Assert.False(results[0].Ok); // not found
         Assert.Contains("not found", results[0].Message);
-        Assert.False(results[1].Ok); // archived→SUBMIT invalid
-        Assert.Contains("Invalid transition", results[1].Message);
+        Assert.False(results[1].Ok); // receiving ≠ review → stage mismatch
+        Assert.Contains("Stage mismatch", results[1].Message);
     }
 
     [Fact]
     [Trait("Fn", "M03.F08.I03")]
-    public void FullLifecycle_receivingToArchived_viaSubmit()
+    public void FullLifecycle_receivingToArchived_viaActSubmit()
     {
+        // 5.49-① 同步：单端点 SubmitAction → 7 个 act 端点（URL 隐式 stage 校验）；
+        // archived 终态改为接受 SUBMIT 自转移写 audit（不再断言「第 7 次失败」）。
         var (_, flow) = Setup(("R-1", FlowStatus.Receiving));
+        var stages = new (Func<FlowActionRequest, ICollection<FlowActionResult>> Act, FlowStatus Expected)[]
+        {
+            (b => flow.ActFlowReceiving(Tenant, b), FlowStatus.Task_assignment),
+            (b => flow.ActFlowAssigning(Tenant, b), FlowStatus.Data_entry),
+            (b => flow.ActFlowDataEntry(Tenant, b), FlowStatus.Review),
+            (b => flow.ActFlowReview(Tenant, b), FlowStatus.Approval),
+            (b => flow.ActFlowApprove(Tenant, b), FlowStatus.Issuance),
+            (b => flow.ActFlowIssuance(Tenant, b), FlowStatus.Archived),
+        };
 
-        foreach (var expected in new[]
+        foreach (var (act, expected) in stages)
         {
-            FlowStatus.Task_assignment, FlowStatus.Data_entry, FlowStatus.Review,
-            FlowStatus.Approval, FlowStatus.Issuance, FlowStatus.Archived,
-        })
-        {
-            var results = flow.SubmitAction(Tenant, new FlowActionRequest
+            var results = act(new FlowActionRequest
             {
                 Ids = new List<string> { "R-1" },
                 Action = FlowAction.Submit,
-            });
+            }).ToList();
             Assert.True(results[0].Ok);
             Assert.Equal(expected, results[0].FlowStatus);
         }
 
-        // archived 无 next → 第 7 次 SUBMIT 失败
-        var beyond = flow.SubmitAction(Tenant, new FlowActionRequest
+        // archived 后 SUBMIT = audit 自转移：Ok 且保持 archived
+        var audit = flow.ActFlowArchived(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Submit,
-        });
-        Assert.False(beyond[0].Ok);
+        }).ToList();
+        Assert.True(audit[0].Ok);
+        Assert.Equal(FlowStatus.Archived, audit[0].FlowStatus);
+
+        // archived 拒 RETURN（终态不可回退）
+        var returned = flow.ActFlowArchived(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Return,
+        }).ToList();
+        Assert.False(returned[0].Ok);
+        Assert.Contains("Action not allowed", returned[0].Message);
     }
 
     [Fact]
@@ -153,19 +176,19 @@ public class ReportFlowServiceTest
     {
         var (_, flow) = Setup(("R-1", FlowStatus.Receiving), ("R-2", FlowStatus.Review));
 
-        var inReceiving = flow.SubmitAction(Tenant, new FlowActionRequest
+        var inReceiving = flow.ActFlowReceiving(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-1" },
             Action = FlowAction.Withdraw,
-        });
+        }).ToList();
         Assert.True(inReceiving[0].Ok);
         Assert.Equal(FlowStatus.Receiving, inReceiving[0].FlowStatus); // 自转移
 
-        var inReview = flow.SubmitAction(Tenant, new FlowActionRequest
+        var inReview = flow.ActFlowReview(Tenant, new FlowActionRequest
         {
             Ids = new List<string> { "R-2" },
             Action = FlowAction.Withdraw,
-        });
+        }).ToList();
         Assert.False(inReview[0].Ok); // 非 receiving 不允许撤回
     }
 

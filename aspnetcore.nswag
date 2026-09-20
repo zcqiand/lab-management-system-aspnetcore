@@ -24,6 +24,7 @@
       "dateType": "System.DateTime",
       "jsonLibrary": "SystemTextJson",
       "generateDefaultValues": true,
+      "generateOptionalPropertiesAsNullable": true,
       "generateOptionalParameters": false,
       "generateResponseClasses": false,
       "wrapResponses": false,

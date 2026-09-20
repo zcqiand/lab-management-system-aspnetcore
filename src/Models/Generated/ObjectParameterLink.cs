@@ -46,7 +46,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public QualificationLevel QualificationLevel { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourcePage")]
-        public int SourcePage { get; set; }
+        public int? SourcePage { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("remark")]
         public string Remark { get; set; }

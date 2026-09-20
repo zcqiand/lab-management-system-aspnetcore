@@ -40,10 +40,10 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("algorithmType")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<CalculationAlgorithmType>))]
-        public CalculationAlgorithmType AlgorithmType { get; set; }
+        public CalculationAlgorithmType? AlgorithmType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("specimenCount")]
-        public int SpecimenCount { get; set; }
+        public int? SpecimenCount { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("formula")]
         public string Formula { get; set; }
@@ -58,7 +58,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Remark { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

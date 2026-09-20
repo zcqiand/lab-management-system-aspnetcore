@@ -49,13 +49,13 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("valueType")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementValueType>))]
-        public RequirementValueType ValueType { get; set; }
+        public RequirementValueType? ValueType { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("minValue")]
-        public int MinValue { get; set; }
+        public int? MinValue { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("maxValue")]
-        public int MaxValue { get; set; }
+        public int? MaxValue { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("targetValue")]
         public string TargetValue { get; set; }
@@ -68,21 +68,21 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("comparison")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementComparison>))]
-        public RequirementComparison Comparison { get; set; }
+        public RequirementComparison? Comparison { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("judgmentMode")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementJudgmentMode>))]
-        public RequirementJudgmentMode JudgmentMode { get; set; }
+        public RequirementJudgmentMode? JudgmentMode { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("verificationStatus")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<RequirementVerificationStatus>))]
-        public RequirementVerificationStatus VerificationStatus { get; set; }
+        public RequirementVerificationStatus? VerificationStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("clause")]
         public string Clause { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourcePage")]
-        public int SourcePage { get; set; }
+        public int? SourcePage { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceHash")]
         public string SourceHash { get; set; }
@@ -106,7 +106,7 @@ namespace Lab.AspNetCore.Controllers.Generated
         public string Remark { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sortOrder")]
-        public int SortOrder { get; set; }
+        public int? SortOrder { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

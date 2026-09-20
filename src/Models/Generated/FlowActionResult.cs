@@ -44,7 +44,7 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("flowStatus")]
         [System.Text.Json.Serialization.JsonConverter(typeof(Lab.AspNetCore.Serialization.EnumMemberEnumConverter<FlowStatus>))]
-        public FlowStatus FlowStatus { get; set; }
+        public FlowStatus? FlowStatus { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
