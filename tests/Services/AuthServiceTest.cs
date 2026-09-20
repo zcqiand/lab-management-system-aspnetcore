@@ -364,7 +364,10 @@ public class AuthServiceTest
             Redirect_uri = "http://localhost:5173/login",
             State = "forged-state",
         };
-        Assert.Throws<InvalidOperationException>(() => _service.SsoCallback(body, auth.CookieValue));
+        // 语义锚点：mismatched state → ArgumentException → Program.cs 异常映射链 400
+        // （RFC 6749 §10.12 CSRF 防护属客户端错误，非服务器故障；0c48e7f 有意改语义，
+        // 原 InvalidOperationException 会落 _ => 500）。
+        Assert.Throws<ArgumentException>(() => _service.SsoCallback(body, auth.CookieValue));
     }
 
     // === M01.F05.I05 登出 ===
