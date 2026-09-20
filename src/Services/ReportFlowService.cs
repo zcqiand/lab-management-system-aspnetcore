@@ -115,13 +115,13 @@ public sealed class ReportFlowService(IFlowStore store)
             }
             // 写 history 当 audit，状态保持 archived；audit 自转移按 submit 语义刷新
             // lastSubmittedBy（SSOT db-queries.ts：submit 分支不看 stage）
-            r.LastSubmittedBy = body.Operator ?? "";
+            r.LastSubmittedBy = body.Operator;
             r.FlowHistory.Add(new FlowHistoryEntry
             {
                 Action = FlowAction.Submit,
                 From = FlowStatus.Archived,
                 To = FlowStatus.Archived,
-                Operator = body.Operator ?? "",
+                Operator = body.Operator,
                 At = Now(),
                 Reason = body.Reason ?? "archived: post-archive audit",
             });
@@ -165,7 +165,7 @@ public sealed class ReportFlowService(IFlowStore store)
                 });
                 continue;
             }
-            results.Add(TryTransition(tenantId, id, body.Action, body.Operator ?? "", body.Reason ?? ""));
+            results.Add(TryTransition(tenantId, id, body.Action, body.Operator, body.Reason ?? ""));
         }
         return results;
     }
