@@ -27,7 +27,7 @@ public sealed class CalculationMethodService(IMethodStore store)
             TestingStandardCode = body.TestingStandardCode ?? "",
             ReportNameCode = body.ReportNameCode ?? "",
             AlgorithmType = body.AlgorithmType ?? CalculationAlgorithmType.Manual,
-            SpecimenCount = body.SpecimenCount is null or 0 ? 1 : body.SpecimenCount.Value,
+            SpecimenCount = body.SpecimenCount is null ? 1 : body.SpecimenCount.Value,
             Formula = body.Formula ?? "",
             Conditions = body.Conditions ?? "",
             RoundingRule = body.RoundingRule ?? "",

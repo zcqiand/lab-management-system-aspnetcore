@@ -68,6 +68,22 @@ public class MethodAndRequirementServiceTest
     }
 
     [Fact]
+    [Trait("Fn", "M06.F05.I03")]
+    public void CreateRule_explicitZeroSpecimenCountLands()
+    {
+        var service = new CalculationMethodService(new InMemoryMethodStore());
+
+        var r = service.Create(new CreateCalculationMethodRequest
+        {
+            InspectionObjectCode = "OBJ-A",
+            InspectionParameterCode = "P-NEW",
+            SpecimenCount = 0,
+        });
+
+        Assert.Equal(0, r.SpecimenCount); // 显式 0 生效（对齐 springboot 纯 null create 语义）
+    }
+
+    [Fact]
     [Trait("Fn", "M06.F05.I04")]
     public void UpdateRule_patchKeepsUnset()
     {
