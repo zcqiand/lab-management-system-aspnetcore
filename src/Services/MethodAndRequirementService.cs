@@ -24,8 +24,11 @@ public sealed class CalculationMethodService(IMethodStore store)
         {
             InspectionObjectCode = body.InspectionObjectCode,
             InspectionParameterCode = body.InspectionParameterCode,
-            TestingStandardCode = body.TestingStandardCode ?? "",
-            ReportNameCode = body.ReportNameCode ?? "",
+            // 可空引用列缺省必须写 NULL 而非 ""：testing_standard_code / report_name_code 带
+            // calc_rule_standard_fk / calc_rule_report_fk（SET NULL），"" 非合法 code → 23503 → 500
+            // （5.54 live 全量 aspnetcore 实证；springboot/nextjs 缺省均存 NULL）。
+            TestingStandardCode = (string?)body.TestingStandardCode,
+            ReportNameCode = (string?)body.ReportNameCode,
             AlgorithmType = body.AlgorithmType ?? CalculationAlgorithmType.Manual,
             SpecimenCount = body.SpecimenCount is null ? 1 : body.SpecimenCount.Value,
             Formula = body.Formula ?? "",
@@ -105,10 +108,12 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
             Clause = body.Clause ?? "",
             SourcePage = body.SourcePage,
             SourceHash = body.SourceHash ?? "",
-            Brand = body.Brand ?? "",
-            Model = body.Model ?? "",
-            Grade = body.Grade ?? "",
-            Spec = body.Spec ?? "",
+            // brand/model/grade/spec 为 SET NULL FK 列（tech_req_brand_fk 等），"" 非合法 code
+            // → 23503 → 500（5.54 live 全量 aspnetcore 实证）；缺省须存 NULL（镜像 springboot）。
+            Brand = (string?)body.Brand,
+            Model = (string?)body.Model,
+            Grade = (string?)body.Grade,
+            Spec = (string?)body.Spec,
             Sieve = body.Sieve ?? "",
             Remark = body.Remark ?? "",
             SortOrder = body.SortOrder ?? 0,
