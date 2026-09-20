@@ -126,6 +126,7 @@
 | M03.F01.I04 | 更新接样 | 接口 | 前端+后端 | PUT /api/receipts/{id}：PATCH 语义（含 3 个 jsonb 列表） | 已上线 |
 | M03.F01.I05 | 删除接样 | 接口 | 前端+后端 | DELETE /api/receipts/{id}：CASCADE 下属 samples | 已上线 |
 | M03.F01.I06 | 流程历史 | 接口 | 前端+后端 | GET /api/receipts/{id}/history → FlowHistoryEntry[] | 已上线 |
+| M03.F01.I08 | 接样-提交 | 接口 | 前端+后端 | POST /api/receipts/receiving/act，body.action={SUBMIT、RETURN、WITHDRAW} 三动作统一（2026-09-20 补登记 7 阶段全 act 模式行，对齐 nextjs/springboot 树；submit 写 last_submitted_by、withdraw 清空，5.69） | 已上线 |
 
 ### M03.F02 任务分配
 
@@ -179,7 +180,8 @@
 |---|---|---|---|---|---|
 | M03.F08.I01 | 归档队列 | 接口 | 前端+后端 | GET /api/receipts/flow/queue?stage=archived | 已上线 |
 | M03.F08.I02 | 归档查看 | 接口 | 前端+后端 | GET /api/receipts/{id} archived 视角 | 已上线 |
-| M03.F08.I03 | 归档退回 | 接口 | 前端+后端 | POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移 | 已上线 |
+| M03.F08.I03 | 归档退回 | 接口 | 前端+后端 | POST /api/receipts/flow：archived 下 SUBMIT 无效（终态）/ RETURN→issuance；WITHDRAW 仅 receiving 自转移。说明陈旧：/flow 端点已删，现行 = POST /api/receipts/archived/act 仅收 SUBMIT 自转移 audit | 已上线 |
+| M03.F08.I05 | 报告归档-提交 | 接口 | 前端+后端 | POST /api/receipts/archived/act，body.action={SUBMIT、RETURN、WITHDRAW} 三动作统一（2026-09-20 补登记，对齐 nextjs/springboot 树；audit 自转移按 submit 语义刷新 last_submitted_by，5.69） | 已上线 |
 
 ### M03.F09 接样单详情
 

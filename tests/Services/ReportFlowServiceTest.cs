@@ -265,6 +265,106 @@ public class ReportFlowServiceTest
         Assert.Single(store.FindReceipt(Tenant, "R-1")!.FlowHistory);
     }
 
+    // === 5.69 last_submitted_by 写/清对齐（SSOT = lab-nextjs db-queries.ts:271-276）===
+    // submit → 写当前操作人；withdraw → 清空（null）；return → 保留原值；
+    // archived audit 自转移按 submit 语义刷新。身份取 body.operator（前端登录态
+    // user.id ?? user.username，nextjs act-route.ts:39-46 同款必填），禁字面量兜底（ADR-0019）。
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I08")]
+    public void ActFlowReceiving_submit_writesLastSubmittedByFromOperator()
+    {
+        var (store, flow) = Setup(("R-1", FlowStatus.Receiving));
+
+        var results = flow.ActFlowReceiving(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "user-uuid-001",
+        }).ToList();
+
+        Assert.True(results[0].Ok);
+        Assert.Equal("user-uuid-001", store.FindReceipt(Tenant, "R-1")!.LastSubmittedBy);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I08")]
+    public void ActFlowReceiving_withdraw_clearsLastSubmittedBy()
+    {
+        var (store, flow) = Setup(("R-1", FlowStatus.Receiving));
+        var preset = store.FindReceipt(Tenant, "R-1")!;
+        preset.LastSubmittedBy = "user-uuid-002";
+        store.SaveReceipt(preset);
+
+        var results = flow.ActFlowReceiving(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Withdraw,
+            Operator = "user-uuid-001",
+        }).ToList();
+
+        Assert.True(results[0].Ok);
+        Assert.Null(store.FindReceipt(Tenant, "R-1")!.LastSubmittedBy);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I08")]
+    public void ActFlowReview_return_keepsLastSubmittedBy()
+    {
+        var (store, flow) = Setup(("R-1", FlowStatus.Review));
+        var preset = store.FindReceipt(Tenant, "R-1")!;
+        preset.LastSubmittedBy = "user-uuid-002";
+        store.SaveReceipt(preset);
+
+        var results = flow.ActFlowReview(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Return,
+            Operator = "user-uuid-001",
+        }).ToList();
+
+        Assert.True(results[0].Ok);
+        Assert.Equal("user-uuid-002", store.FindReceipt(Tenant, "R-1")!.LastSubmittedBy);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F08.I05")]
+    public void ActFlowArchived_submit_refreshesLastSubmittedBy()
+    {
+        // SSOT：archived audit 自转移也是 submit —— 刷新 lastSubmittedBy
+        var (store, flow) = Setup(("R-1", FlowStatus.Archived));
+
+        var results = flow.ActFlowArchived(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "user-uuid-003",
+        }).ToList();
+
+        Assert.True(results[0].Ok);
+        Assert.Equal("user-uuid-003", store.FindReceipt(Tenant, "R-1")!.LastSubmittedBy);
+    }
+
+    [Fact]
+    [Trait("Fn", "M03.F01.I01")]
+    public void Submit_then_filterSubmitted_noFlowStatus_hitsRow()
+    {
+        // 5.69 行为收紧的端到端锚：submit 写 last_submitted_by 后，
+        // filter=submitted 不传 flowStatus 必须命中该单（写路径补齐前恒漏行）。
+        var (store, flow) = Setup(("R-1", FlowStatus.Receiving));
+
+        var results = flow.ActFlowReceiving(Tenant, new FlowActionRequest
+        {
+            Ids = new List<string> { "R-1" },
+            Action = FlowAction.Submit,
+            Operator = "user-uuid-001",
+        }).ToList();
+        Assert.True(results[0].Ok);
+
+        var submitted = store.FilterReceipts(Tenant, null, null, null, "submitted");
+        Assert.Contains(submitted, r => r.Id == "R-1");
+    }
+
     [Fact]
     [Trait("Fn", "M03.F06.I03")]
     public void ActFlowApprove_stageMismatch_rejectsNonApproval()

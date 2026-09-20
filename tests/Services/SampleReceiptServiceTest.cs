@@ -155,7 +155,8 @@ public class SampleReceiptServiceTest
         var moved = service.Create(Tenant, Req("WT-002"));
         service.AssignTask(Tenant, moved.Id, new AssignTaskRequest { AssigneeId = "U-1", AssigneeName = "李四" });
         // moved 已从 receiving submit 至 task_assignment（history 有 submit-from-receiving），
-        // 再补 lastSubmittedBy 模拟 submit 链路的完整落库（aspnetcore 写路径暂不写该列，见报告 concerns）
+        // 手工补 lastSubmittedBy 模拟 act submit 链路的完整落库
+        // （assignTask 不写该列 —— 5.69 起 act submit/withdraw 写/清，SSOT = db-queries.ts）
         store.FindReceipt(Tenant, moved.Id)!.LastSubmittedBy = "李四";
         store.SaveReceipt(store.FindReceipt(Tenant, moved.Id)!);
         // history>0 但 lastSubmittedBy 为 null 的对照行（无 flowStatus 的 submitted 不得命中）

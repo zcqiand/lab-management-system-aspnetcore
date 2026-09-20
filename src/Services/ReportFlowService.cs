@@ -112,7 +112,9 @@ public sealed class ReportFlowService(IFlowStore store)
                 });
                 continue;
             }
-            // 写 history 当 audit，状态保持 archived
+            // 写 history 当 audit，状态保持 archived；audit 自转移按 submit 语义刷新
+            // lastSubmittedBy（SSOT db-queries.ts：submit 分支不看 stage）
+            r.LastSubmittedBy = body.Operator ?? "";
             r.FlowHistory.Add(new FlowHistoryEntry
             {
                 Action = FlowAction.Submit,
@@ -197,6 +199,17 @@ public sealed class ReportFlowService(IFlowStore store)
 
         var from = r.FlowStatus;
         r.FlowStatus = to;
+        // 5.69 last_submitted_by 对齐（SSOT = lab-nextjs db-queries.ts:271-276）：
+        // submit 写当前操作人（body.operator = 前端登录态 user.id ?? user.username）；
+        // withdraw 清空；return 保留原值。null! 治 generated 非空注解（列本身可空）。
+        if (action == FlowAction.Submit)
+        {
+            r.LastSubmittedBy = op;
+        }
+        else if (action == FlowAction.Withdraw)
+        {
+            r.LastSubmittedBy = null!;
+        }
         r.FlowHistory.Add(new FlowHistoryEntry
         {
             Action = action,
