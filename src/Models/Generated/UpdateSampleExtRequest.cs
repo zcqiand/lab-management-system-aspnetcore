@@ -34,7 +34,10 @@ namespace Lab.AspNetCore.Controllers.Generated
 
         [System.Text.Json.Serialization.JsonPropertyName("ext")]
         [System.ComponentModel.DataAnnotations.Required]
-        public System.Collections.Generic.IDictionary<string, string> Ext { get; set; } = new System.Collections.Generic.Dictionary<string, string>();
+        // 5.89 patch-generated：剥离子生成器带的 `= new Dictionary<>()` 初始化器 ——
+        // 否则缺 ext 绑定后非 null，[Required]+ModelStateValidationFilter（5.64）失效，
+        // 静默清空返 200。重跑 codegen 由 scripts/patch-generated.py 幂等补回本修补。
+        public System.Collections.Generic.IDictionary<string, string> Ext { get; set; }
 
         private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 

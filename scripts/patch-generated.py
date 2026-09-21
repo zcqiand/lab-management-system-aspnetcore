@@ -104,6 +104,29 @@ def patch_nullable_enable(text: str) -> str:
     return text[:insert_at] + directive + text[insert_at:]
 
 
+def patch_update_sample_ext_no_initializer(text: str) -> str:
+    """5.89：NSwag 给 [Required] 字典属性带 `= new Dictionary<>()` 初始化器——
+    缺键绑定后非 null，[Required] + ModelStateValidationFilter（5.64）形同虚设，
+    缺 ext 静默清空返 200（lab-ct 断言锁定）。剥离初始化器让 Required 真正 enforce。
+    只动 UpdateSampleExtRequest（Sample.cs 响应 DTO 同款 initializer 但不参与绑定，
+    剥离反而引入构造侧 NRE 面，不动）。"""
+    class_re = re.compile(r"public partial class UpdateSampleExtRequest\b.*?\n    \}", re.DOTALL)
+    m = class_re.search(text)
+    if not m:
+        raise SystemExit("patch-generated: 未找到 UpdateSampleExtRequest —— NSwag 输出变了，请更新修补脚本")
+    block = m.group(0)
+    old_prop = (
+        "public System.Collections.Generic.IDictionary<string, string> Ext { get; set; }"
+        " = new System.Collections.Generic.Dictionary<string, string>();"
+    )
+    new_prop = "public System.Collections.Generic.IDictionary<string, string> Ext { get; set; }"
+    if old_prop not in block:
+        if new_prop in block:  # 已修补（幂等）
+            return text
+        raise SystemExit("patch-generated: 未找到 Ext initializer 模式 —— NSwag 输出变了，请更新修补脚本")
+    return text.replace(block, block.replace(old_prop, new_prop))
+
+
 def main() -> None:
     if not GENERATED.exists():
         raise SystemExit(f"patch-generated: missing {GENERATED}")
@@ -112,6 +135,7 @@ def main() -> None:
     text = patch_requirement_comparison(text)
     text = patch_enum_converter(text)
     text = patch_nullable_query_params(text)
+    text = patch_update_sample_ext_no_initializer(text)
     text = patch_nullable_enable(text)
     GENERATED.write_text(text, encoding="utf-8")
     print("[patch-generated] OK")

@@ -98,6 +98,14 @@ public sealed class SampleService(IFlowStore store)
     /// </summary>
     public Sample UpdateExt(string tenantId, string id, UpdateSampleExtRequest body)
     {
+        // 5.89：契约 ext 必填（sample.tsp UpdateSampleExtRequest.ext 无 ?）——缺省
+        // ArgumentException → 400（Program.cs 全局映射）。主防线在生成 DTO 的 [Required]
+        // （patch-generated 已剥离初始化器，ModelStateValidationFilter 5.64 先拦），
+        // 本守卫兜直接调服务的调用方（单测/内部引用）。
+        if (body?.Ext is null)
+        {
+            throw new ArgumentException("ext is required");
+        }
         var s = Get(tenantId, id);
         s.Ext = new Dictionary<string, string>(body.Ext);
         s.UpdatedAt = Now();
