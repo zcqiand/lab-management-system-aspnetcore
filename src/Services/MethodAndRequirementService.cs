@@ -27,8 +27,10 @@ public sealed class CalculationMethodService(IMethodStore store)
             // 可空引用列缺省必须写 NULL 而非 ""：testing_standard_code / report_name_code 带
             // calc_rule_standard_fk / calc_rule_report_fk（SET NULL），"" 非合法 code → 23503 → 500
             // （5.54 live 全量 aspnetcore 实证；springboot/nextjs 缺省均存 NULL）。
-            TestingStandardCode = (string?)body.TestingStandardCode,
-            ReportNameCode = (string?)body.ReportNameCode,
+            // `!` 治 generated 非空注解（REQ-2026-001 NSwag optional→非空缺口，读侧由
+            // LabDbContext 全局 IsNullable 兜底）——列真可空，null 落库合法。
+            TestingStandardCode = body.TestingStandardCode!,
+            ReportNameCode = body.ReportNameCode!,
             AlgorithmType = body.AlgorithmType ?? CalculationAlgorithmType.Manual,
             SpecimenCount = body.SpecimenCount is null ? 1 : body.SpecimenCount.Value,
             Formula = body.Formula ?? "",
@@ -110,10 +112,11 @@ public sealed class TechnicalRequirementService(IRequirementStore store)
             SourceHash = body.SourceHash ?? "",
             // brand/model/grade/spec 为 SET NULL FK 列（tech_req_brand_fk 等），"" 非合法 code
             // → 23503 → 500（5.54 live 全量 aspnetcore 实证）；缺省须存 NULL（镜像 springboot）。
-            Brand = (string?)body.Brand,
-            Model = (string?)body.Model,
-            Grade = (string?)body.Grade,
-            Spec = (string?)body.Spec,
+            // `!` 同上：generated 非空注解 vs 可空列（REQ-2026-001），null 落库合法。
+            Brand = body.Brand!,
+            Model = body.Model!,
+            Grade = body.Grade!,
+            Spec = body.Spec!,
             Sieve = body.Sieve ?? "",
             Remark = body.Remark ?? "",
             SortOrder = body.SortOrder ?? 0,
