@@ -1,5 +1,6 @@
 namespace Lab.AspNetCore.Persistence;
 
+using System.Collections.Generic;
 using Lab.AspNetCore.Controllers.Generated;
 using Lab.AspNetCore.Data;
 using Microsoft.EntityFrameworkCore;
@@ -118,6 +119,18 @@ internal static class EfStoreOps
         else
         {
             db.Entry(existing).CurrentValues.SetValues(entity);
+            // 5.83：EF 默认 ValueComparer 对 jsonb List 属性做引用快照（5.75 SaveReceipt 同根）——
+            // 调用方拿 tracked 实例原地 mutate 再 Upsert(自身) 时 SetValues 检测不到 jsonb 变更、
+            // 静默不落库。防御性换新实例触发 modified（命中面 = InspectionParameter.Aliases /
+            // InspectionReportName.ExtFields；EfStorePgTest 两条回归锁定该语义）。
+            foreach (var p in typeof(T).GetProperties().Where(p =>
+                         p.PropertyType.IsGenericType
+                         && p.PropertyType.GetGenericTypeDefinition() == typeof(List<>)
+                         && p.CanWrite))
+            {
+                var src = p.GetValue(existing);
+                p.SetValue(existing, src is null ? src : Activator.CreateInstance(p.PropertyType, src));
+            }
         }
 
         db.SaveChanges();

@@ -40,6 +40,8 @@ public sealed class EfStorePgTest : IDisposable
         db.Contracts.Where(c => c.TenantId == Tenant).ExecuteDelete();
         db.InspectionBrands.Where(b => b.TenantId == Tenant).ExecuteDelete();
         db.InspectionModels.Where(m => m.TenantId == Tenant).ExecuteDelete();
+        db.InspectionParameters.Where(p => p.Code == "PAR-583").ExecuteDelete();
+        db.InspectionReportNames.Where(r => r.Code == "RN-583").ExecuteDelete();
         // 父行（objects/specialties 是平台级字典，同 code 复用；清业务行即够）
         db.SaveChanges();
     }
@@ -208,5 +210,71 @@ public sealed class EfStorePgTest : IDisposable
         var reread = fresh.SampleReceipts.First(r => r.TenantId == Tenant && r.Id == "R-FH");
         Assert.Single(reread.FlowHistory);
         Assert.Equal(FlowAction.Return, reread.FlowHistory[0].Action);
+    }
+
+    // 5.83 潜伏面回归：Upsert 的 jsonb List 属性（InspectionParameter.Aliases /
+    // InspectionReportName.ExtFields）与 5.75 SaveReceipt 同根——EF ValueComparer 引用快照
+    // 令「tracked 实例原地 mutate 再 Save(自身)」的 jsonb 变更静默不落库。现行写路径
+    // （DictionaryService）全为新实例赋值无活 bug，本组测试锁 Upsert 防御性新实例拷贝语义。
+    [Fact]
+    public void SaveParameter_persistsInPlaceAliasesMutation()
+    {
+        var store = new EfDictionaryStore(db);
+        store.SaveParameter(new InspectionParameter
+        {
+            Code = "PAR-583",
+            Name = "n",
+            RawName = "n",
+            CanonicalName = "n",
+            MethodText = "",
+            Aliases = new List<string> { "别名-1" },
+            Unit = "",
+            SourceType = InspectionParameterSourceType.Official,
+            SortOrder = 0,
+            CreatedAt = "t",
+            UpdatedAt = "t",
+        });
+
+        var tracked = store.FindParameter("PAR-583");
+        Assert.NotNull(tracked);
+        tracked!.Aliases.Add("别名-2");
+        store.SaveParameter(tracked);
+
+        using var fresh = TestDb.CreateContext();
+        var reread = fresh.InspectionParameters.Find("PAR-583");
+        Assert.NotNull(reread);
+        Assert.Equal(new[] { "别名-1", "别名-2" }, reread!.Aliases);
+    }
+
+    [Fact]
+    public void SaveReportName_persistsInPlaceExtFieldsMutation()
+    {
+        var store = new EfDictionaryStore(db);
+        store.SaveReportName(new InspectionReportName
+        {
+            Code = "RN-583",
+            Name = "n",
+            FullName = "",
+            TemplatePath = "",
+            SummaryName = "",
+            ExtFields = new List<ExtFieldDef>
+            {
+                new() { Key = "k1", Label = "l1", Type = ExtFieldDefType.Text },
+            },
+            Description = "",
+            SortOrder = 0,
+            CreatedAt = "t",
+            UpdatedAt = "t",
+        });
+
+        var tracked = store.FindReportName("RN-583");
+        Assert.NotNull(tracked);
+        tracked!.ExtFields.Add(new ExtFieldDef { Key = "k2", Label = "l2", Type = ExtFieldDefType.Text });
+        store.SaveReportName(tracked);
+
+        using var fresh = TestDb.CreateContext();
+        var reread = fresh.InspectionReportNames.Find("RN-583");
+        Assert.NotNull(reread);
+        Assert.Equal(new[] { "k1", "k2" }, reread!.ExtFields.Select(f => f.Key));
     }
 }
