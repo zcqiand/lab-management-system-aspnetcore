@@ -34,11 +34,18 @@ public class JunctionServiceTest
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（契约 unlink = void，未命中不抛；
         // 原 KeyNotFound→404 断言随 Unlink 语义变更同 commit 移除）
-        Svc().UnlinkSpecialtyObject(new SpecialtyObjectLink
+        // 2.6②：对齐 SB 镜像 verify(never()).deleteById——种子一行后删幽灵键，断行数不变（无连带删除）
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkSpecialtyObject(new SpecialtyObjectLink { InspectionSpecialtyCode = "SP-1", InspectionObjectCode = "OBJ-1" });
+
+        svc.UnlinkSpecialtyObject(new SpecialtyObjectLink
         {
             InspectionSpecialtyCode = "SP-GHOST",
             InspectionObjectCode = "OBJ-GHOST",
         }); // 未命中静默
+
+        Assert.Single(store.ListSpecialtyObject(null));
     }
 
     [Fact]
@@ -76,7 +83,14 @@ public class JunctionServiceTest
     public void UnlinkObjectParameter_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkObjectParameter("OBJ-GHOST", "P-GHOST"); // 未命中静默
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkObjectParameter(new ObjectParameterLink { InspectionObjectCode = "OBJ-1", InspectionParameterCode = "P-1" });
+
+        svc.UnlinkObjectParameter("OBJ-GHOST", "P-GHOST"); // 未命中静默
+
+        Assert.Single(store.ListObjectParameter(null, null));
     }
 
     // === object-standard（role 必填 + 在 PK；link F01.I05 / unlink F01.I06） ===
@@ -114,7 +128,19 @@ public class JunctionServiceTest
     public void UnlinkObjectStandard_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkObjectStandard("OBJ-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkObjectStandard(new ObjectStandardLink
+        {
+            InspectionObjectCode = "OBJ-1",
+            InspectionStandardCode = "STD-1",
+            Role = InspectionStandardRole.TESTING,
+        });
+
+        svc.UnlinkObjectStandard("OBJ-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+
+        Assert.Single(store.ListObjectStandard(null, null));
     }
 
     // === standard-parameter（link F03.I05 / unlink F03.I06） ===
@@ -135,11 +161,18 @@ public class JunctionServiceTest
     public void UnlinkStandardParameter_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkStandardParameter(new StandardParameterLink
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkStandardParameter(new StandardParameterLink { InspectionStandardCode = "STD-1", InspectionParameterCode = "P-1" });
+
+        svc.UnlinkStandardParameter(new StandardParameterLink
         {
             InspectionStandardCode = "GHOST",
             InspectionParameterCode = "GHOST",
         }); // 未命中静默
+
+        Assert.Single(store.ListStandardParameter(null, null));
     }
 
     // === report-name-object（link F07.I06 / unlink F04.I05） ===
@@ -160,7 +193,14 @@ public class JunctionServiceTest
     public void UnlinkObjectReportName_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkObjectReportName("OBJ-GHOST", "RN-GHOST"); // 未命中静默
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkObjectReportName(new ObjectReportNameLink { InspectionObjectCode = "OBJ-1", ReportNameCode = "RN-1" });
+
+        svc.UnlinkObjectReportName("OBJ-GHOST", "RN-GHOST"); // 未命中静默
+
+        Assert.Single(store.ListObjectReportName(null, null));
     }
 
     // === report-name-standard（role 在 PK；link 双标 F07.I07+F04.I07 / unlink F04.I07） ===
@@ -192,7 +232,19 @@ public class JunctionServiceTest
     public void UnlinkReportNameStandard_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkReportNameStandard("RN-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkReportNameStandard(new ReportNameStandardLink
+        {
+            ReportNameCode = "RN-1",
+            InspectionStandardCode = "STD-1",
+            Role = InspectionStandardRole.TESTING,
+        });
+
+        svc.UnlinkReportNameStandard("RN-GHOST", "STD-GHOST", InspectionStandardRole.TESTING); // 未命中静默
+
+        Assert.Single(store.ListReportNameStandard(null, null));
     }
 
     // === report-name-parameter（link 双标 F07.I08+F03.I07 / unlink F04.I06） ===
@@ -214,7 +266,14 @@ public class JunctionServiceTest
     public void UnlinkReportNameParameter_idempotent204()
     {
         // REQ-2026-001 推广（Task 2.6）：unlink 幂等（原 KeyNotFound→404 断言随语义变更同 commit 移除）
-        Svc().UnlinkReportNameParameter("RN-GHOST", "P-GHOST"); // 未命中静默
+        // 2.6②：对齐 SB 镜像——种子一行后删幽灵键，断行数不变
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkReportNameParameter(new ReportNameParameterLink { ReportNameCode = "RN-1", InspectionParameterCode = "P-1" });
+
+        svc.UnlinkReportNameParameter("RN-GHOST", "P-GHOST"); // 未命中静默
+
+        Assert.Single(store.ListReportNameParameter(null, null));
     }
 
     // === param-interface（link F08.I06 / unlink F03.I07） ===
@@ -239,12 +298,17 @@ public class JunctionServiceTest
     {
         // REQ-2026-001：unlink 幂等（契约 unlink = void，未命中不抛；
         // 原 KeyNotFound→404 断言随 UnlinkParamInterface 语义变更同 commit 移除）
-        var svc = Svc();
+        // 2.6②：对齐 SB 镜像——行数断言取代「仅不抛」
+        var store = new InMemoryJunctionStore();
+        var svc = new JunctionService(store);
+        svc.LinkParamInterface(new ParamInterfaceLink { InspectionParameterCode = "P-1", ParamInterfaceCode = "PI-1" });
 
         svc.UnlinkParamInterface("P-GHOST", "PI-GHOST"); // 未命中静默
-        svc.LinkParamInterface(new ParamInterfaceLink { InspectionParameterCode = "P-1", ParamInterfaceCode = "PI-1" });
+        Assert.Single(store.ListParamInterface(null, null));
+
         svc.UnlinkParamInterface("P-1", "PI-1");
         svc.UnlinkParamInterface("P-1", "PI-1"); // 已删再删幂等
+        Assert.Empty(store.ListParamInterface(null, null));
     }
 
     // === junction GET（Page<T> 契约补齐 — link 后按 query 过滤取回）===

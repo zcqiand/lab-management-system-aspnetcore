@@ -126,7 +126,7 @@ public class ReportFlowServiceTest
     }
 
     [Fact]
-    [Trait("Fn", "M03.F08.I03")]
+    [Trait("Fn", "M03.F08.I05")]
     public void FullLifecycle_receivingToArchived_viaActSubmit()
     {
         // 5.49-① 同步：单端点 SubmitAction → 7 个 act 端点（URL 隐式 stage 校验）；
@@ -259,7 +259,7 @@ public class ReportFlowServiceTest
     }
 
     [Fact]
-    [Trait("Fn", "M03.F08.I03")]
+    [Trait("Fn", "M03.F08.I05")]
     public void ActFlowArchived_submitOnlyReturnAndWithdrawRejected()
     {
         // archived 是终态但允许 submit 自转移（写 history），拒 return/withdraw
