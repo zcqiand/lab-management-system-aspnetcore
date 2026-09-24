@@ -86,7 +86,7 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     # 登录 UI 同栈匹配：lab-vue 后端是 lab-aspnetcore → 登录页指 saas-vue
     #（2026-08-29 前指 saas-react；saas-vue LoginPage 已补 OAuth code 回跳）
     printf 'LAB_SSO_LOGIN_URL=https://saas-vue.xiangru.uk\n'
-    printf 'LAB_SAAS_CLIENT_ID=11111111-1111-1111-1111-111111111111\n'
+    printf 'LAB_SAAS_CLIENT_ID=lab-management\n'
     printf 'LAB_SAAS_CLIENT_SECRET=%s\n' "$LAB_SAAS_CLIENT_SECRET"
     printf 'LAB_SAAS_DEFAULT_TENANT_ID=%s\n' "${LAB_SAAS_DEFAULT_TENANT_ID:-00000000-0000-0000-0000-000000000001}"
     printf 'LAB_SSO_CALLBACK_REDIRECT=https://lab-react.xiangru.uk/login\n'
@@ -136,7 +136,15 @@ if [ -f "$BASE/aspnetcore.env" ]; then
     echo "→ migrate stale LAB_SSO_LOGIN_URL saas-react -> saas-vue (同栈匹配) in $BASE/aspnetcore.env"
     sed -i 's#^LAB_SSO_LOGIN_URL=https://saas-react\.xiangru\.uk$#LAB_SSO_LOGIN_URL=https://saas-vue.xiangru.uk#' "$BASE/aspnetcore.env"
   fi
-  append_if_missing LAB_SAAS_CLIENT_ID '11111111-1111-1111-1111-111111111111'
+  # OAuth clientId 漂移修正（2026-09-25 线上 400 事故根因）：
+  # 历史 .env.production 把 LAB_SAAS_CLIENT_ID 误写成 oauth_client.id UUID 行号，
+  # saas authorize 端点查 oauth_client.client_id 列（varchar code 形如 'lab-management'），
+  # UUID 必 INVALID_CLIENT 400。append_if_missing 只补缺失不动 stale UUID，先 reconcile 再 append。
+  if grep -qE '^LAB_SAAS_CLIENT_ID=11111111-[0-9a-f-]+$' "$BASE/aspnetcore.env"; then
+    echo "→ reconcile LAB_SAAS_CLIENT_ID in $BASE/aspnetcore.env (UUID → lab-management, ADR-0019 + 登录 clientId 是字符串不是行 id)"
+    sed -i -E 's#^LAB_SAAS_CLIENT_ID=11111111-[0-9a-f-]+$#LAB_SAAS_CLIENT_ID=lab-management#' "$BASE/aspnetcore.env"
+  fi
+  append_if_missing LAB_SAAS_CLIENT_ID 'lab-management'
   if ! grep -q '^LAB_SAAS_CLIENT_SECRET=' "$BASE/aspnetcore.env"; then
     if [ -z "${LAB_SAAS_CLIENT_SECRET:-}" ]; then
       echo "ERROR: LAB_SAAS_CLIENT_SECRET missing in $BASE/aspnetcore.env and not forwarded via ci.yml envs (静默降级在 prod 是事故)" >&2
