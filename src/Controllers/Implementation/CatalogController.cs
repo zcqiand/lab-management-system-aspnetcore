@@ -20,6 +20,7 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F06 型号 ===
 
+    // @entry M04.F06.I01 — 型号列表：租户隔离+关键字大小写不敏+排序（book anchor xr-know-016）
     public override Task<Response3> ListModels(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
@@ -37,6 +38,7 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
         });
     }
 
+    // @entry M04.F06.I02 — 型号新增：创建/修改时间戳相等初始化（book anchor xr-know-016）
     public override Task<InspectionModel> CreateModel([FromBody] CreateCatalogEntryRequest body) =>
         Task.FromResult(_service.CreateModel(_tenantContext.TenantId, body));
 
@@ -51,6 +53,7 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F07 规格 ===
 
+    // @entry M04.F07.I01 — 规格列表：名称关键字过滤（book anchor xr-know-016）
     public override Task<Response4> ListSpecs(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
@@ -82,6 +85,7 @@ public sealed class CatalogController(CatalogService service, ITenantContext ten
 
     // === M04.F08 等级 ===
 
+    // @entry M04.F08.I01 — 等级列表：objectCode 精确过滤（book anchor xr-know-016）
     public override Task<Response2> ListGrades(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,

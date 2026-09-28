@@ -6,6 +6,7 @@ using Lab.AspNetCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
+// @impl M03.F05.I01 — 审核队列：本类 FlowQueue/BuildFlowQueueQuery 按 stage 过滤+分页截断（2026-09-17 重整后队列无独立 HTTP 端点，经 GET /api/receipts?flowStatus= 暴露）（book anchor xr-know-016）
 public sealed class EfFlowStore(LabDbContext db) : IFlowStore
 {
     // === 合同 M02.F01 ===

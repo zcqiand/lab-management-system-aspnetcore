@@ -15,6 +15,7 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
 {
     private readonly AuthService _service = service;
 
+    // @entry M01.F05.I01 — 密码登录：AuthService.Login 校验并签发会话（book anchor xr-know-016）
     public override Task<LoginResponse> Login([FromBody] LoginRequest body) =>
         Task.FromResult(_service.Login(body));
 
@@ -27,10 +28,12 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
 
     public override Task Logout([FromBody] Body body) => Task.CompletedTask;
 
+    // @entry M00.F01.I01 — 当前会话： claims 解析当前用户与租户（book anchor xr-know-016）
     [Authorize]
     public override Task<CurrentUserSession> GetCurrentUser() =>
         Task.FromResult(_service.Me(ReadClaims()));
 
+    // @entry M01.F04.I01 — 动态菜单：按当前用户/租户返回菜单树（book anchor xr-know-016）
     [Authorize]
     public override Task<System.Collections.Generic.ICollection<MenuNode>> GetMenus() =>
         Task.FromResult<System.Collections.Generic.ICollection<MenuNode>>(_service.Menus(ReadClaims()));
@@ -39,9 +42,11 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
     public override Task<PermissionSet> GetPermissions() =>
         Task.FromResult(_service.Permissions());
 
+    // @entry M01.F05.I04 — 刷新 token：以 refresh token 换发新会话（book anchor xr-know-016）
     public override Task<LoginResponse> Refresh([FromBody] RefreshTokenRequest body) =>
         Task.FromResult(_service.Refresh(body));
 
+    // @entry M01.F05.I02 — SSO 跳转：授权端点，透传 state/redirect_uri（book anchor xr-know-016）
     /** M01.F05.I02 — RFC 6749 §4.1.1：透传前端 state/redirect_uri，写签名 state cookie。 */
     // 参数名必须与生成基类一致（response_type 等 snake_case）：模型绑定按实现方法
     // 的参数名取 query，改成 responseType 会让前端发的 ?response_type= 绑不上 → 400。
@@ -63,6 +68,7 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
         return Task.FromResult(_service.SsoCallback(body, cookieValue));
     }
 
+    // @entry M00.F02.I01 — 选租户换发：校验租户成员资格并重签含租户 claim 的 token（book anchor xr-know-016）
     [Authorize]
     public override Task<LoginResponse> SwitchTenant([FromBody] SwitchTenantRequest body) =>
         Task.FromResult(_service.SwitchTenant(ReadClaims(), body));

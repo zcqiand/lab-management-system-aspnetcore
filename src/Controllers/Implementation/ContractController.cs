@@ -15,6 +15,7 @@ public sealed class ContractsController(ContractService service, ITenantContext 
     private readonly ContractService _service = service;
     private readonly ITenantContext _tenantContext = tenantContext;
 
+    // @entry M02.F01.I01 — 合同列表：关键字（编码/项目名）+状态过滤（book anchor xr-know-016）
     public override Task<Response5> ListContracts(
         [FromQuery] int? page, [FromQuery] int? pageSize,
         [FromQuery] string? keyword, [FromQuery] ContractStatus? status)
@@ -29,12 +30,15 @@ public sealed class ContractsController(ContractService service, ITenantContext 
         });
     }
 
+    // @entry M02.F01.I03 — 创建合同：生成 ID+默认启用（book anchor xr-know-016）
     public override Task<Contract> CreateContract([FromBody] CreateContractRequest body) =>
         Task.FromResult(_service.Create(_tenantContext.TenantId, body));
 
+    // @entry M02.F01.I02 — 合同详情：缺失抛 404 语义（book anchor xr-know-016）
     public override Task<Contract> GetContract(string id) =>
         Task.FromResult(_service.Get(_tenantContext.TenantId, id));
 
+    // @entry M02.F01.I04 — 更新合同：patch 语义，未传字段保留（book anchor xr-know-016）
     public override Task<Contract> UpdateContract(string id, [FromBody] UpdateContractRequest body) =>
         Task.FromResult(_service.Update(_tenantContext.TenantId, id, body));
 
@@ -78,6 +82,7 @@ public sealed class ReceiptsController(
         });
     }
 
+    // @entry M03.F01.I03 — 创建接样：初始化 receiving 态+空流程历史，合同缺失拦截（book anchor xr-know-016）
     public override Task<SampleReceipt> CreateReceipt([FromBody] CreateSampleReceiptRequest body) =>
         Task.FromResult(_service.Create(_tenantContext.TenantId, body));
 
@@ -93,7 +98,7 @@ public sealed class ReceiptsController(
         return Task.CompletedTask;
     }
 
-    // M03.F01.I06 流程历史
+    // @entry M03.F01.I06 — 流程历史：按接样返回 FlowHistoryEntry 列表（book anchor xr-know-016）
     public override Task<System.Collections.Generic.ICollection<FlowHistoryEntry>> GetReceiptHistory(string id) =>
         Task.FromResult<System.Collections.Generic.ICollection<FlowHistoryEntry>>(
             _service.History(_tenantContext.TenantId, id).ToList());
@@ -111,8 +116,10 @@ public sealed class ReceiptsController(
         Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowAssigning(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowDataEntry([FromBody] FlowActionRequest body) =>
         Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowDataEntry(_tenantContext.TenantId, body));
+    // @entry M03.F05.I03 — 通过退回：review 态 act，SUBMIT 推进至 approval / RETURN 退回（book anchor xr-know-016）
     public override Task<ICollection<FlowActionResult>> ActFlowReview([FromBody] FlowActionRequest body) =>
         Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowReview(_tenantContext.TenantId, body));
+    // @entry M03.F06.I01 + M03.F06.I03 — 批准态 act：SUBMIT 阶段推进（approval→issuance）/ RETURN 批准退回（approval→review）（book anchor xr-know-016）
     public override Task<ICollection<FlowActionResult>> ActFlowApprove([FromBody] FlowActionRequest body) =>
         Task.FromResult<ICollection<FlowActionResult>>(_flowService.ActFlowApprove(_tenantContext.TenantId, body));
     public override Task<ICollection<FlowActionResult>> ActFlowIssuance([FromBody] FlowActionRequest body) =>
@@ -144,6 +151,7 @@ public sealed class SamplesController(SampleService service, ITenantContext tena
         });
     }
 
+    // @entry M03.F03.I03 — 创建样品：ext 缺省空字典，接样缺失拦截（book anchor xr-know-016）
     public override Task<Sample> CreateSample([FromBody] CreateSampleRequest body) =>
         Task.FromResult(_service.Create(_tenantContext.TenantId, body));
 
@@ -188,6 +196,7 @@ public sealed class TestRecordsController(TestRecordService service, ITenantCont
         });
     }
 
+    // @entry M03.F03.I08 — 创建检测记录：必填字段映射落库（book anchor xr-know-016）
     public override Task<TestRecord> CreateTestRecord([FromBody] CreateTestRecordRequest body) =>
         Task.FromResult(_service.Create(_tenantContext.TenantId, body));
 

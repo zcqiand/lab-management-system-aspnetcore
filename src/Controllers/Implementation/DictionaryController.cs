@@ -28,6 +28,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.FromResult(Wrap12(items, page, pageSize));
     }
 
+    // @entry M06.F01.I03 — 专项新增：默认值初始化（book anchor xr-know-016）
     public override Task<InspectionSpecialty> CreateSpecialty([FromBody] CreateInspectionSpecialtyRequest body) =>
         Task.FromResult(_service.CreateSpecialty(body));
 
@@ -52,6 +53,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.FromResult(Wrap11(items, page, pageSize));
     }
 
+    // @entry M06.F03.I03 — 参数新增：official 默认与空 aliases 语义（book anchor xr-know-016）
     public override Task<InspectionParameter> CreateParameter([FromBody] CreateInspectionParameterRequest body) =>
         Task.FromResult(_service.CreateParameter(body));
 
@@ -76,6 +78,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.FromResult(Wrap13(items, page, pageSize));
     }
 
+    // @entry M06.F04.I03 — 标准新增：默认启用状态（book anchor xr-know-016）
     public override Task<InspectionStandard> CreateStandard([FromBody] CreateInspectionStandardRequest body) =>
         Task.FromResult(_service.CreateStandard(body));
 
@@ -100,6 +103,7 @@ public sealed class InspectionDictionaryController(DictionaryService service, Ju
         return Task.FromResult(Wrap10(items, page, pageSize));
     }
 
+    // @entry M06.F02.I03 — 项目新增：字段映射，专项缺失 restrict 拦截（book anchor xr-know-016）
     public override Task<InspectionObject> CreateObject([FromBody] CreateInspectionObjectRequest body) =>
         Task.FromResult(_service.CreateObject(body));
 
@@ -425,6 +429,7 @@ public sealed class ParamInterfacesController(DictionaryService service, Junctio
     private readonly DictionaryService _service = service;
     private readonly JunctionService _junction = junction;
 
+    // @entry M06.F08.I01 — 参数界面列表：关键字过滤（book anchor xr-know-016）
     public override Task<Response14> ListParamInterfaces(
         [FromQuery] int? page,
         [FromQuery] int? pageSize,
