@@ -2,9 +2,9 @@
   "db_synced_sha": "4587566fec82a491793d93e924d3a1cc19f83554",
   "db_synced_at": "2026-09-13T01:05:30.405086+00:00",
   "db_synced_cmd": "sync-db.sh",
-  "shared_sha": "10ab516495924eb823794ec6b4f1722ce1675c33",
+  "shared_sha": "9e69993d62617834e0bd794d427b4771c2e03aa9",
   "consumer_repo": "lab-management-system-aspnetcore",
-  "api_synced_sha": "10ab516495924eb823794ec6b4f1722ce1675c33",
-  "api_synced_at": "2026-09-28T01:52:50.123217+00:00",
+  "api_synced_sha": "9e69993d62617834e0bd794d427b4771c2e03aa9",
+  "api_synced_at": "2026-09-28T02:19:06.852021+00:00",
   "api_synced_cmd": "gen-shared.sh"
 }
