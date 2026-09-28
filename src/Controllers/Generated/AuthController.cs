@@ -48,6 +48,10 @@ namespace Lab.AspNetCore.Controllers.Generated
         public abstract System.Threading.Tasks.Task<System.Collections.Generic.ICollection<MenuNode>> GetMenus();
 
         /// <returns>The request has succeeded.</returns>
+        [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/auth/native-login")]
+        public abstract System.Threading.Tasks.Task<LoginResponse> NativeLogin([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] LoginRequest body);
+
+        /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/auth/permissions")]
         public abstract System.Threading.Tasks.Task<PermissionSet> GetPermissions();
 

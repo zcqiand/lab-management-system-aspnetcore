@@ -18,6 +18,13 @@ public sealed class AuthController(AuthService service) : AuthControllerBase
     public override Task<LoginResponse> Login([FromBody] LoginRequest body) =>
         Task.FromResult(_service.Login(body));
 
+    /// <summary>
+    /// M01.F05.I06 原生登录（REQ-2026-003 Q4-C）：非浏览器客户端密码通道，
+    /// 校验与签发口径与 Login 同源（AuthService.Login，service-account 链路）。
+    /// </summary>
+    public override Task<LoginResponse> NativeLogin([FromBody] LoginRequest body) =>
+        Task.FromResult(_service.Login(body));
+
     public override Task Logout([FromBody] Body body) => Task.CompletedTask;
 
     [Authorize]

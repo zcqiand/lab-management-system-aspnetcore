@@ -28,3 +28,6 @@ appsettings.*.local.json
 # key 集合由 suite L0.5 门核对(存在时与 .env.example 严格双向比对);真值经 scripts/sync-secrets 进 GitHub Secrets
 .env.production
 .env.local
+
+# gen-shared.sh 构建自检日志（本地产物）
+.gen-shared-build.log
