@@ -6,6 +6,7 @@
     "Swashbuckle.AspNetCore": "6.6.2",
     "Npgsql.EntityFrameworkCore.PostgreSQL": "8.0.8",
     "EFCore.NamingConventions": "8.0.0",
-    "xunit": "2.9.0"
+    "xunit": "2.9.0",
+    "Microsoft.AspNetCore.Mvc.Testing": "8.0.0"
   }
 }

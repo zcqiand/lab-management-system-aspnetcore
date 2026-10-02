@@ -191,6 +191,14 @@ app.UseExceptionHandler(errorApp =>
 // 匿名 /health 探针（deploy 脚本 wget 探 200；与 saas-aspnetcore MapGet("/health") 同模式）
 app.MapGet("/health", () => Results.Ok(new { status = "ok" })).AllowAnonymous();
 
+// REQ-2026-001 根路径默认跳转 Swagger UI（基础设施端点：不进契约面/功能树，与 /health 同模式
+// minimal API，只占精确 "/"，不吞 /api/*）。
+// AllowAnonymous → 带/不带 Authorization 行为一致（AC-2）；
+// ExcludeFromDescription → 不出现在 swagger.json（AC-4）。
+app.MapGet("/", () => Results.Redirect("/swagger"))
+    .AllowAnonymous()
+    .ExcludeFromDescription();
+
 app.MapControllers();
 
 app.Run();
