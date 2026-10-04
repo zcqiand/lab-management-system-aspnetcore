@@ -1,0 +1,1697 @@
+{
+  "_schema": "code-suite-handoff v1",
+  "_note": "写书的事实底，非逐字引用源。book 引用该 tag 的终态文件(带 source=)；此清单供作者对账建造顺序。",
+  "project": "lab-management-system-aspnetcore",
+  "tag": "v0.2.32-20260928",
+  "stack": "aspnetcore",
+  "gate_proof": {
+    "tag": "v0.2.32-20260928",
+    "checked_at": "2026-09-28T15:36:12+00:00",
+    "verified": true,
+    "all_green": true,
+    "method": "gate.py --all",
+    "gate_command": "D:\\qiand-life\\1-projects\\xr-code-suite\\scripts\\gate.py -p lab-management-system-aspnetcore"
+  },
+  "function_tree": [
+    {
+      "fn_id": "M00.F01.I01",
+      "name": "当前会话",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M00.F02.I01",
+      "name": "选租户换发",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F04.I01",
+      "name": "动态菜单",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F04.I02",
+      "name": "权限集",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F05.I01",
+      "name": "密码登录",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F05.I02",
+      "name": "SSO 跳转",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F05.I03",
+      "name": "SSO 回调",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F05.I04",
+      "name": "刷新 token",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M01.F05.I05",
+      "name": "登出",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M02.F01.I01",
+      "name": "合同列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M02.F01.I02",
+      "name": "合同详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M02.F01.I03",
+      "name": "创建合同",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M02.F01.I04",
+      "name": "更新合同",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M02.F01.I05",
+      "name": "删除合同",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I01",
+      "name": "接样列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I02",
+      "name": "接样详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I03",
+      "name": "创建接样",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I04",
+      "name": "更新接样",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I05",
+      "name": "删除接样",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I06",
+      "name": "流程历史",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F01.I08",
+      "name": "接样-提交",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F02.I01",
+      "name": "任务分配",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I01",
+      "name": "样品列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I02",
+      "name": "样品详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I03",
+      "name": "创建样品",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I04",
+      "name": "更新样品",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I05",
+      "name": "删除样品",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I06",
+      "name": "检测记录列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I07",
+      "name": "检测记录详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I08",
+      "name": "创建检测记录",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I09",
+      "name": "更新检测记录",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I10",
+      "name": "删除检测记录",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F03.I11",
+      "name": "改判",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F05.I01",
+      "name": "审核队列",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F05.I02",
+      "name": "审核查看",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F05.I03",
+      "name": "通过退回",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F06.I01",
+      "name": "阶段推进",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F06.I02",
+      "name": "批准查看",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F06.I03",
+      "name": "批准退回",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F07.I01",
+      "name": "发放队列",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F07.I02",
+      "name": "发放查看",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F07.I03",
+      "name": "发放退回",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F08.I01",
+      "name": "归档队列",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F08.I02",
+      "name": "归档查看",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F08.I03",
+      "name": "归档退回",
+      "type": "接口",
+      "status": "已废弃"
+    },
+    {
+      "fn_id": "M03.F08.I05",
+      "name": "报告归档-提交",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M03.F09.I01",
+      "name": "接样单详情聚合",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F06.I01",
+      "name": "型号列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F06.I02",
+      "name": "型号新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F06.I03",
+      "name": "型号修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F06.I04",
+      "name": "型号删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F07.I01",
+      "name": "规格列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F07.I02",
+      "name": "规格新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F07.I03",
+      "name": "规格修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F07.I04",
+      "name": "规格删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F08.I01",
+      "name": "等级列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F08.I02",
+      "name": "等级新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F08.I03",
+      "name": "等级修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F08.I04",
+      "name": "等级删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F09.I01",
+      "name": "牌号列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F09.I02",
+      "name": "牌号新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F09.I03",
+      "name": "牌号修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M04.F09.I04",
+      "name": "牌号删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M05.F01.I01",
+      "name": "报告汇总",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M05.F01.I03",
+      "name": "核心指标卡",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M05.F01.I04",
+      "name": "任务状态漏斗",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M05.F01.I06",
+      "name": "仪表盘统计基础端点",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I01",
+      "name": "专项列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I02",
+      "name": "专项详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I03",
+      "name": "专项新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I04",
+      "name": "专项修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I05",
+      "name": "专项标准关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F01.I06",
+      "name": "专项标准解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I01",
+      "name": "项目列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I02",
+      "name": "项目详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I03",
+      "name": "项目新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I04",
+      "name": "项目修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I05",
+      "name": "专项项目关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I06",
+      "name": "专项项目解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I07",
+      "name": "项目参数关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F02.I08",
+      "name": "项目参数解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I01",
+      "name": "参数列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I02",
+      "name": "参数详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I03",
+      "name": "参数新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I04",
+      "name": "参数修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I05",
+      "name": "标准参数关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I06",
+      "name": "标准参数解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F03.I07",
+      "name": "参数界面解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I01",
+      "name": "标准列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I02",
+      "name": "标准详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I03",
+      "name": "标准新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I04",
+      "name": "标准修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I05",
+      "name": "报告对象解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I06",
+      "name": "报告参数解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F04.I07",
+      "name": "报告标准解除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F05.I01",
+      "name": "规则列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F05.I02",
+      "name": "规则详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F05.I03",
+      "name": "规则新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F05.I04",
+      "name": "规则修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F05.I05",
+      "name": "规则删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F06.I01",
+      "name": "要求列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F06.I02",
+      "name": "要求详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F06.I03",
+      "name": "要求新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F06.I04",
+      "name": "要求修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F06.I05",
+      "name": "要求删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I01",
+      "name": "报告名称列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I02",
+      "name": "报告名称详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I03",
+      "name": "报告名称新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I04",
+      "name": "报告名称修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I05",
+      "name": "报告名称删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I06",
+      "name": "报告对象关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I07",
+      "name": "报告标准关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F07.I08",
+      "name": "报告参数关联",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I01",
+      "name": "参数界面列表",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I02",
+      "name": "参数界面详情",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I03",
+      "name": "参数界面新增",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I04",
+      "name": "参数界面修改",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I05",
+      "name": "参数界面删除",
+      "type": "接口",
+      "status": "已上线"
+    },
+    {
+      "fn_id": "M06.F08.I06",
+      "name": "参数界面关联",
+      "type": "接口",
+      "status": "已上线"
+    }
+  ],
+  "trace": [
+    {
+      "fn_id": "M00.F01.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_passwordUser_stillReturnsDemoTenants",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_ssoUser_snapshotCarriesRealNames",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_withTenantClaim_resolvesCurrentTenant",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_withoutTenantClaim_fallsBackToDefaultTenant",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_ssoUser_membershipHit_returnsSaasTenants",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_unknownUser_throws",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Me_ssoUser_membershipMiss_throws401"
+      ]
+    },
+    {
+      "fn_id": "M00.F02.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SwitchTenant_unknownTenant_throws",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SwitchTenant_validTenant_reissuesTokenWithClaim"
+      ]
+    },
+    {
+      "fn_id": "M01.F04.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasMeClientTest.ListMyMenusAsync_appCodeAsQueryString",
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasMeClientTest.ListMyMenusAsync_mapShape_byAppCode_returnsList",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Menus_snapshotMiss_throwsMenusUnavailable",
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasMeClientTest.ListMyMenusAsync_mapShape_unknownAppCode_returnsEmpty",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Login_passwordFlow_cachesServiceAccountSnapshot",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Menus_reloadRotatesStoredSaasRefreshToken"
+      ]
+    },
+    {
+      "fn_id": "M01.F04.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Permissions_returnsAdminFullSet"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasAuthClientTest.ServiceLoginAsync_postsToAuthLogin",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Login_success_returnsSessionWithTenants",
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasAuthClientTest.Constructor_missingServiceClientId_throws",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Login_wrongPassword_throws",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Login_missingFields_throws",
+        "Lab.AspNetCore.Tests.Auth.Sso.SaasAuthClientTest.ServiceLoginAsync_bodyHasClientId_noTenantCode"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoAuthorize_returnsAuthorizeUrlAndState"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoCallback_tenantListUnavailable_degradesToTenantId",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoCallback_tokenCarriesTenantIdClaim",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoCallback_mismatchedState_throws",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoCallback_tenantsCarryRealNames_notTenantId",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.SsoCallback_returnsSaasSession"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Refresh_validToken_returnsNewSession",
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Refresh_malformedToken_throws"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.AuthServiceTest.Logout_stateless_noop"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.List_statusFilter",
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.List_keywordMatchesCodeOrProjectName"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.Create_generatesIdAndDefaultsActive"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.Update_patchKeepsUnset"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.Delete_unreferenced_removes",
+        "Lab.AspNetCore.Tests.Services.ContractServiceTest.Delete_referencedByReceipt_throwsRestrict"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.List_contractAndFlowStatusFilters",
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.List_unknownFilterEqualsAbsent",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.Submit_then_filterSubmitted_noFlowStatus_hitsRow",
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.List_filterThreeState_notYetAndSubmitted"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Create_initializesReceivingAndEmptyHistory",
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Create_missingContract_throws"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Update_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Delete_cascadesSamples"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.History_returnsFlowHistoryEntries"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I08",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReceiving_submit_writesLastSubmittedByFromOperator",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReview_return_keepsLastSubmittedBy",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReceiving_blankOperator_throws",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlow_missingOperator_throws",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReceiving_withdraw_clearsLastSubmittedBy"
+      ]
+    },
+    {
+      "fn_id": "M03.F02.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.AssignTask_alreadyAssigned_doesNotAdvanceStage",
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.AssignTask_inReceiving_autoAdvancesToTaskAssignment"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.ListSamples_receiptAndKeywordFilters"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.GetSample_missing404"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.CreateSample_missingReceipt_throws",
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.CreateSample_extDefaultsToEmptyDict"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.UpdateSample_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.DeleteSample_removes"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.ListRecords_filtersBySampleIdOnly"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I07",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.GetRecord_missing404"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I08",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.CreateRecord_mapsRequiredFields"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I09",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.UpdateRecord_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I10",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.DeleteRecord_missing404"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I11",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleAndRecordServiceTest.SetVerdict_overwrites"
+      ]
+    },
+    {
+      "fn_id": "M03.F05.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.FlowQueue_filtersByStage"
+      ]
+    },
+    {
+      "fn_id": "M03.F05.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M03.F05.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReview_withdraw_rejected_actionNotAllowed",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReview_submitAndReturn_bothSupported",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReview_submit_advancesReviewToApproval"
+      ]
+    },
+    {
+      "fn_id": "M03.F06.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowApprove_return_returnsApprovalToReview",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowReview_submit_advancesReviewToApproval"
+      ]
+    },
+    {
+      "fn_id": "M03.F06.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M03.F06.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowApprove_stageMismatch_rejectsNonApproval",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlow_missing_andStageMismatch_failWithoutBreakingBatch"
+      ]
+    },
+    {
+      "fn_id": "M03.F07.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.FlowQueue_filtersByStage"
+      ]
+    },
+    {
+      "fn_id": "M03.F07.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M03.F07.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.Withdraw_onlyValidInReceiving_selfTransition"
+      ]
+    },
+    {
+      "fn_id": "M03.F08.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.FlowQueue_filtersByStage"
+      ]
+    },
+    {
+      "fn_id": "M03.F08.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M03.F08.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowArchived_submit_refreshesLastSubmittedBy",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowArchived_submitOnlyReturnAndWithdrawRejected",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.ActFlowArchived_blankOperator_throws",
+        "Lab.AspNetCore.Tests.Services.ReportFlowServiceTest.FullLifecycle_receivingToArchived_viaActSubmit"
+      ]
+    },
+    {
+      "fn_id": "M03.F09.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SampleReceiptServiceTest.Get_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListModels_objectCodeFiltersExactly",
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListModels_tenantIsolation",
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListModels_keywordMatchesNameCaseInsensitive_sortedBySortOrderThenCode"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.CreateModel_setsTimestampsEqual"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateModel_patchKeepsUnsetFields",
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateModel_missing_throws404",
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateModel_explicitZeroSortOrderLands"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.DeleteModel_removes_thenMissing"
+      ]
+    },
+    {
+      "fn_id": "M04.F07.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListSpecs_keywordFiltersByName"
+      ]
+    },
+    {
+      "fn_id": "M04.F07.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.CreateSpec_mapsAllFields"
+      ]
+    },
+    {
+      "fn_id": "M04.F07.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateSpec_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M04.F07.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.DeleteSpec_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M04.F08.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListGrades_emptyWhenNoData",
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListGrades_objectCodeFilter"
+      ]
+    },
+    {
+      "fn_id": "M04.F08.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.CreateGrade_defaults"
+      ]
+    },
+    {
+      "fn_id": "M04.F08.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateGrade_rename"
+      ]
+    },
+    {
+      "fn_id": "M04.F08.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.DeleteGrade_removes"
+      ]
+    },
+    {
+      "fn_id": "M04.F09.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.ListBrands_keywordFiltersByCode"
+      ]
+    },
+    {
+      "fn_id": "M04.F09.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.CreateBrand_mapsFields"
+      ]
+    },
+    {
+      "fn_id": "M04.F09.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.UpdateBrand_missing_throws404"
+      ]
+    },
+    {
+      "fn_id": "M04.F09.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.CatalogServiceTest.DeleteBrand_setsNullOnReferencingRequirements"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetReportSummary_blankCategoryCode_treatedAsAll",
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetReportSummary_dateRange_closedInterval",
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetReportSummary_byCategoryCode_filters",
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetReportSummary_all_returnsColumnsAndAllRows"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetDashboardStats_materialRate_usesReportNameSummaryName"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetDashboardStats_funnel_sixStages"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetDashboardStats_aggregatesByStatus",
+        "Lab.AspNetCore.Tests.Services.SummaryServiceTest.GetDashboardStats_empty_returnsZeros"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListSpecialties_keywordFilters"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetSpecialty_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateSpecialty_defaults"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateSpecialty_explicitZeroSortOrderLands",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteSpecialty_missing404",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateSpecialty_patchKeepsUnset"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkObjectStandard_samePairDifferentRoles_areTwoRows"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkObjectStandard_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListObjects_specialtyFilter"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetObject_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateObject_mapsFields",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateObject_missingSpecialty_throwsRestrict"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteObject_removes",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateObject_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkSpecialtyObject_upsertNoError"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkSpecialtyObject_afterLink_succeeds",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkSpecialtyObject_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I07",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkObjectParameter_defaultsQualified"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I08",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkObjectParameter_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListParameters_keywordAndSourceTypeFilters"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetParameter_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateParameter_defaultsOfficialAndEmptyAliases"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteParameter_removes",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateParameter_aliasesReplaceWholeList"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkStandardParameter_upsert"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkStandardParameter_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I07",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkParamInterface_idempotent204",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkReportNameParameter_upsert"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListStandards_keywordAndStatusFilters"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetStandard_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateStandard_defaultsActive"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteStandard_missing404",
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateStandard_statusTransition"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkObjectReportName_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkReportNameParameter_idempotent204"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I07",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.UnlinkReportNameStandard_idempotent204",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkReportNameStandard_roleDefaultsToTesting"
+      ]
+    },
+    {
+      "fn_id": "M06.F05.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.ListRules_dualFilter"
+      ]
+    },
+    {
+      "fn_id": "M06.F05.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.GetRule_compositeKey_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F05.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.CreateRule_explicitZeroSpecimenCountLands",
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.CreateRule_defaultsManualAndSpecimen1"
+      ]
+    },
+    {
+      "fn_id": "M06.F05.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRule_patchKeepsUnset",
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRule_explicitZeroSortOrderLands",
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRule_explicitZeroSpecimenCountLands",
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRule_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F05.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.DeleteRule_compositeKey"
+      ]
+    },
+    {
+      "fn_id": "M06.F06.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.ListRequirements_quadFilter_withStatus"
+      ]
+    },
+    {
+      "fn_id": "M06.F06.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.GetRequirement_tripleKey_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F06.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.CreateRequirement_defaultsNumericGeManualDraft"
+      ]
+    },
+    {
+      "fn_id": "M06.F06.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRequirement_fourDimensionFields",
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.UpdateRequirement_patchKeepsUnset"
+      ]
+    },
+    {
+      "fn_id": "M06.F06.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.MethodAndRequirementServiceTest.DeleteRequirement_tripleKey"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListReportNames_keywordFilters"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetReportName_includesExtFields"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateReportName_extFieldsDefaultEmpty"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateReportName_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteReportName_removes"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.ListObjectReportNameLinks_filterByObject",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkObjectReportName_upsert"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I07",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.ListReportNameStandardLinks_filterByRole",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkReportNameStandard_roleDefaultsToTesting"
+      ]
+    },
+    {
+      "fn_id": "M06.F07.I08",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.ListReportNameParameterLinks_filterByReport",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkReportNameParameter_upsert"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I01",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.ListInterfaces_keywordFilters"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I02",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.GetInterface_configMap"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I03",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.CreateInterface_configDefaultsEmpty"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I04",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.UpdateInterface_patchSemantics"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I05",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.DictionaryServiceTest.DeleteInterface_missing404"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I06",
+      "tests": [
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.ListParamInterfaceLinks_filterByParam",
+        "Lab.AspNetCore.Tests.Services.JunctionServiceTest.LinkParamInterface_withRowLevelConfig"
+      ]
+    }
+  ],
+  "source_index": [
+    {
+      "fn_id": "M00.F01.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M00.F02.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M01.F04.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I02",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M01.F05.I04",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\AuthController.cs"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I02",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M02.F01.I04",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F01.I06",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F03.I08",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F05.I01",
+      "source_paths": [
+        "src\\Persistence\\EfFlowStore.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F05.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F06.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M03.F06.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\ContractController.cs"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\CatalogController.cs"
+      ]
+    },
+    {
+      "fn_id": "M04.F06.I02",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\CatalogController.cs"
+      ]
+    },
+    {
+      "fn_id": "M04.F07.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\CatalogController.cs"
+      ]
+    },
+    {
+      "fn_id": "M04.F08.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\CatalogController.cs"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\SummaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\SummaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I04",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\SummaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M05.F01.I06",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\SummaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M06.F01.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\DictionaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M06.F02.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\DictionaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M06.F03.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\DictionaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M06.F04.I03",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\DictionaryController.cs"
+      ]
+    },
+    {
+      "fn_id": "M06.F08.I01",
+      "source_paths": [
+        "src\\Controllers\\Implementation\\DictionaryController.cs"
+      ]
+    }
+  ]
+}
