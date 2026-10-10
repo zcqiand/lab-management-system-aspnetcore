@@ -101,11 +101,9 @@ builder.Services.AddHttpClient<ISaasMeClient, HttpSaasMeClient>()
     .AddHttpMessageHandler<SaasErrorMappingHandler>();
 
 // 用户目录（B1 配置式 demo，1:1 镜像 lab-msw / lab-springboot ConfigUserDirectory）
-// ADR-0019：DevPassword 缺失 throw,不允许 "dev123456" 兜底。dev 期 appsettings.Development.json
-// 必须显式声明 (即便 dev 也要求显式 dev password,与 prod 同 key 路径对齐)。
-builder.Services.AddSingleton<IUserDirectory>(sp =>
-    new ConfigUserDirectory(
-        ConfigBuilder.RequireDevPassword(sp.GetRequiredService<IConfiguration>())));
+// REQ-2026-023：DevPassword 随本地口令校验路径退役（账密校验代理 saas IdP），
+// 目录只承担 SSO/refresh/me 的用户与租户查找。
+builder.Services.AddSingleton<IUserDirectory>(_ => new ConfigUserDirectory());
 builder.Services.AddSingleton<AuthService>(sp =>
     new AuthService(
         sp.GetRequiredService<IUserDirectory>(),
@@ -180,12 +178,23 @@ app.UseExceptionHandler(errorApp =>
         {
             KeyNotFoundException => StatusCodes.Status404NotFound,
             Lab.AspNetCore.Services.MenusUnavailableException => StatusCodes.Status503ServiceUnavailable,
+            // REQ-2026-023：原生登录 saas IdP 不可达 → 五仓统一 502 SAAS_UNAVAILABLE
+            Lab.AspNetCore.Services.SaasIdpUnavailableException => StatusCodes.Status502BadGateway,
             AuthenticationException or UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             ArgumentException => StatusCodes.Status400BadRequest,
             SaasAuthException s => s.Status,
             _ => StatusCodes.Status500InternalServerError,
         };
-        await context.Response.WriteAsJsonAsync(new { error = ex?.Message ?? "internal error" });
+        // 统一错误码随 body 下发（仅登录路径新增，既有形状 {error} 保持不变）
+        var code = ex switch
+        {
+            Lab.AspNetCore.Services.SaasIdpUnavailableException => "SAAS_UNAVAILABLE",
+            _ => null,
+        };
+        object payload = code is null
+            ? new { error = ex?.Message ?? "internal error" }
+            : new { error = ex?.Message ?? "internal error", code };
+        await context.Response.WriteAsJsonAsync(payload);
     }));
 
 // 匿名 /health 探针（deploy 脚本 wget 探 200；与 saas-aspnetcore MapGet("/health") 同模式）

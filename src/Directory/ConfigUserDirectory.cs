@@ -17,7 +17,7 @@ using Lab.AspNetCore.Controllers.Generated;
 ///   saas /token refresh → 重新调 saas /me/menus → 填 cache。单实例 OK,多实例部署
 ///   需要替换为 DB / Redis 持久层 (Phase 6+ follow-up)。
 ///
-/// 口令可用 Lab:Auth:DevPassword 覆盖（避免硬编码扩散到测试）。
+/// REQ-2026-023：口令校验已代理 saas IdP，本目录只承担 SSO/refresh/me 的用户与租户查找。
 /// </summary>
 public sealed class ConfigUserDirectory : IUserDirectory
 {
@@ -36,13 +36,12 @@ public sealed class ConfigUserDirectory : IUserDirectory
         new MyTenant { TenantId = "TENANT-003", Code = "third-party", Name = "第三方检测实验室", RoleIds = new List<string> { "viewer" } },
     };
 
-    private readonly string _devPassword;
     private readonly Dictionary<string, CurrentUser> _upserted = new();
     private readonly ConcurrentDictionary<string, string> _saasRefreshTokens = new();
 
-    public ConfigUserDirectory(string devPassword)
+    // REQ-2026-023：devPassword/CheckPassword 随本地校验路径退役（账密校验代理 saas IdP）。
+    public ConfigUserDirectory()
     {
-        _devPassword = devPassword;
     }
 
     public CurrentUser? FindByUsername(string username)
@@ -77,9 +76,6 @@ public sealed class ConfigUserDirectory : IUserDirectory
         }
         return null;
     }
-
-    public bool CheckPassword(string username, string password) =>
-        DemoUser.Username == username && _devPassword == password;
 
     public IReadOnlyList<MyTenant> TenantsOf(string username) => Tenants;
 

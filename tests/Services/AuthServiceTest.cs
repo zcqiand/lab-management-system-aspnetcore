@@ -45,7 +45,7 @@ public class AuthServiceTest
     }
 
     private readonly AuthService _service = new(
-        new ConfigUserDirectory("dev123456"),
+        new ConfigUserDirectory(),
         new LabJwtSigner(Secret, "lab-test", 3600, 604800),
         new NoopSaasAuthClient(),
         new NoopSaasMeClient(),
@@ -71,9 +71,29 @@ public class AuthServiceTest
     [Trait("Fn", "M01.F05.I01")]
     public void Login_wrongPassword_throws()
     {
+        // REQ-2026-023：校验代理 saas IdP —— saas 4xx（口令错）→ 401 AuthenticationException
+        var failing = new FailingUserLoginClient(new SaasAuthException.InvalidGrant("saas 400: wrong password"));
+        var svc = NewServiceWith(failing);
         Assert.Throws<AuthenticationException>(
-            () => _service.Login(new LoginRequest { Username = "alice", Password = "wrong" }));
+            () => svc.Login(new LoginRequest { Username = "alice", Password = "wrong" }));
     }
+
+    /// <summary>UserLoginAsync 可注错替身（REQ-2026-023）。</summary>
+    private sealed class FailingUserLoginClient : NoopSaasAuthClient
+    {
+        private readonly Exception _failure;
+        public FailingUserLoginClient(Exception failure) => _failure = failure;
+        public override Task<SaasLoginResponse> UserLoginAsync(
+            string username, string password, CancellationToken ct = default) => throw _failure;
+    }
+
+    private static AuthService NewServiceWith(ISaasAuthClient saasAuth) => new(
+        new ConfigUserDirectory(),
+        new LabJwtSigner(Secret, "lab-test", 3600, 604800),
+        saasAuth,
+        new NoopSaasMeClient(),
+        new StateCookieManager(Secret),
+        Microsoft.Extensions.Options.Options.Create(Opts));
 
     [Fact]
     [Trait("Fn", "M01.F05.I01")]
@@ -228,7 +248,7 @@ public class AuthServiceTest
         // 用两个 service 实例模拟「重启后 cache 空」：实例 A 完成 SSO（存 token +
         // 填快照到 A 的 cache）；实例 B cache 天然 miss → reload 路径必须仍能
         // 工作（不抛 MenusUnavailable）且 reload 后 B 再调 Menus 命中。
-        var directory = new ConfigUserDirectory("dev123456");
+        var directory = new ConfigUserDirectory();
         var svcA = new AuthService(directory, new LabJwtSigner(Secret, "lab-test", 3600, 604800),
             new NoopSaasAuthClient(), new NoopSaasMeClient(), new StateCookieManager(Secret),
             Microsoft.Extensions.Options.Options.Create(Opts));
@@ -429,7 +449,7 @@ public class AuthServiceTest
         // saas /admin/tenants 5xx：登录不阻塞，name/code 降级回 tenantId
         var failing = new DegradedSaasMeClient();
         var degraded = new AuthService(
-            new ConfigUserDirectory("dev123456"),
+            new ConfigUserDirectory(),
             new LabJwtSigner(Secret, "lab-test", 3600, 604800),
             new NoopSaasAuthClient(),
             failing,

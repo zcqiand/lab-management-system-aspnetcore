@@ -110,4 +110,82 @@ public class SaasAuthClientTest
 
         Assert.Throws<InvalidOperationException>(() => new HttpSaasAuthClient(http, opts));
     }
+
+    // === REQ-2026-023：原生登录账密校验代理（UserLoginAsync） ===
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I01")]
+    public async Task UserLoginAsync_sendsOAuthClientId_andParsesLoginBody()
+    {
+        var (client, handler) = NewClient();
+        handler.ResponseBody = """
+            {"user":{"id":"saas-user-alice","username":"alice","email":"alice@saas.local"},
+             "availableTenants":[{"tenantId":"TENANT-001","roleIds":["admin"],"status":"active"}],
+             "accessToken":"u-at","refreshToken":"u-rt","userId":"saas-user-alice"}
+            """;
+
+        var resp = await client.UserLoginAsync("alice", "pw-123");
+
+        Assert.NotNull(handler.LastRequest);
+        Assert.Equal("/api/v1/auth/login", handler.LastRequest!.RequestUri!.PathAndQuery);
+        var body = await handler.LastRequest.Content!.ReadAsStringAsync();
+        Assert.Contains("\"username\":\"alice\"", body);
+        Assert.Contains("\"password\":\"pw-123\"", body);
+        // 原生登录的 clientId = OAuth client-id（LAB_SAAS_CLIENT_ID），不是服务账号的
+        // ServiceClientId（lab-management）——与 nextjs/springboot 出站语义对齐
+        Assert.Contains("\"clientId\":\"11111111-1111-1111-1111-111111111111\"", body);
+        Assert.DoesNotContain("lab-management", body);
+        // 响应 DTO 解析：user/availableTenants 进强类型
+        Assert.Equal("alice", resp.User!.Username);
+        Assert.Equal("saas-user-alice", resp.UserId);
+        Assert.Single(resp.AvailableTenants!);
+        Assert.Equal("TENANT-001", resp.AvailableTenants![0].TenantId);
+    }
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I01")]
+    public async Task UserLoginAsync_saas4xx_throwsInvalidGrant()
+    {
+        // 走真 SaasErrorMappingHandler 链（DI 同款）：saas 4xx → InvalidGrant
+        var handler = new StubHandler { Status = HttpStatusCode.BadRequest, ResponseBody = """{"message":"bad"}""" };
+        var http = new HttpClient(new SaasErrorMappingHandler { InnerHandler = handler })
+        {
+            BaseAddress = new Uri("https://saas.example.com"),
+        };
+        var client = NewClientWithHandler(http);
+
+        await Assert.ThrowsAsync<SaasAuthException.InvalidGrant>(
+            () => client.UserLoginAsync("alice", "wrong"));
+    }
+
+    [Fact]
+    [Trait("Fn", "M01.F05.I01")]
+    public async Task UserLoginAsync_saas5xx_throwsUpstreamUnavailable()
+    {
+        var handler = new StubHandler { Status = HttpStatusCode.ServiceUnavailable, ResponseBody = """{"message":"down"}""" };
+        var http = new HttpClient(new SaasErrorMappingHandler { InnerHandler = handler })
+        {
+            BaseAddress = new Uri("https://saas.example.com"),
+        };
+        var client = NewClientWithHandler(http);
+
+        await Assert.ThrowsAsync<SaasAuthException.UpstreamUnavailable>(
+            () => client.UserLoginAsync("alice", "pw-123"));
+    }
+
+    private static HttpSaasAuthClient NewClientWithHandler(HttpClient http)
+    {
+        var opts = Options.Create(new LabOptions
+        {
+            Sso = new LabOptions.SsoSection
+            {
+                _saasBase = "https://saas.example.com",
+                _clientId = "11111111-1111-1111-1111-111111111111",
+                _clientSecret = "sec",
+                _defaultTenantId = "00000000-0000-0000-0000-000000000001",
+                _serviceClientId = "lab-management",
+            },
+        });
+        return new HttpSaasAuthClient(http, opts);
+    }
 }

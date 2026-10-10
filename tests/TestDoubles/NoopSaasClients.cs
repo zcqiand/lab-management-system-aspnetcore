@@ -7,7 +7,7 @@ using Lab.AspNetCore.Auth.Sso;
 /// 测试项目 —— src 恒 real 注册 HttpSaas*Client，离线模拟只属于测试替身）。
 /// 语义不变：固定 admin session + 单租户 + 空菜单树 + ACME 平台租户种子。
 /// </summary>
-public sealed class NoopSaasAuthClient : ISaasAuthClient
+public class NoopSaasAuthClient : ISaasAuthClient
 {
     public Task<AuthorizeCodeResponse> AuthorizeAsync(string redirectUri, string scope, string state, CancellationToken ct = default)
     {
@@ -38,9 +38,36 @@ public sealed class NoopSaasAuthClient : ISaasAuthClient
             Scope = "openid",
         });
     }
+
+    /// <summary>
+    /// REQ-2026-023：userLogin 替身——与旧 demo 目录同形（USER-A/alice/三 demo 租户），
+    /// 存量 login 消费测试（success/refresh round-trip/菜单快照）零改动。
+    /// </summary>
+    public virtual Task<SaasLoginResponse> UserLoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        var tenants = new List<SaasAvailableTenant>
+        {
+            new() { TenantId = "TENANT-001", RoleIds = new() { "admin" }, Status = "active" },
+            new() { TenantId = "TENANT-002", RoleIds = new() { "technician" }, Status = "active" },
+            new() { TenantId = "TENANT-003", RoleIds = new() { "viewer" }, Status = "active" },
+        };
+        return Task.FromResult(new SaasLoginResponse
+        {
+            User = new SaasLoginUser
+            {
+                Id = "USER-A",
+                Username = "alice",
+                Email = "alice@saas.local",
+            },
+            AvailableTenants = tenants,
+            AccessToken = "dev-access-token",
+            RefreshToken = "dev-refresh-token",
+            UserId = "USER-A",
+        });
+    }
 }
 
-public sealed class NoopSaasMeClient : ISaasMeClient
+public class NoopSaasMeClient : ISaasMeClient
 {
     /// <summary>
     /// 2026-09-03 租户体系对齐：saas 侧租户用 UUID 体系（与 prod 一致），
@@ -77,7 +104,7 @@ public sealed class NoopSaasMeClient : ISaasMeClient
     }
 
     /// noop：与 saas_dev 种子同值（id -001 = ACME Corp / acme），演练 name/tenantKey 注入而非 UUID 充名。
-    public Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default)
+    public virtual Task<List<SaasPlatformTenant>> ListPlatformTenantsAsync(string saasAccessToken, CancellationToken ct = default)
     {
         return Task.FromResult(new List<SaasPlatformTenant>
         {

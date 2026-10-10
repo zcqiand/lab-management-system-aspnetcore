@@ -11,6 +11,12 @@ public interface ISaasAuthClient
     Task<TokenResponse> TokenAsync(string grantType, string? code, string? refreshToken, string? redirectUri, CancellationToken ct = default);
     /// <summary>saas /api/v1/auth/login 密码登录（服务账号用，替密码登录用户拉菜单快照）。</summary>
     Task<TokenResponse> ServiceLoginAsync(string username, string password, CancellationToken ct = default);
+
+    /// <summary>
+    /// REQ-2026-023：原生登录账密校验代理 —— 用终端用户账密调 saas /api/v1/auth/login，
+    /// 返回完整 body（user/availableTenants/userId/currentTenantId）供映射 LoginResponse。
+    /// </summary>
+    Task<SaasLoginResponse> UserLoginAsync(string username, string password, CancellationToken ct = default);
 }
 
 public sealed class AuthorizeCodeResponse
@@ -26,6 +32,36 @@ public sealed class TokenResponse
     public string TokenType { get; set; } = "Bearer";
     public int ExpiresIn { get; set; }
     public string Scope { get; set; } = "";
+}
+
+/// <summary>
+/// REQ-2026-023：saas /api/v1/auth/login 完整响应（原生登录代理用）。
+/// 注意 saas user 无 displayName、availableTenants 无租户名（富化走 /admin/tenants）。
+/// </summary>
+public sealed class SaasLoginResponse
+{
+    public SaasLoginUser? User { get; set; }
+    public List<SaasAvailableTenant>? AvailableTenants { get; set; }
+    public string AccessToken { get; set; } = "";
+    public string? RefreshToken { get; set; }
+    public string? UserId { get; set; }
+    public string? CurrentTenantId { get; set; }
+}
+
+public sealed class SaasLoginUser
+{
+    public string? Id { get; set; }
+    public string? Username { get; set; }
+    public string? Email { get; set; }
+    public string? DisplayName { get; set; }
+    public string? Status { get; set; }
+}
+
+public sealed class SaasAvailableTenant
+{
+    public string? TenantId { get; set; }
+    public List<string>? RoleIds { get; set; }
+    public string? Status { get; set; }
 }
 
 /// <summary>
@@ -99,6 +135,22 @@ public sealed class HttpSaasAuthClient : ISaasAuthClient
         var resp = await _http.PostAsJsonAsync("/api/v1/auth/login", body, ct);
         resp.EnsureSuccessStatusCode();
         var result = await resp.Content.ReadFromJsonAsync<TokenResponse>(cancellationToken: ct);
+        return result ?? throw new SaasAuthException.UpstreamUnavailable("saas returned empty login response");
+    }
+
+    public async Task<SaasLoginResponse> UserLoginAsync(string username, string password, CancellationToken ct = default)
+    {
+        // REQ-2026-023：原生登录代理，body 同 {username, password, clientId}——但 clientId 取
+        // OAuth client-id（LAB_SAAS_CLIENT_ID），不是服务账号的 ServiceClientId（另一键另一值语义）。
+        var body = new Dictionary<string, string>
+        {
+            ["username"] = username,
+            ["password"] = password,
+            ["clientId"] = _sso.ClientId,
+        };
+        var resp = await _http.PostAsJsonAsync("/api/v1/auth/login", body, ct);
+        resp.EnsureSuccessStatusCode();
+        var result = await resp.Content.ReadFromJsonAsync<SaasLoginResponse>(cancellationToken: ct);
         return result ?? throw new SaasAuthException.UpstreamUnavailable("saas returned empty login response");
     }
 }

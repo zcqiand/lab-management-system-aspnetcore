@@ -62,13 +62,27 @@ public sealed class AuthService
         {
             throw new ArgumentException("username and password are required");
         }
-        if (!_directory.CheckPassword(username, password))
+        // REQ-2026-023（2026-10-11 人裁方案 A）：账密校验代理 saas IdP——请求体账密调
+        // saas /api/v1/auth/login（clientId=LAB_SAAS_CLIENT_ID），本地 LAB_AUTH_DEV_PASSWORD /
+        // CheckPassword 路径退役（凭据真源=saas 库）。错误映射五仓统一：saas 4xx → 401
+        // （不透传）；5xx/不可达/超时 → 502 SAAS_UNAVAILABLE。
+        var saasLogin = ProxySaasLogin(username, password);
+        var saasUser = saasLogin.User ?? new SaasLoginUser();
+        // saas user 无 displayName、availableTenants 无租户名 → 瞬时持 accessToken 拉
+        // 平台租户列表富化（与 SsoCallback 同款 best-effort，失败降级 name=tenantId）。
+        // 回退链必须 ||/FirstNonEmpty 语义（空串 falsy，?? 接不住）——saas 无 displayName 时为空串。
+        var tenants = TenantsFromLogin(
+            saasLogin.AvailableTenants ?? new List<SaasAvailableTenant>(),
+            FetchTenantNames(FirstNonEmpty(saasUser.Id, saasLogin.UserId), saasLogin.AccessToken));
+        var user = new CurrentUser
         {
-            throw new AuthenticationException("Invalid username or password");
-        }
-        var user = _directory.FindByUsername(username) ?? throw new AuthenticationException("Invalid username or password");
-        // 密码登录的 dev 用户无 saas 身份 -> 用服务账号拉菜单快照（demo 兜底已删，
-        // miss 时 Menus() 抛 503）。失败不阻塞登录（warn），重登/SSO 可补。
+            Id = FirstNonEmpty(saasUser.Id, saasLogin.UserId) ?? "unknown",
+            Username = FirstNonEmpty(saasUser.Username, saasUser.Email) ?? "unknown",
+            DisplayName = FirstNonEmpty(saasUser.DisplayName, saasUser.Username, saasUser.Email) ?? "未知用户",
+            RoleCode = tenants.Count > 0 && tenants[0].RoleIds.Count > 0 ? tenants[0].RoleIds[0] : "member",
+        };
+        // 密码登录用户无 per-user saas refresh token -> 仍用服务账号拉菜单快照
+        // （REQ-2026-023 非目标，行为不动：失败不阻塞登录（warn），miss 时 Menus() 503）。
         try
         {
             var t = _saasAuth.ServiceLoginAsync(_opts.Value.Sso.ServiceUser, _opts.Value.Sso.ServicePassword).GetAwaiter().GetResult();
@@ -78,14 +92,62 @@ public sealed class AuthService
         {
             Console.Error.WriteLine($"[login] service-account menu snapshot failed for {user.Id}: {e.Message}");
         }
-        // 2026-09-16 Phase 2 测试切真（T11 live 首跑实证）：密码登录铸 token 必须带
-        // tenant_id claim —— nextjs（config.ts: claims.tenant_id ?? directory.defaultTenant()）
-        // 与 springboot（currentTenantIdOrDefaultStatic）的家族语义都是「claim 缺 → directory
-        // 默认租户」，aspnetcore 单侧 token 不带 claim 令全部租户域业务端点 401，四方比对全红。
-        // 这里在签发侧落 identity（config 定义目录，非字面量、非请求期 fallback），与 SSO 路径
-        // Session(labUser, saasUser.CurrentTenantId, …) 同构；TenantContext 的 ADR-0019 严格
-        // 校验保持不变（无 claim 的 token 依旧 401）。
-        return Session(user, _directory.DefaultTenant().TenantId, null);
+        _membershipCache.Put(user.Id, tenants);
+        // 2026-09-16 Phase 2 测试切真（T11 live 首跑实证）+ REQ-2026-023：token 带 tenant_id
+        // claim（saas currentTenantId ?? 首租户），refresh 维持 dev-placeholder（不透传 saas
+        // refreshToken）。与 SSO 路径 Session(labUser, saasUser.CurrentTenantId, …) 同构。
+        return Session(user, FirstNonEmpty(saasLogin.CurrentTenantId, tenants.Count > 0 ? tenants[0].TenantId : null), tenants, null);
+    }
+
+    /// <summary>
+    /// 账密代理出站（REQ-2026-023）。错误归类：saas 4xx → 401（不透传 saas 内部码）；
+    /// 5xx/连接失败/超时 → <see cref="SaasIdpUnavailableException"/>（Program.cs 映射 502 SAAS_UNAVAILABLE）。
+    /// </summary>
+    private SaasLoginResponse ProxySaasLogin(string username, string password)
+    {
+        try
+        {
+            return _saasAuth.UserLoginAsync(username, password).GetAwaiter().GetResult();
+        }
+        catch (SaasAuthException s) when (s.Status >= 400 && s.Status < 500)
+        {
+            throw new AuthenticationException("Invalid username or password");
+        }
+        catch (SaasAuthException s)
+        {
+            throw new SaasIdpUnavailableException("saas IdP unavailable: " + s.Message);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+        {
+            throw new SaasIdpUnavailableException("saas IdP unavailable: " + e.Message);
+        }
+    }
+
+    /// <summary>空串 falsy 回退链（saas 无 displayName 时为空串，?? 接不住）。</summary>
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(v => !string.IsNullOrEmpty(v));
+
+    /// <summary>
+    /// availableTenants → MyTenant（REQ-2026-023）。过滤 removed/无 tenantId；
+    /// nameById 命中时 Code=tenantKey、Name=name；miss 降级 Code=Name=tenantId（与 TenantsFrom 同语义）。
+    /// </summary>
+    private static List<MyTenant> TenantsFromLogin(
+        List<SaasAvailableTenant> available,
+        Dictionary<string, SaasPlatformTenant> nameById)
+    {
+        return available
+            .Where(t => !string.IsNullOrEmpty(t.TenantId) && t.Status != "removed")
+            .Select(t =>
+            {
+                nameById.TryGetValue(t.TenantId!, out var p);
+                return new MyTenant
+                {
+                    TenantId = t.TenantId!,
+                    Code = !string.IsNullOrEmpty(p?.TenantKey) ? p.TenantKey : t.TenantId!,
+                    Name = !string.IsNullOrEmpty(p?.Name) ? p.Name : t.TenantId!,
+                    RoleIds = t.RoleIds?.ToList() ?? new List<string>(),
+                };
+            }).ToList();
     }
 
     // === M01.F05.I04 刷新 token ===

@@ -38,7 +38,7 @@ public class AuthControllerStateCookieTest
         opts.Config = config;
         opts.Sso.Config = config;
         var service = new AuthService(
-            new ConfigUserDirectory("dev123456"),
+            new ConfigUserDirectory(),
             new LabJwtSigner("test-lab-jwt-secret-test-lab-jwt-secret-test-lab-jwt-secret", "lab-test", 3600, 604800),
             new NoopSaasAuthClient(),
             new NoopSaasMeClient(),

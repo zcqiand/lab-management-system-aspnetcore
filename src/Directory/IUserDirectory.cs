@@ -19,8 +19,6 @@ public interface IUserDirectory
 
     CurrentUser? FindById(string id);
 
-    bool CheckPassword(string username, string password);
-
     IReadOnlyList<MyTenant> TenantsOf(string username);
 
     MyTenant DefaultTenant();

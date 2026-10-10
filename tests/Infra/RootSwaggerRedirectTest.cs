@@ -28,7 +28,6 @@ public class RootSwaggerRedirectTest : IClassFixture<RootSwaggerRedirectTest.Fac
             builder.UseSetting("JWT_TTL_SECONDS", "3600");
             builder.UseSetting("JWT_REFRESH_TTL_SECONDS", "604800");
             builder.UseSetting("LAB_CORS_ALLOWED_ORIGINS", "http://localhost:5201,http://localhost:5202,http://localhost:5203");
-            builder.UseSetting("Lab:Auth:DevPassword", "unit-test-dev-password");
             builder.UseSetting("DATABASE_URL", "Host=localhost;Port=5432;Database=unused_root_redirect;Username=test;Password=test");
         }
     }

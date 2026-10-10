@@ -60,19 +60,6 @@ public static class ConfigBuilder
         return v.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
     }
 
-    /// <summary>
-    /// Lab:Auth:DevPassword（demo 目录密码，密码登录用）。缺失 throw。
-    /// dev 必填（即使 dev profile 也要求显式声明,不允许 "dev123456" 字面兜底）。
-    /// </summary>
-    public static string RequireDevPassword(IConfiguration cfg)
-    {
-        var v = cfg["Lab:Auth:DevPassword"];
-        if (string.IsNullOrEmpty(v))
-        {
-            throw new InvalidOperationException(
-                "Lab:Auth:DevPassword env is required (ADR-0019 禁 \"dev123456\" 兜底). " +
-                "Set in appsettings.Development.json (dev) or env (prod).");
-        }
-        return v;
-    }
+    // REQ-2026-023：RequireDevPassword（Lab:Auth:DevPassword）随本地口令校验路径退役——
+    // 账密校验代理 saas IdP，凭据真源=saas 库。
 }
