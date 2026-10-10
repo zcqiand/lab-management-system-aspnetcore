@@ -75,7 +75,7 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     printf 'JWT_REFRESH_TTL_SECONDS=604800\n'
     # CORS 白名单：lab 前端三仓 + 同域（与 lab-springboot.springboot.env 同源集合）。
     # Program.cs 只读 flat key LAB_CORS_ALLOWED_ORIGINS（Phase 4 起老 key Lab__Cors__* 废弃）。
-    printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,http://localhost:5201,http://localhost:5202,http://localhost:5203\n' "$NGINX_DOMAIN"
+    printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,https://lab-flutter.xiangru.uk,http://localhost:5201,http://localhost:5202,http://localhost:5203\n' "$NGINX_DOMAIN"
     # SSO 跳板：v0.1.9 接 saas-aspnetcore v0.2.0 真 OAuth IdP（同栈匹配 —— ADR xxc-cuddling 决策 §1）
     # client_id 是固定 UUID (11111111-...) 不是字符串 'lab-management', 因为 shared/openapi.yaml
     # TypeSpec @format("uuid") 给 saas-aspnetcore/saas-springboot NSwag codegen 生成 Guid/UUID,
@@ -256,8 +256,21 @@ fi
 if ! grep -q '^LAB_CORS_ALLOWED_ORIGINS=' "$BASE/aspnetcore.env"; then
   echo "→ append LAB_CORS_ALLOWED_ORIGINS to existing $BASE/aspnetcore.env"
   umask 077
-  printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk\n' "$NGINX_DOMAIN" >> "$BASE/aspnetcore.env"
+  printf 'LAB_CORS_ALLOWED_ORIGINS=https://%s,https://lab-vue.xiangru.uk,https://lab-react.xiangru.uk,https://lab-nextjs.xiangru.uk,https://lab-flutter.xiangru.uk\n' "$NGINX_DOMAIN" >> "$BASE/aspnetcore.env"
 fi
+
+# origin 级无损追加（家族同款，lab-rails/lab-fastapi 同形）：lab 三前端 + flutter prod
+# 都可跨源调本后端，存量 env-file 缺哪个 origin 就补哪个（不整值覆盖，运维手工 origin 保留）。
+for cors_origin in "https://${NGINX_DOMAIN}" \
+                   "https://lab-nextjs.xiangru.uk" \
+                   "https://lab-react.xiangru.uk" \
+                   "https://lab-vue.xiangru.uk" \
+                   "https://lab-flutter.xiangru.uk"; do
+  if grep -q '^LAB_CORS_ALLOWED_ORIGINS=' "$BASE/aspnetcore.env" && ! grep '^LAB_CORS_ALLOWED_ORIGINS=' "$BASE/aspnetcore.env" | grep -qF "$cors_origin"; then
+    sed -i "s#^\(LAB_CORS_ALLOWED_ORIGINS=.*\)#\1,${cors_origin}#" "$BASE/aspnetcore.env"
+    echo "→ reconcile LAB_CORS_ALLOWED_ORIGINS: 追加缺失 origin ${cors_origin}（origin 级，不整值覆盖）"
+  fi
+done
 
 echo "→ image: $IMAGE"
 echo "→ docker login"
