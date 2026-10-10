@@ -93,6 +93,15 @@ public sealed class AuthService
             Console.Error.WriteLine($"[login] service-account menu snapshot failed for {user.Id}: {e.Message}");
         }
         _membershipCache.Put(user.Id, tenants);
+        // REQ-2026-023 live 回归（2026-10-11 五目标 401 指纹）：密码登录用户落
+        // directory（镜像 SsoCallback Upsert 链）——Me/SwitchTenant 的 ResolveUser
+        // 按 sub=saas user id 解析，不落目录必 unknown user 401。email 缺失降级
+        // username 作 upsert 键（与 SsoCallback 的 email 主键约定同形）。
+        _directory.Upsert(
+            user.Id,
+            FirstNonEmpty(saasUser.Email, user.Username) ?? user.Username,
+            user.DisplayName,
+            user.RoleCode);
         // 2026-09-16 Phase 2 测试切真（T11 live 首跑实证）+ REQ-2026-023：token 带 tenant_id
         // claim（saas currentTenantId ?? 首租户），refresh 维持 dev-placeholder（不透传 saas
         // refreshToken）。与 SSO 路径 Session(labUser, saasUser.CurrentTenantId, …) 同构。
@@ -209,20 +218,15 @@ public sealed class AuthService
     {
         var user = ResolveUser(claims);
         // 2026-09-03 租户体系对齐（docs/superpowers/specs/2026-09-03-me-tenant-alignment-design.md §3）：
-        // SSO 用户（有 per-user saas refresh token）必须返回 saas memberships 租户，
-        // 与 SsoCallback 同体系 —— 否则前端 hydrateAuth 的 tenants.find(saas UUID)
-        // 跨体系失配 → awaiting_tenant → 卡「检查登录态…」死锁。
-        // miss（容器重启/TTL 过期）抛 401，前端 catch 走 /api/auth/refresh 自愈
-        // （该端点会重填本快照）。密码登录用户（无 per-user token）保持 demo 租户。
-        var saasRefresh = _directory.GetSaasRefreshToken(user.Id);
-        if (!string.IsNullOrEmpty(saasRefresh))
+        // 登录会话租户必须与登录响应同体系（前端 hydrateAuth 的 tenants.find(saas UUID)
+        // 必命中 → 否则 awaiting_tenant 卡「检查登录态…」死锁）。
+        // REQ-2026-023：密码登录与 SSO 同写 membership 快照（登录响应租户=saas 体系），
+        // 快照 hit 优先返回——两类用户同链；miss 时：SSO 用户（有 per-user saas refresh
+        // token）抛 401 走 /api/auth/refresh 自愈；密码用户（无 per-user token）降级
+        // demo 租户（重启/TTL 后可恢复态，重登即重建快照）。
+        var cachedTenants = _membershipCache.Get(user.Id);
+        if (cachedTenants is not null)
         {
-            var cachedTenants = _membershipCache.Get(user.Id);
-            if (cachedTenants is null)
-            {
-                throw new AuthenticationException(
-                    $"membership snapshot unavailable for user {user.Id} (cache miss); refresh required");
-            }
             var currentTenantId = claims.TryGetValue("tenant_id", out var tenantClaim) && tenantClaim != null
                 ? tenantClaim.ToString() ?? ""
                 : cachedTenants[0].TenantId;
@@ -232,6 +236,12 @@ public sealed class AuthService
                 Tenants = cachedTenants,
                 CurrentTenantId = currentTenantId,
             };
+        }
+        var saasRefresh = _directory.GetSaasRefreshToken(user.Id);
+        if (!string.IsNullOrEmpty(saasRefresh))
+        {
+            throw new AuthenticationException(
+                $"membership snapshot unavailable for user {user.Id} (cache miss); refresh required");
         }
         var demoTenantId = claims.TryGetValue("tenant_id", out var demoTenantClaim) && demoTenantClaim != null
             ? demoTenantClaim.ToString() ?? ""
@@ -250,9 +260,14 @@ public sealed class AuthService
     {
         var user = ResolveUser(claims);
         var tenantId = body?.TenantId ?? "";
-        var target = _directory.FindByTenantId(tenantId)
+        // REQ-2026-023 live 回归：归属校验对用户当前租户集（membership 快照=登录响应
+        // 同体系，写死 demo 字面量会让密码登录用户切 saas 租户 404）；快照 miss 降级
+        // demo 目录（与 Me() 降级链一致）。
+        var knownTenants = _membershipCache.Get(user.Id)
+            ?? _directory.TenantsOf(user.Username).ToList();
+        var target = knownTenants.FirstOrDefault(t => t.TenantId == tenantId)
             ?? throw new KeyNotFoundException("Tenant not found");
-        return Session(user, target.TenantId, null);
+        return Session(user, target.TenantId, knownTenants, null);
     }
 
     // === M01.F04.I01 动态菜单 / I02 权限集 ===

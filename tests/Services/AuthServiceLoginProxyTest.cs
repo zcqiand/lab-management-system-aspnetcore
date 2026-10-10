@@ -200,4 +200,53 @@ public class AuthServiceLoginProxyTest
         padded = padded.PadRight(padded.Length + ((4 - padded.Length % 4) % 4), '=');
         return Encoding.UTF8.GetString(Convert.FromBase64String(padded));
     }
+
+    // === REQ-2026-023 live 回归（2026-10-11 五目标同时失败指纹） ===
+    // 现场：登录 sub=saas user id / tenant_id claim=saas 租户，但登录链不落
+    // SsoCallback 同款 Upsert + membership 快照 → Me/SwitchTenant ResolveUser
+    // 「unknown user」401；SwitchTenant 归属校验写死 demo 字面量 → saas 租户 404。
+
+    /// <summary>saas 真实租户是 UUID 形（live 实测），刻意不用 TENANT-00x 字面量——会与 demo 目录撞键掩盖失配。</summary>
+    private static SaasLoginResponse SaasUuidLoginBody()
+    {
+        return new SaasLoginResponse
+        {
+            User = new SaasLoginUser
+            {
+                Id = "00000000-0000-0000-0000-b00000000001",
+                Username = "alice",
+                Email = "alice@saas.local",
+            },
+            AvailableTenants = new List<SaasAvailableTenant>
+            {
+                new() { TenantId = "00000000-0000-0000-0000-000000000001", RoleIds = new() { "admin" }, Status = "active" },
+                new() { TenantId = "00000000-0000-0000-0000-000000000002", RoleIds = new() { "technician" }, Status = "active" },
+            },
+            AccessToken = "saas-access-token",
+            RefreshToken = "saas-refresh-token",
+            UserId = "00000000-0000-0000-0000-b00000000001",
+        };
+    }
+
+    [Fact]
+    [Trait("Fn", "M00.F01.I01")]
+    public void Login_sessionCoherence_meAndSwitchTenant_stayInSaasTenantSystem()
+    {
+        var saasAuth = new RecordingSaasAuthClient { Response = SaasUuidLoginBody() };
+        var svc = NewService(saasAuth, new EnrichingMeClient());
+        var res = svc.Login(new LoginRequest { Username = "alice", Password = "pw-123" });
+        var sub = res.User!.Id;
+        var tid = res.Tenants[0].TenantId;
+
+        // Me：ResolveUser 必须能解析密码登录签发的 sub；租户与登录响应同体系
+        var me = svc.Me(new Dictionary<string, object> { ["sub"] = sub });
+        Assert.Equal(tid, me.Tenants[0].TenantId);
+        Assert.Equal(res.Tenants.Count, me.Tenants.Count);
+
+        // SwitchTenant：登录响应里的租户可切 → 200 + 3 段真 JWT
+        var switched = svc.SwitchTenant(
+            new Dictionary<string, object> { ["sub"] = sub },
+            new SwitchTenantRequest { TenantId = tid });
+        Assert.Equal(3, switched.Token.Split('.').Length);
+    }
 }
