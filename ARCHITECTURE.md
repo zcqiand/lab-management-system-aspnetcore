@@ -126,7 +126,8 @@ env 变量表（`.env.example`，全部 fail-fast，缺失即 throw——ADR-001
 | `LAB_SAAS_BASE_URL` / `LAB_SSO_LOGIN_URL` | saas IdP 地址 | LabOptions 必填 |
 | `LAB_SAAS_CLIENT_ID` / `LAB_SAAS_CLIENT_SECRET` | OAuth code 流客户端 | 必填 |
 | `LAB_SAAS_SERVICE_USER` / `LAB_SAAS_SERVICE_PASSWORD` / `LAB_SAAS_SERVICE_CLIENT_ID` | 菜单快照服务账号 | 必填 |
-| `Lab__Auth__DevPassword` | demo 用户目录口令（dev 也必须显式声明） | `RequireDevPassword` throw |
+
+> REQ-2026-023（2026-10-11）：`Lab__Auth__DevPassword` 已随原生登录代理 saas IdP 退役（凭据真源=saas 库），`RequireDevPassword` 已删。
 
 端口与部署：dev/容器统一监听 **:5204**；VPS nginx 反代 host **8014**（`lab-aspnetcore.xiangru.uk`，家族 801x 分段）。构建产物 = multi-stage `Dockerfile`（sdk:8.0 publish → aspnet:8.0 debian-slim，非 root `labasp`，HEALTHCHECK wget 探 `/health`）。CI（`.github/workflows/ci.yml`）：branch push 只跑 test；tag `v<X>.<Y>.<Z>-<YYYYMMDD>` 触发 test + docker build/push + VPS 部署（`deploy/lab-management-system-aspnetcore.sh`，deploy 脚本自举随机 `JWT_SIGNING_KEY` 入 env-file）。
 

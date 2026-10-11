@@ -331,7 +331,8 @@ M02.F01（合同）、M03.F01-F09（接样/样品/检测/flow）、M04.F06-F09�
 | `Lab:Cors:AllowedOrigins` | `http://localhost:5201,http://localhost:5202,http://localhost:5203,http://localhost:5101` | lab 三前端 dev port + saas-nextjs（lab→saas SSO）；flat key `LAB_CORS_ALLOWED_ORIGINS` |
 | `Lab:Data:Provider` | `memory` | `memory` / `ef` 二选一 |
 | `Lab:Data:ConnectionString` | ef 时必填 | Npgsql 连接串（env 注入，不硬编码） |
-| `Lab:Auth:DevPassword` | `dev123456` | dev demo 密码 |
+
+> REQ-2026-023（2026-10-11）：`Lab:Auth:DevPassword` 已随原生登录代理 saas IdP 退役（凭据真源=saas 库）。
 
 **DI 注入生命周期**：
 

@@ -94,9 +94,6 @@ if [ ! -f "$BASE/aspnetcore.env" ]; then
     printf 'LAB_SAAS_SERVICE_PASSWORD=%s\n' "$LAB_SAAS_SERVICE_PASSWORD"
     # 5.33 服务账号登录 LoginRequest.clientId(saas 契约必填;非 secret,oauth_client code 形固定值)
     printf 'LAB_SAAS_SERVICE_CLIENT_ID=lab-management\n'
-    # ADR-0019：ConfigUserDirectory 删 "dev123456" 字面兜底后必填（demo 目录口令，
-    # 值=契约值（.env.production 明文），非真 secret；Secrets 可覆盖。
-    printf 'Lab__Auth__DevPassword=%s\n' "${LAB_AUTH_DEV_PASSWORD:-dev123456}"
   } > "$BASE/aspnetcore.env"
   chown deploy:deploy "$BASE/aspnetcore.env" 2>/dev/null || true
   chmod 600 "$BASE/aspnetcore.env"
@@ -170,14 +167,10 @@ if [ -f "$BASE/aspnetcore.env" ]; then
   append_if_missing JWT_AUDIENCE 'lab-management-system-clients'
   append_if_missing JWT_TTL_SECONDS '3600'
   append_if_missing JWT_REFRESH_TTL_SECONDS '604800'
-  # ADR-0019：v0.2.22 删 ConfigUserDirectory "dev123456" 字面兜底后必填。
-  # 存量 env-file 没有此 key → 容器启动后所有走 AuthService 的端点 500
-  # （2026-09-04 prod /api/auth/sso/authorize 500 事故）。
-  # 值=契约值（.env.production 明文，demo 目录口令非真 secret）；Secrets 可覆盖。
-  append_if_missing Lab__Auth__DevPassword "${LAB_AUTH_DEV_PASSWORD:-dev123456}"
   # 死键清理:Lab__Sso__*/Lab__Data__* 段映射已废弃(key 统一改 flat,老 env-file
-  # 迁移时删除);Lab__Cors__AllowedOrigins 无读者同理
-  for dead in Lab__Sso__SaasBase Lab__Sso__LoginUrl Lab__Sso__ClientId Lab__Sso__ClientSecret Lab__Sso__DefaultTenantId Lab__Sso__ServiceUser Lab__Sso__ServicePassword Lab__Sso__CallbackRedirectBase Lab__Data__Provider Lab__Cors__AllowedOrigins; do
+  # 迁移时删除);Lab__Cors__AllowedOrigins 无读者同理;
+  # Lab__Auth__DevPassword 随 REQ-2026-023 本地口令校验退役(2026-10-11)
+  for dead in Lab__Sso__SaasBase Lab__Sso__LoginUrl Lab__Sso__ClientId Lab__Sso__ClientSecret Lab__Sso__DefaultTenantId Lab__Sso__ServiceUser Lab__Sso__ServicePassword Lab__Sso__CallbackRedirectBase Lab__Data__Provider Lab__Cors__AllowedOrigins Lab__Auth__DevPassword; do
     if grep -q "^${dead}=" "$BASE/aspnetcore.env"; then
       echo "→ drop legacy key ${dead} from $BASE/aspnetcore.env (key 统一为 flat)"
       umask 077
