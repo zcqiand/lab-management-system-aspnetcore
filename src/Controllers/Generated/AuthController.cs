@@ -59,6 +59,14 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpPost, Microsoft.AspNetCore.Mvc.Route("api/auth/refresh")]
         public abstract System.Threading.Tasks.Task<LoginResponse> Refresh([Microsoft.AspNetCore.Mvc.FromBody] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] RefreshTokenRequest body);
 
+        /// <remarks>
+        /// SSO 跳转端点（RFC 6749 §4.1.1 授权码流）。返回跳板 URL 而非 302：客户端取
+        /// <br/>  authorizeUrl 做 top-level navigation。
+        /// <br/>
+        /// <br/>  state 由前端生成并原样透传，回跳时前端比对，防 CSRF；redirect_uri 须在后端
+        /// <br/>  白名单内（https 域名之外，原生客户端允许自定义 scheme），白名单配置随部署
+        /// <br/>  env，不入契约；client_secret 仅后端持有，不出现在本契约。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/auth/sso/authorize")]
         public abstract System.Threading.Tasks.Task<SsoRedirect> SsoAuthorize([Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] OAuthResponseType response_type, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string client_id, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string redirect_uri, [Microsoft.AspNetCore.Mvc.FromQuery] [Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string state);
