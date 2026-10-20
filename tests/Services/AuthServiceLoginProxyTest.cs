@@ -128,16 +128,19 @@ public class AuthServiceLoginProxyTest
         Assert.Equal("alice", res.User.Username);
         Assert.Equal("admin", res.User.RoleCode);
         // tenants 四字段 + 富化真名/tenantKey（TENANT-002 不在平台列表 → 降级 tenantId）
+        // 2026-10-20 租户标识=tenant_key（人裁「对外交互用 key」）：平台列表命中的租户
+        // TenantId=tenant_key（TENANT-001→city-lab）；miss 降级原 tenantId 不变。
         Assert.Equal(2, res.Tenants.Count);
-        Assert.Equal("TENANT-001", res.Tenants[0].TenantId);
+        Assert.Equal("city-lab", res.Tenants[0].TenantId);
         Assert.Equal("city-lab", res.Tenants[0].Code);
         Assert.Equal("市住建工程质量检测中心", res.Tenants[0].Name);
+        Assert.Equal("TENANT-002", res.Tenants[1].TenantId);
         Assert.Equal("TENANT-002", res.Tenants[1].Code);
         Assert.Equal("TENANT-002", res.Tenants[1].Name);
-        // lab 自家 JWT 重签：可被本仓 signer 验签，tenant_id 落首租户
+        // lab 自家 JWT 重签：可被本仓 signer 验签，tenant_id 落首租户（tenant_key）
         var claims = jwt.Verify(res.Token);
         Assert.Equal("saas-user-alice", claims["sub"]);
-        Assert.Equal("TENANT-001", claims["tenant_id"]);
+        Assert.Equal("city-lab", claims["tenant_id"]);
         // refresh 维持 dev-placeholder（不透传 saas refreshToken）
         Assert.Contains(
             "\"saas_refresh_token\":\"dev-placeholder\"",

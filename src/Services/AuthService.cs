@@ -71,9 +71,10 @@ public sealed class AuthService
         // saas user 无 displayName、availableTenants 无租户名 → 瞬时持 accessToken 拉
         // 平台租户列表富化（与 SsoCallback 同款 best-effort，失败降级 name=tenantId）。
         // 回退链必须 ||/FirstNonEmpty 语义（空串 falsy，?? 接不住）——saas 无 displayName 时为空串。
+        var tenantNameById = FetchTenantNames(FirstNonEmpty(saasUser.Id, saasLogin.UserId), saasLogin.AccessToken);
         var tenants = TenantsFromLogin(
             saasLogin.AvailableTenants ?? new List<SaasAvailableTenant>(),
-            FetchTenantNames(FirstNonEmpty(saasUser.Id, saasLogin.UserId), saasLogin.AccessToken));
+            tenantNameById);
         var user = new CurrentUser
         {
             Id = FirstNonEmpty(saasUser.Id, saasLogin.UserId) ?? "unknown",
@@ -105,7 +106,13 @@ public sealed class AuthService
         // 2026-09-16 Phase 2 测试切真（T11 live 首跑实证）+ REQ-2026-023：token 带 tenant_id
         // claim（saas currentTenantId ?? 首租户），refresh 维持 dev-placeholder（不透传 saas
         // refreshToken）。与 SSO 路径 Session(labUser, saasUser.CurrentTenantId, …) 同构。
-        return Session(user, FirstNonEmpty(saasLogin.CurrentTenantId, tenants.Count > 0 ? tenants[0].TenantId : null), tenants, null);
+        // 2026-10-20 人裁：claim 落 tenant_key（ResolveTenantKey，平台列表 miss 降级 UUID）。
+        return Session(
+            user,
+            ResolveTenantKey(FirstNonEmpty(saasLogin.CurrentTenantId, tenants.Count > 0 ? tenants[0].TenantId : null), tenantNameById)
+                ?? tenants.FirstOrDefault()?.TenantId,
+            tenants,
+            null);
     }
 
     /// <summary>
@@ -138,7 +145,8 @@ public sealed class AuthService
 
     /// <summary>
     /// availableTenants → MyTenant（REQ-2026-023）。过滤 removed/无 tenantId；
-    /// nameById 命中时 Code=tenantKey、Name=name；miss 降级 Code=Name=tenantId（与 TenantsFrom 同语义）。
+    /// nameById 命中时 TenantId=Code=tenantKey、Name=name；miss 降级 Code=Name=TenantId
+    /// （2026-10-20 人裁「对外交互用 key」：lab 租户标识=saas tenant_key，非 UUID）。
     /// </summary>
     private static List<MyTenant> TenantsFromLogin(
         List<SaasAvailableTenant> available,
@@ -151,7 +159,7 @@ public sealed class AuthService
                 nameById.TryGetValue(t.TenantId!, out var p);
                 return new MyTenant
                 {
-                    TenantId = t.TenantId!,
+                    TenantId = !string.IsNullOrEmpty(p?.TenantKey) ? p.TenantKey : t.TenantId!,
                     Code = !string.IsNullOrEmpty(p?.TenantKey) ? p.TenantKey : t.TenantId!,
                     Name = !string.IsNullOrEmpty(p?.Name) ? p.Name : t.TenantId!,
                     RoleIds = t.RoleIds?.ToList() ?? new List<string>(),
@@ -375,8 +383,9 @@ public sealed class AuthService
         var tenantNameById = FetchTenantNames(labUser.Id, t.AccessToken);
         _membershipCache.Put(labUser.Id, TenantsFrom(memberships, tenantNameById));
         // 2026-09-03 设计 §4.1.4：token 带 tenant_id claim（whoami currentTenantId），
-        // Me() 的 currentTenantId 不再落 demo 默认租户
-        return Session(labUser, saasUser.CurrentTenantId, TenantsFrom(memberships, tenantNameById), t.RefreshToken);
+        // Me() 的 currentTenantId 不再落 demo 默认租户。
+        // 2026-10-20 人裁：claim 落 tenant_key（ResolveTenantKey，miss 降级 UUID）。
+        return Session(labUser, ResolveTenantKey(saasUser.CurrentTenantId, tenantNameById), TenantsFrom(memberships, tenantNameById), t.RefreshToken);
     }
 
     // === helpers ===
@@ -439,8 +448,9 @@ public sealed class AuthService
         TenantsFrom(memberships, new Dictionary<string, SaasPlatformTenant>());
 
     /// <summary>
-    /// memberships → MyTenant。nameById 命中时 Code=tenantKey、Name=name；
+    /// memberships → MyTenant。nameById 命中时 TenantId=Code=tenantKey、Name=name；
     /// miss（列表拉取失败/租户未在平台注册）降级 Code=Name=tenantId —— 切换器最差显示 UUID，不空。
+    /// 2026-10-20 人裁：lab 租户标识=saas tenant_key（对外交互用 key，非 UUID）。
     /// </summary>
     private static List<MyTenant> TenantsFrom(List<SaasTenantMembership> memberships, Dictionary<string, SaasPlatformTenant> nameById)
     {
@@ -449,13 +459,24 @@ public sealed class AuthService
             nameById.TryGetValue(m.TenantId, out var t);
             return new MyTenant
             {
-                TenantId = m.TenantId,
+                TenantId = !string.IsNullOrEmpty(t?.TenantKey) ? t.TenantKey : m.TenantId,
                 Code = !string.IsNullOrEmpty(t?.TenantKey) ? t.TenantKey : m.TenantId,
                 Name = !string.IsNullOrEmpty(t?.Name) ? t.Name : m.TenantId,
                 RoleIds = m.RoleIds?.ToList() ?? new List<string>(),
             };
         }).ToList();
     }
+
+    /// <summary>
+    /// saas 租户 UUID → tenant_key（2026-10-20 人裁：lab JWT tenant_id claim 落 key）。
+    /// 平台列表 miss 时降级原值（与 TenantsFrom/TenantsFromLogin 同语义）。
+    /// </summary>
+    private static string? ResolveTenantKey(string? saasTenantId, Dictionary<string, SaasPlatformTenant> nameById) =>
+        saasTenantId != null
+        && nameById.TryGetValue(saasTenantId, out var p)
+        && !string.IsNullOrEmpty(p?.TenantKey)
+            ? p.TenantKey
+            : saasTenantId;
 
     /// <summary>lab 家族在 saas 注册的 appCode（seeds apps.json）。</summary>
     internal const string LabAppCode = "lab-management";

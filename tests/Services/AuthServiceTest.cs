@@ -362,10 +362,11 @@ public class AuthServiceTest
         var res = _service.SsoCallback(body, auth.CookieValue);
 
         // 2026-09-03 Noop saas fixture 改 UUID 体系：SSO 用户是 upsert 的 saas 身份，
-        // 租户来自 saas memberships（1 条 UUID），非 demo TENANT-00x
+        // 租户来自 saas memberships（1 条 UUID），非 demo TENANT-00x。
+        // 2026-10-20 租户标识=tenant_key（人裁）：平台列表命中 → TenantId=tenant_key。
         Assert.Equal("00000000-0000-0000-0000-b00000000001", res.User.Id);
         Assert.Single(res.Tenants);
-        Assert.Equal("00000000-0000-0000-0000-000000000001", res.Tenants[0].TenantId);
+        Assert.Equal("acme", res.Tenants[0].TenantId);
         Assert.NotNull(res.Token);
         // refresh token 嵌 saas refresh token
         var refreshPayload = res.RefreshToken!.Split('.')[1];
@@ -418,7 +419,8 @@ public class AuthServiceTest
             State = "st-tenant-name-1",
         }, auth.CookieValue);
 
-        Assert.Equal("00000000-0000-0000-0000-000000000001", res.Tenants[0].TenantId);
+        // 2026-10-20 租户标识=tenant_key：TenantId 与 Code 同落 tenant_key（ACME 真名不变）
+        Assert.Equal("acme", res.Tenants[0].TenantId);
         Assert.Equal("ACME Corp", res.Tenants[0].Name);
         Assert.Equal("acme", res.Tenants[0].Code);
     }
