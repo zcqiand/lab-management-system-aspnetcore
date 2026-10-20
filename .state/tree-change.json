@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "approved": true,
+  "mirror": true,
+  "summary": "REQ-2026-023：M01.F05.I06 原生登录 镜像登记（免批类①；shared 树已上线；aspnetcore AuthController 已实现、仓内无测试锚定，登记 开发中）",
+  "changes": [
+    {
+      "id": "M01.F05.I06",
+      "action": "新增",
+      "name": "原生登录",
+      "reason": "REQ-2026-023：镜像 shared 树 M01.F05.I06（免批类①）——POST /api/auth/native-login 非浏览器客户端密码通道，校验代理 saas IdP（clientId=lab-management），saas 4xx→401 不透传、5xx/不可达→502 SAAS_UNAVAILABLE，lab 自家 JWT 重签，LoginResponse 契约形状不变；aspnetcore Generated/AuthController.cs 已含 native-login 实现，仓内无测试锚定，登记 开发中"
+    }
+  ],
+  "sync_files": [],
+  "base_sha": "873ea63e248da0e7"
+}
