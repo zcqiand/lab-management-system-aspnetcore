@@ -38,6 +38,21 @@ dotnet run --project src           # 本地起服务
 | :--- | :--- | :--- |
 | （待补） | | |
 
+### 书一《ASP.NET Core 从入门到项目实践》
+
+- 书稿定位：xr-know-016，第 27、30、32、33、34、35、36、38 章正文代码块挂本仓 `source=` 锚点
+- 配套版本：`v0.2.32-20260928`（registry 冻结 tag，代码以此为准）
+
+| 章 | 章题 | 对应源文件 |
+| :--- | :--- | :--- |
+| 27 | JWT 与 API 鉴权 | `src/Controllers/Implementation/AuthController.cs` |
+| 30 | 单元测试：xUnit 与 Moq | `src/Controllers/Implementation/ContractController.cs` |
+| 32 | Spring Boot ↔ ASP.NET Core 对照 | `src/Controllers/Implementation/AuthController.cs` |
+| 33 | 贯穿项目启动：实验室管理系统架构设计 | `src/Controllers/Implementation/AuthController.cs` |
+| 34 | 领域建模与数据库落地 | `src/Controllers/Implementation/ContractController.cs` + `src/Controllers/Implementation/DictionaryController.cs` + `src/Persistence/LabDbContext.cs` |
+| 35 | 业务模块开发：预约与设备管理 | `src/Controllers/Implementation/ContractController.cs` + `src/Persistence/EfFlowStore.cs` + `src/Controllers/Implementation/CatalogController.cs` + `src/Controllers/Implementation/SummaryController.cs` |
+| 36 | 前后端协作：REST 契约与前端对接 | `src/Controllers/Implementation/ContractController.cs` + `src/Controllers/Implementation/DictionaryController.cs` |
+| 38 | 性能优化与压力实测 | `src/Controllers/Implementation/SummaryController.cs` |
 ## 快速链接
 
 - [CLAUDE.md](CLAUDE.md) — 开发约定与编码规范
