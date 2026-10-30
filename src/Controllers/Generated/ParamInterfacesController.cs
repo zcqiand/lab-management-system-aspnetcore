@@ -31,6 +31,9 @@ namespace Lab.AspNetCore.Controllers.Generated
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public abstract class ParamInterfacesControllerBase : ControllerBase
     {
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/param-interfaces")]
         public abstract System.Threading.Tasks.Task<Response14> ListParamInterfaces([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);

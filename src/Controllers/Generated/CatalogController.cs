@@ -31,6 +31,9 @@ namespace Lab.AspNetCore.Controllers.Generated
     [System.CodeDom.Compiler.GeneratedCode("NSwag", "14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))")]
     public abstract class CatalogControllerBase : ControllerBase
     {
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/brands")]
         public abstract System.Threading.Tasks.Task<Response> ListBrands([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
@@ -47,6 +50,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/catalog/brands/{code}")]
         public abstract System.Threading.Tasks.Task DeleteBrand([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/grades")]
         public abstract System.Threading.Tasks.Task<Response2> ListGrades([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
@@ -63,6 +69,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/catalog/grades/{code}")]
         public abstract System.Threading.Tasks.Task DeleteGrade([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/models")]
         public abstract System.Threading.Tasks.Task<Response3> ListModels([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
@@ -79,6 +88,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/catalog/models/{code}")]
         public abstract System.Threading.Tasks.Task DeleteModel([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/catalog/specs")]
         public abstract System.Threading.Tasks.Task<Response4> ListSpecs([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionObjectCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);

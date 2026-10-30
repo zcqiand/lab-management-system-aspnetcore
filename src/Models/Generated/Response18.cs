@@ -36,9 +36,15 @@ namespace Lab.AspNetCore.Controllers.Generated
         [System.ComponentModel.DataAnnotations.Required]
         public System.Collections.Generic.List<ObjectReportNameLink> Items { get; set; } = new System.Collections.Generic.List<ObjectReportNameLink>();
 
+        /// <summary>
+        /// 当前实现仅回显，不切片：参照实现返回全量，无分页语义。
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("page")]
         public int Page { get; set; }
 
+        /// <summary>
+        /// 当前实现仅回显，不切片。
+        /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
         public int PageSize { get; set; }
 

@@ -79,6 +79,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/links/standard-parameter")]
         public abstract System.Threading.Tasks.Task<Response9> ListStandardParameterLinks([Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionStandardCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionParameterCode);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/objects")]
         public abstract System.Threading.Tasks.Task<Response10> ListObjects([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? inspectionSpecialtyCode, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
@@ -95,6 +98,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/objects/{code}")]
         public abstract System.Threading.Tasks.Task DeleteObject([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/parameters")]
         public abstract System.Threading.Tasks.Task<Response11> ListParameters([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionParameterSourceType? sourceType);
@@ -111,6 +117,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/parameters/{code}")]
         public abstract System.Threading.Tasks.Task DeleteParameter([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/specialties")]
         public abstract System.Threading.Tasks.Task<Response12> ListSpecialties([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword);
@@ -127,6 +136,9 @@ namespace Lab.AspNetCore.Controllers.Generated
         [Microsoft.AspNetCore.Mvc.HttpDelete, Microsoft.AspNetCore.Mvc.Route("api/inspection/specialties/{code}")]
         public abstract System.Threading.Tasks.Task DeleteSpecialty([Microsoft.AspNetCore.Mvc.ModelBinding.BindRequired] string code);
 
+        /// <remarks>
+        /// 分页：当前实现仅回显不切片，参照实现返回全量，无分页语义（pageSize 同）。
+        /// </remarks>
         /// <returns>The request has succeeded.</returns>
         [Microsoft.AspNetCore.Mvc.HttpGet, Microsoft.AspNetCore.Mvc.Route("api/inspection/standards")]
         public abstract System.Threading.Tasks.Task<Response13> ListStandards([Microsoft.AspNetCore.Mvc.FromQuery] int? page, [Microsoft.AspNetCore.Mvc.FromQuery] int? pageSize, [Microsoft.AspNetCore.Mvc.FromQuery] string? keyword, [Microsoft.AspNetCore.Mvc.FromQuery] InspectionStandardStatus? status);
