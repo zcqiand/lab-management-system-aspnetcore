@@ -31,3 +31,6 @@ appsettings.*.local.json
 
 # gen-shared.sh 构建自检日志（本地产物）
 .gen-shared-build.log
+
+# 可再生件（正式区/临时区纪律：过程件进 _work/，_work 整体不入库；2026-10-24 人裁）
+_work/
