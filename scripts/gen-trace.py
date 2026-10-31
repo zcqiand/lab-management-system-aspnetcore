@@ -45,7 +45,8 @@ METHOD_RE = re.compile(r"^\s*(?:public|internal|private|protected|\s)*(?:async\s
 
 
 def find_tests_csproj() -> Path:
-    """动态发现测试工程（5.126 反灌批改：仓会重命名 csproj，模板硬编码已证陈旧）。
+    """动态发现测试工程（5.126 反灌批改：仓会重命名 csproj——Lab.AspNetCore.Tests/
+    Saas.Identity.AspNetCore.Tests 各异，模板硬编码 App.Tests.csproj 已证陈旧）。
     约定 tests/ 下有且仅有一个 .csproj，多/零个 fail-fast。"""
     candidates = sorted(TESTS_DIR.glob("*.csproj"))
     if len(candidates) != 1:
