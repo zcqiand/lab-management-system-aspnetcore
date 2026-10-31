@@ -44,12 +44,22 @@ CLASS_RE = re.compile(r"^\s*(?:public|internal|partial|abstract|sealed|static|\s
 METHOD_RE = re.compile(r"^\s*(?:public|internal|private|protected|\s)*(?:async\s+)?(?:Task|ValueTask|void)\s+(\w+)\s*\(", re.MULTILINE)
 
 
+def find_tests_csproj() -> Path:
+    """动态发现测试工程（5.126 反灌批改：仓会重命名 csproj，模板硬编码已证陈旧）。
+    约定 tests/ 下有且仅有一个 .csproj，多/零个 fail-fast。"""
+    candidates = sorted(TESTS_DIR.glob("*.csproj"))
+    if len(candidates) != 1:
+        raise SystemExit(f"[gen-trace] tests/ 下期望恰 1 个 .csproj，实得 {len(candidates)}: "
+                         f"{[c.name for c in candidates]}")
+    return candidates[0]
+
+
 def run_tests() -> int:
     """跑 dotnet test，TRX 落到 tests/.trx/。返回退出码（0 = 全绿）。"""
     cmd = [
         "dotnet",
         "test",
-        str(TESTS_DIR / "Lab.AspNetCore.Tests.csproj"),
+        str(find_tests_csproj()),
         "--nologo",
         "--logger",
         "trx",
